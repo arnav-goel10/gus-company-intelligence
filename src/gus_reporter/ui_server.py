@@ -32,10 +32,20 @@ class GusUIApplication:
     def __init__(self) -> None:
         self.store = RunStateStore()
 
+    def _missing_runtime_requirements(self) -> list[str]:
+        missing: list[str] = []
+        if not os.getenv("OPENAI_API_KEY", "").strip():
+            missing.append("OPENAI_API_KEY")
+        if not os.getenv("TINYFISH_API_KEY", "").strip():
+            missing.append("TINYFISH_API_KEY")
+        return missing
+
     def health_payload(self) -> dict[str, Any]:
+        missing = self._missing_runtime_requirements()
         return {
-            "openai_api_key_present": bool(os.getenv("OPENAI_API_KEY", "").strip()),
-            "tinyfish_api_key_present": bool(os.getenv("TINYFISH_API_KEY", "").strip()),
+            "openai_api_key_present": "OPENAI_API_KEY" not in missing,
+            "tinyfish_api_key_present": "TINYFISH_API_KEY" not in missing,
+            "missing_requirements": missing,
             "company_name_only_supported": False,
             "notes": [
                 "The UI is live and the financial pipeline is wired end to end.",
@@ -45,6 +55,11 @@ class GusUIApplication:
         }
 
     def start_run(self, payload: dict[str, Any]) -> str:
+        missing = self._missing_runtime_requirements()
+        if missing:
+            raise ValueError(
+                "Missing runtime configuration: " + ", ".join(missing)
+            )
         request_payload = self._normalize_request_payload(payload)
         run_id = self.store.create_run(request_payload)
         worker = threading.Thread(

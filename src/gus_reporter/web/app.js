@@ -56,6 +56,20 @@ function renderHealth(health) {
   }
 
   target.innerHTML = pills.join("");
+  syncComposerAvailability(health);
+}
+
+function syncComposerAvailability(health) {
+  const button = document.getElementById("run-submit");
+  const note = document.getElementById("composer-note");
+  const missing = health.missing_requirements || [];
+  const ready = missing.length === 0;
+
+  button.disabled = !ready;
+  button.textContent = ready ? "Run" : "Setup required";
+  note.textContent = ready
+    ? "Financial mode only for now."
+    : `Add ${missing.join(" and ")} to enable live runs.`;
 }
 
 function renderRuns() {
@@ -271,6 +285,13 @@ async function submitRun(event) {
   button.textContent = "Launching…";
 
   try {
+    const health = await api("/api/health");
+    if ((health.missing_requirements || []).length) {
+      syncComposerAvailability(health);
+      throw new Error(
+        `Missing runtime configuration: ${(health.missing_requirements || []).join(", ")}`
+      );
+    }
     const response = await api("/api/runs", {
       method: "POST",
       body: JSON.stringify({
@@ -284,8 +305,13 @@ async function submitRun(event) {
   } catch (error) {
     alert(error.message);
   } finally {
-    button.disabled = false;
-    button.textContent = "Run";
+    try {
+      const health = await api("/api/health");
+      syncComposerAvailability(health);
+    } catch (error) {
+      button.disabled = false;
+      button.textContent = "Run";
+    }
   }
 }
 

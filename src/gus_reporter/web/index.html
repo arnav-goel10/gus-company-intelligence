@@ -16,14 +16,32 @@
         <div id="health-pills" class="health-pills">Checking runtime…</div>
       </header>
 
-      <main class="canvas">
-        <section class="hero">
-          <p class="eyebrow">Single-Box Workflow</p>
-          <h2>Type a company name. Watch the report assemble itself.</h2>
-          <p class="lede">
-            GUS plans sources, runs Tinyfish, extracts financial claims, verifies
-            them, and builds the report in one live workspace.
-          </p>
+      <main class="app-layout">
+        <section class="thread-shell">
+          <div class="thread-head">
+            <div>
+              <p class="eyebrow">Research Thread</p>
+              <h2 id="thread-title">Company intelligence in motion</h2>
+            </div>
+            <div id="thread-meta" class="thread-meta">
+              Start a run to open the live research thread.
+            </div>
+          </div>
+
+          <div id="thread" class="thread">
+            <article class="message assistant intro">
+              <div class="avatar">G</div>
+              <div class="bubble">
+                <p class="message-label">Orchestrator</p>
+                <h3>Enter a company name to start the financial swarm.</h3>
+                <p>
+                  The thread will show source discovery, Tinyfish acquisition,
+                  specialist extraction, verification, and report assembly as
+                  they happen.
+                </p>
+              </div>
+            </article>
+          </div>
 
           <form id="run-form" class="composer">
             <label class="sr-only" for="company_name">Company name</label>
@@ -39,63 +57,37 @@
               <button type="submit" id="run-submit">Run</button>
             </div>
           </form>
-
-          <div id="runs" class="run-pills"></div>
         </section>
 
-        <section class="workspace">
-          <div class="workspace-main">
-            <div class="section-head">
-              <p class="eyebrow">Live Run</p>
-              <h3 id="run-title">Waiting for a company</h3>
+        <aside class="utility-rail">
+          <section class="rail-card">
+            <div class="mini-head">
+              <span>Recent Runs</span>
             </div>
+            <div id="runs" class="run-pills"></div>
+          </section>
 
-            <div id="stage-rail" class="stage-rail"></div>
-
-            <div class="live-layout">
-              <section class="stream-panel">
-                <div class="mini-head">
-                  <span>Pipeline Stream</span>
-                </div>
-                <div id="events" class="event-feed empty-state">
-                  Start a run to watch the pipeline think in public.
-                </div>
-              </section>
-
-              <section class="stream-panel">
-                <div class="mini-head">
-                  <span>Source Activity</span>
-                </div>
-                <div id="source-jobs" class="source-jobs empty-state">
-                  Planned sources and Tinyfish progress will show up here.
-                </div>
-              </section>
+          <section class="rail-card">
+            <div class="mini-head">
+              <span>Run Snapshot</span>
             </div>
-          </div>
-
-          <aside class="workspace-side">
-            <div class="section-head">
-              <p class="eyebrow">Report Surface</p>
-              <h3>Verified Output</h3>
+            <div id="run-snapshot" class="snapshot empty-state">
+              Select or launch a run to inspect the latest status.
             </div>
+          </section>
 
-            <article id="report-summary" class="report-pane empty-state">
-              The report will appear here after verification and synthesis finish.
-            </article>
-
-            <section class="artifact-shell">
-              <div class="mini-head">
-                <span>Artifacts</span>
-              </div>
-              <div id="artifact-list" class="artifact-list empty-state">
-                Artifact files will appear after the run starts.
-              </div>
-              <pre id="artifact-viewer" class="artifact-viewer">
+          <section class="rail-card">
+            <div class="mini-head">
+              <span>Artifacts</span>
+            </div>
+            <div id="artifact-list" class="artifact-list empty-state">
+              Artifact files will appear after the run starts.
+            </div>
+            <pre id="artifact-viewer" class="artifact-viewer">
 Select an artifact to inspect it.
-              </pre>
-            </section>
-          </aside>
-        </section>
+            </pre>
+          </section>
+        </aside>
       </main>
     </div>
 

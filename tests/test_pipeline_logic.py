@@ -3,15 +3,28 @@ from __future__ import annotations
 import unittest
 
 from gus_reporter.agents import DOMAIN_AGENTS, get_extraction_agents
-from gus_reporter.models import EvidenceItem, ReportRequest, VerifiedClaim
+from gus_reporter.models import EvidenceItem, ReportRequest, TinyfishRunRecord, VerifiedClaim
 from gus_reporter.pipeline import (
+    build_spawned_financial_source_jobs,
     compute_publish_decision,
+    normalize_tinyfish_runs,
     seed_source_jobs,
     select_evidence_for_extraction_agent,
 )
 
 
 class SeedSourceJobsTests(unittest.TestCase):
+    def test_company_name_only_financial_request_seeds_search_discovery_jobs(self) -> None:
+        request = ReportRequest(
+            company_name="Apple",
+            focus_areas=["financials"],
+        )
+        jobs = seed_source_jobs(request, "stealth")
+        self.assertEqual(3, len(jobs))
+        self.assertTrue(all(job.category == "financials" for job in jobs))
+        self.assertTrue(all(job.source_type == "financial_search_discovery" for job in jobs))
+        self.assertTrue(all(job.url.startswith("https://www.bing.com/search?q=") for job in jobs))
+
     def test_seed_jobs_from_company_website(self) -> None:
         request = ReportRequest(
             company_name="Example Corp",
@@ -65,6 +78,54 @@ class SeedSourceJobsTests(unittest.TestCase):
         self.assertTrue(all(job.use_vault for job in jobs))
         self.assertEqual(["item_abc123"], jobs[0].credential_item_ids)
         self.assertTrue(all(job.enable_agent_memory for job in jobs))
+
+    def test_discovery_runs_spawn_child_financial_source_jobs(self) -> None:
+        request = ReportRequest(
+            company_name="Apple",
+            focus_areas=["financials"],
+        )
+        runs = [
+            TinyfishRunRecord(
+                run_id="run_1",
+                status="COMPLETED",
+                goal="Discover sources",
+                label="Financial source discovery",
+                category="financials",
+                url="https://www.bing.com/search?q=apple+investor+relations",
+                source_type="financial_search_discovery",
+                result={
+                    "capture_mode": "search_discovery",
+                    "sources": [
+                        {
+                            "page_title": "Apple Investor Relations",
+                            "final_url": "https://investor.apple.com/",
+                            "source_kind": "investor_relations_hub",
+                            "linked_documents": [
+                                {
+                                    "title": "Q1 2026 10-Q",
+                                    "url": "https://investor.apple.com/q1-2026-10q.pdf",
+                                    "document_type": "quarterly_filing",
+                                }
+                            ],
+                        }
+                    ],
+                },
+            )
+        ]
+        existing_urls = {
+            "https://www.bing.com/search?q=apple+investor+relations",
+        }
+        spawned = build_spawned_financial_source_jobs(
+            request,
+            runs,
+            "stealth",
+            existing_urls,
+        )
+        spawned_urls = [job.url for job in spawned]
+        self.assertIn("https://investor.apple.com/", spawned_urls)
+        self.assertIn("https://investor.apple.com/q1-2026-10q.pdf", spawned_urls)
+        self.assertEqual("financial_investor_relations", spawned[0].source_type)
+        self.assertTrue(all(job.category == "financials" for job in spawned))
 
 
 class FinancialSubAgentTests(unittest.TestCase):
@@ -150,6 +211,48 @@ class PublishDecisionTests(unittest.TestCase):
             ["company_overview", "financials", "legal", "news"], claims
         )
         self.assertEqual("publish", decision)
+
+
+class TinyfishEvidenceNormalizationTests(unittest.TestCase):
+    def test_normalize_tinyfish_runs_preserves_raw_capture_material(self) -> None:
+        runs = [
+            TinyfishRunRecord(
+                run_id="run_1",
+                status="COMPLETED",
+                goal="Collect raw financial sources",
+                label="Financial source discovery",
+                category="financials",
+                url="https://www.bing.com/search?q=apple+investor+relations",
+                source_type="financial_search_discovery",
+                result={
+                    "capture_mode": "search_discovery",
+                    "sources": [
+                        {
+                            "page_title": "Apple Investor Relations",
+                            "final_url": "https://investor.apple.com/",
+                            "source_kind": "investor_relations_hub",
+                            "reporting_period": "",
+                            "captured_text": "Apple reported quarterly revenue of $124.3 billion.",
+                            "linked_documents": [
+                                {
+                                    "title": "Q1 2026 10-Q",
+                                    "url": "https://investor.apple.com/q1-2026-10q.pdf",
+                                    "document_type": "quarterly_filing",
+                                }
+                            ],
+                            "notes": "Official source",
+                        }
+                    ],
+                    "coverage_gaps": [],
+                    "error": None,
+                },
+            )
+        ]
+        evidence = normalize_tinyfish_runs(runs)
+        self.assertEqual(1, len(evidence))
+        self.assertIn("Apple Investor Relations", evidence[0].content)
+        self.assertIn("$124.3 billion", evidence[0].content)
+        self.assertIn("Q1 2026 10-Q", evidence[0].content)
 
 
 if __name__ == "__main__":

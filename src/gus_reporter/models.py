@@ -235,10 +235,13 @@ class FinalReport:
     publish_decision: str
     publish_reason: str
     executive_summary: str
+    scope_and_limitations: str
     methodology: str
     entity_profile: str
+    diligence_conclusion: str
     key_findings: list[str]
     recommendations: list[str]
+    pdf_section_order: list[str]
     risk_matrix: list[RiskMatrixEntry]
     sections: list[ReportSection]
     source_log: list[dict[str, Any]]

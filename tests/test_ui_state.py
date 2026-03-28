@@ -15,7 +15,7 @@ class RunStateStoreTests(unittest.TestCase):
             {
                 "event": "pipeline_started",
                 "run_dir": "/tmp/example-run",
-                "openai_model": "gpt-5-mini",
+                "openai_model": "gpt-5.4-mini",
             },
         )
         store.record_event(
@@ -59,7 +59,7 @@ class RunStateStoreTests(unittest.TestCase):
         assert run is not None
         self.assertEqual("running", run["status"])
         self.assertEqual("/tmp/example-run", run["run_dir"])
-        self.assertEqual("gpt-5-mini", run["openai_model"])
+        self.assertEqual("gpt-5.4-mini", run["openai_model"])
         self.assertEqual("completed", run["stages"]["planning"]["status"])
         self.assertEqual(1, len(run["source_jobs"]))
         self.assertEqual("running", run["source_jobs"][0]["status"])

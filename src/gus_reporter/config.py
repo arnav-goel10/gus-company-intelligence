@@ -77,7 +77,7 @@ class AppConfig:
     @classmethod
     def from_env(cls) -> "AppConfig":
         load_runtime_env()
-        model = os.getenv("OPENAI_MODEL", "gpt-5-mini").strip() or "gpt-5-mini"
+        model = os.getenv("OPENAI_MODEL", "gpt-5.4-mini").strip() or "gpt-5.4-mini"
         return cls(
             openai_api_key=_require_env("OPENAI_API_KEY"),
             tinyfish_api_key=_require_env("TINYFISH_API_KEY"),

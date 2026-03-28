@@ -2,7 +2,7 @@
 
 This repository is the first implementation slice of an automated multi-agent
 company intelligence pipeline using Tinyfish for acquisition and OpenAI
-`gpt-5-mini` by default for structured extraction and verification.
+`gpt-5.4-mini` by default for structured extraction and verification.
 
 The current scaffold is intentionally narrow:
 
@@ -16,8 +16,8 @@ The current scaffold is intentionally narrow:
   finance-specific red flags.
 - Domain agents focus on individual sections such as financials, legal, news,
   leadership, workforce, and risk.
-- OpenAI `gpt-5-mini` extracts typed claims for each domain agent by default.
-- OpenAI `gpt-5-mini` verifies each claim against its source evidence by default.
+- OpenAI `gpt-5.4-mini` extracts typed claims for each domain agent by default.
+- OpenAI `gpt-5.4-mini` verifies each claim against its source evidence by default.
 - Section agents synthesize section summaries.
 - An executive aggregation pass compiles the overall report.
 - The report assembler publishes only verified claims and blocks output when
@@ -67,8 +67,8 @@ Useful Tinyfish tuning variables:
 
 Model policy:
 
-- The default model is `gpt-5-mini`.
-- You can override it with `OPENAI_MODEL` when you want to switch back to a stronger model later.
+- The default model is `gpt-5.4-mini`.
+- You can override it with `OPENAI_MODEL` if you want to move to a different model later.
 
 ## Usage
 

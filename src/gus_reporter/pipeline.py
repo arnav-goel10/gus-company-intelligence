@@ -32,12 +32,16 @@ from gus_reporter.prompts import (
     SECTION_DESCRIPTIONS,
     VERIFICATION_SYSTEM_PROMPT,
     build_financial_tinyfish_goal,
+    build_legal_tinyfish_goal,
+    build_news_tinyfish_goal,
 )
 from gus_reporter.raw_source_client import RawSourceClient
 from gus_reporter.schemas import (
     executive_report_schema,
     extraction_schema,
     financial_section_summary_schema,
+    legal_section_summary_schema,
+    news_section_summary_schema,
     section_summary_schema,
     verification_schema,
 )
@@ -48,6 +52,9 @@ MAX_TEXT_EVIDENCE_CHARS = 12000
 MAX_FILE_INPUTS_PER_REQUEST = 4
 
 
+_DEEP_ACQUISITION_CATEGORIES = {"financials", "legal", "news"}
+
+
 def _job_defaults(
     request: ReportRequest,
     default_browser_profile: str,
@@ -56,7 +63,8 @@ def _job_defaults(
     category: str,
     proxy_country_code: str,
 ) -> dict[str, Any]:
-    browser_profile = "lite" if category == "financials" else default_browser_profile
+    is_deep = category in _DEEP_ACQUISITION_CATEGORIES
+    browser_profile = "lite" if is_deep else default_browser_profile
     return {
         "source_type": source_type,
         "browser_profile": browser_profile,
@@ -64,9 +72,8 @@ def _job_defaults(
         "preferred_run_mode": "async",
         "use_vault": request.tinyfish_use_vault,
         "credential_item_ids": list(request.tinyfish_credential_item_ids),
-        "enable_agent_memory": request.tinyfish_enable_agent_memory
-        or category == "financials",
-        "allow_stealth_fallback": category == "financials",
+        "enable_agent_memory": request.tinyfish_enable_agent_memory or is_deep,
+        "allow_stealth_fallback": is_deep,
     }
 
 
@@ -89,6 +96,52 @@ def build_financial_goal(
         source_label=label,
         source_type=source_type_map.get(source_type, "financial_document"),
         ticker=request.ticker,
+    )
+
+
+def build_legal_goal(
+    request: ReportRequest,
+    *,
+    source_type: str,
+    label: str,
+    url: str,
+) -> str:
+    source_type_map = {
+        "legal_court_records": "court_docket_search",
+        "legal_regulatory_filings": "regulatory_enforcement_search",
+        "legal_enforcement": "regulatory_enforcement_search",
+        "legal_sanctions": "sanctions_screening",
+        "legal_corporate_registry": "corporate_registry_lookup",
+        "legal_search_discovery": "legal_search_discovery",
+        "legal_document": "legal_search_discovery",
+    }
+    return build_legal_tinyfish_goal(
+        company_name=request.company_name,
+        source_label=label,
+        source_type=source_type_map.get(source_type, "legal_search_discovery"),
+        ticker=request.ticker,
+        jurisdiction=request.primary_jurisdiction,
+    )
+
+
+def build_news_goal(
+    request: ReportRequest,
+    *,
+    source_type: str,
+    label: str,
+    url: str,
+) -> str:
+    source_type_map = {
+        "news_aggregator": "news_aggregator_search",
+        "news_press_release": "press_release_search",
+        "news_industry_publication": "industry_publication_search",
+        "news_search_discovery": "news_search_discovery",
+        "news_document": "news_search_discovery",
+    }
+    return build_news_tinyfish_goal(
+        company_name=request.company_name,
+        source_label=label,
+        source_type=source_type_map.get(source_type, "news_search_discovery"),
     )
 
 
@@ -299,6 +352,259 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                         ),
                     )
                 )
+
+    if "legal" in request.focus_areas:
+        legal_search_queries = [
+            (
+                "Litigation search",
+                f"\"{request.company_name}\" lawsuit litigation court case filed",
+            ),
+            (
+                "SEC enforcement search",
+                f"\"{request.company_name}\" SEC enforcement action investigation penalty",
+            ),
+            (
+                "Regulatory action search",
+                f"\"{request.company_name}\" FTC DOJ EPA regulatory fine penalty settlement",
+            ),
+            (
+                "Sanctions screening",
+                f"\"{request.company_name}\" OFAC sanctions SDN debarment",
+            ),
+        ]
+        for label, query in legal_search_queries:
+            search_url = _build_search_url(query)
+            jobs.append(
+                SourceJob(
+                    label=label,
+                    category="legal",
+                    url=search_url,
+                    goal=build_legal_goal(
+                        request,
+                        source_type="legal_search_discovery",
+                        label=label,
+                        url=search_url,
+                    ),
+                    **_job_defaults(
+                        request,
+                        default_browser_profile,
+                        source_type="legal_search_discovery",
+                        category="legal",
+                        proxy_country_code=proxy_country,
+                    ),
+                )
+            )
+        court_listener_url = (
+            f"https://www.courtlistener.com/?q=%22{urllib.parse.quote(request.company_name)}%22&type=o"
+        )
+        jobs.append(
+            SourceJob(
+                label="CourtListener search",
+                category="legal",
+                url=court_listener_url,
+                goal=build_legal_goal(
+                    request,
+                    source_type="legal_court_records",
+                    label="CourtListener search",
+                    url=court_listener_url,
+                ),
+                **_job_defaults(
+                    request,
+                    default_browser_profile,
+                    source_type="legal_court_records",
+                    category="legal",
+                    proxy_country_code=proxy_country,
+                ),
+            )
+        )
+        opencorporates_url = (
+            f"https://opencorporates.com/companies?q={urllib.parse.quote(request.company_name)}"
+        )
+        jobs.append(
+            SourceJob(
+                label="OpenCorporates lookup",
+                category="legal",
+                url=opencorporates_url,
+                goal=build_legal_goal(
+                    request,
+                    source_type="legal_corporate_registry",
+                    label="OpenCorporates lookup",
+                    url=opencorporates_url,
+                ),
+                **_job_defaults(
+                    request,
+                    default_browser_profile,
+                    source_type="legal_corporate_registry",
+                    category="legal",
+                    proxy_country_code=proxy_country,
+                ),
+            )
+        )
+        if request.ticker:
+            sec_enforcement_url = _build_search_url(
+                f"site:sec.gov \"{request.company_name}\" OR \"{request.ticker}\" "
+                "enforcement litigation administrative proceedings"
+            )
+            jobs.append(
+                SourceJob(
+                    label="SEC enforcement filings",
+                    category="legal",
+                    url=sec_enforcement_url,
+                    goal=build_legal_goal(
+                        request,
+                        source_type="legal_search_discovery",
+                        label="SEC enforcement filings",
+                        url=sec_enforcement_url,
+                    ),
+                    **_job_defaults(
+                        request,
+                        default_browser_profile,
+                        source_type="legal_search_discovery",
+                        category="legal",
+                        proxy_country_code="US",
+                    ),
+                )
+            )
+        for index, url in enumerate(request.legal_source_urls, start=1):
+            if url.strip():
+                jobs.append(
+                    SourceJob(
+                        label=f"Legal source {index}",
+                        category="legal",
+                        url=url.strip(),
+                        goal=build_legal_goal(
+                            request,
+                            source_type="legal_document",
+                            label=f"Legal source {index}",
+                            url=url.strip(),
+                        ),
+                        **_job_defaults(
+                            request,
+                            default_browser_profile,
+                            source_type="legal_document",
+                            category="legal",
+                            proxy_country_code=proxy_country,
+                        ),
+                    )
+                )
+
+    if "news" in request.focus_areas:
+        news_search_url = (
+            f"https://www.bing.com/news/search?q={urllib.parse.quote_plus(request.company_name)}"
+        )
+        jobs.append(
+            SourceJob(
+                label="Recent news search",
+                category="news",
+                url=news_search_url,
+                goal=build_news_goal(
+                    request,
+                    source_type="news_search_discovery",
+                    label="Recent news search",
+                    url=news_search_url,
+                ),
+                **_job_defaults(
+                    request,
+                    default_browser_profile,
+                    source_type="news_search_discovery",
+                    category="news",
+                    proxy_country_code=proxy_country,
+                ),
+            )
+        )
+        negative_news_url = _build_search_url(
+            f"\"{request.company_name}\" lawsuit layoff investigation scandal recall controversy"
+        )
+        jobs.append(
+            SourceJob(
+                label="Negative news search",
+                category="news",
+                url=negative_news_url,
+                goal=build_news_goal(
+                    request,
+                    source_type="news_search_discovery",
+                    label="Negative news search",
+                    url=negative_news_url,
+                ),
+                **_job_defaults(
+                    request,
+                    default_browser_profile,
+                    source_type="news_search_discovery",
+                    category="news",
+                    proxy_country_code=proxy_country,
+                ),
+            )
+        )
+        press_release_url = _build_search_url(
+            f"\"{request.company_name}\" press release "
+            "site:prnewswire.com OR site:businesswire.com OR site:globenewswire.com"
+        )
+        jobs.append(
+            SourceJob(
+                label="Press release search",
+                category="news",
+                url=press_release_url,
+                goal=build_news_goal(
+                    request,
+                    source_type="news_press_release",
+                    label="Press release search",
+                    url=press_release_url,
+                ),
+                **_job_defaults(
+                    request,
+                    default_browser_profile,
+                    source_type="news_press_release",
+                    category="news",
+                    proxy_country_code=proxy_country,
+                ),
+            )
+        )
+        industry_url = _build_search_url(
+            f"\"{request.company_name}\" analysis report review coverage"
+        )
+        jobs.append(
+            SourceJob(
+                label="Industry coverage search",
+                category="news",
+                url=industry_url,
+                goal=build_news_goal(
+                    request,
+                    source_type="news_search_discovery",
+                    label="Industry coverage search",
+                    url=industry_url,
+                ),
+                **_job_defaults(
+                    request,
+                    default_browser_profile,
+                    source_type="news_search_discovery",
+                    category="news",
+                    proxy_country_code=proxy_country,
+                ),
+            )
+        )
+        for index, url in enumerate(request.news_source_urls, start=1):
+            if url.strip():
+                jobs.append(
+                    SourceJob(
+                        label=f"News source {index}",
+                        category="news",
+                        url=url.strip(),
+                        goal=build_news_goal(
+                            request,
+                            source_type="news_document",
+                            label=f"News source {index}",
+                            url=url.strip(),
+                        ),
+                        **_job_defaults(
+                            request,
+                            default_browser_profile,
+                            source_type="news_document",
+                            category="news",
+                            proxy_country_code=proxy_country,
+                        ),
+                    )
+                )
+
     return jobs
 
 
@@ -395,6 +701,237 @@ def build_spawned_financial_source_jobs(
             linked_documents = source.get("linked_documents")
             if not isinstance(linked_documents, list):
                 continue
+
+    return spawned
+
+
+def _guess_discovered_legal_source_type(
+    *,
+    source_kind: str,
+    document_type: str,
+    url: str,
+) -> str:
+    source_kind = source_kind.lower()
+    document_type = document_type.lower()
+    url_lower = url.lower()
+
+    if any(marker in source_kind for marker in {"court", "docket", "pacer", "case", "litigation"}):
+        return "legal_court_records"
+    if any(marker in source_kind for marker in {"enforcement", "penalty", "fine", "settlement", "consent"}):
+        return "legal_enforcement"
+    if any(marker in source_kind for marker in {"sanction", "ofac", "sdn", "debarment"}):
+        return "legal_sanctions"
+    if any(marker in source_kind for marker in {"registry", "corporat", "secretary", "incorporation"}):
+        return "legal_corporate_registry"
+    if any(marker in url_lower for marker in {"courtlistener", "pacer", "uscourts.gov"}):
+        return "legal_court_records"
+    if any(marker in url_lower for marker in {"sec.gov/litigation", "ftc.gov", "doj.gov", "enforcement"}):
+        return "legal_enforcement"
+    if any(marker in url_lower for marker in {"ofac", "sanctions", "treasury.gov/sdn"}):
+        return "legal_sanctions"
+    if any(marker in url_lower for marker in {"opencorporates", "secretary", "sos."}):
+        return "legal_corporate_registry"
+    if any(marker in document_type for marker in {"complaint", "order", "judgment", "settlement", "filing"}):
+        return "legal_document"
+    return "legal_document"
+
+
+def _guess_discovered_news_source_type(
+    *,
+    source_kind: str,
+    url: str,
+) -> str:
+    source_kind = source_kind.lower()
+    url_lower = url.lower()
+
+    if any(marker in url_lower for marker in {"prnewswire", "businesswire", "globenewswire"}):
+        return "news_press_release"
+    if any(marker in source_kind for marker in {"press_release", "press release", "wire"}):
+        return "news_press_release"
+    if any(marker in url_lower for marker in {
+        "reuters.com", "bloomberg.com", "wsj.com", "nytimes.com", "ft.com",
+        "cnbc.com", "bbc.com", "apnews.com",
+    }):
+        return "news_aggregator"
+    if any(marker in url_lower for marker in {
+        "techcrunch.com", "theinformation.com", "semafor.com", "arstechnica.com",
+        "theverge.com", "wired.com",
+    }):
+        return "news_industry_publication"
+    if any(marker in source_kind for marker in {"news", "article", "report", "coverage"}):
+        return "news_aggregator"
+    return "news_article"
+
+
+def build_spawned_legal_source_jobs(
+    request: ReportRequest,
+    runs: list[TinyfishRunRecord],
+    default_browser_profile: str,
+    existing_urls: set[str],
+) -> list[SourceJob]:
+    spawned: list[SourceJob] = []
+    proxy_country = request.primary_jurisdiction[:2].upper()
+
+    def maybe_add_job(
+        *,
+        label: str,
+        url: str,
+        source_type: str,
+    ) -> None:
+        normalized = _normalize_url(url)
+        if not normalized or normalized in existing_urls:
+            return
+        existing_urls.add(normalized)
+        spawned.append(
+            SourceJob(
+                label=label,
+                category="legal",
+                url=url,
+                goal=build_legal_goal(
+                    request,
+                    source_type=source_type,
+                    label=label,
+                    url=url,
+                ),
+                **_job_defaults(
+                    request,
+                    default_browser_profile,
+                    source_type=source_type,
+                    category="legal",
+                    proxy_country_code=proxy_country,
+                ),
+            )
+        )
+
+    for run in runs:
+        if run.category != "legal" or not isinstance(run.result, dict):
+            continue
+        sources = run.result.get("sources")
+        if not isinstance(sources, list):
+            continue
+        for source in sources:
+            if not isinstance(source, dict):
+                continue
+            final_url = str(source.get("final_url", "")).strip()
+            page_title = str(source.get("page_title", "")).strip()
+            source_kind = str(source.get("source_kind", "")).strip()
+            document_type = ""
+            if final_url:
+                source_type = _guess_discovered_legal_source_type(
+                    source_kind=source_kind,
+                    document_type=document_type,
+                    url=final_url,
+                )
+                if source_type in {"legal_court_records", "legal_enforcement", "legal_sanctions"}:
+                    maybe_add_job(
+                        label=page_title or f"Discovered {source_kind or 'legal source'}",
+                        url=final_url,
+                        source_type=source_type,
+                    )
+
+            linked_documents = source.get("linked_documents")
+            if not isinstance(linked_documents, list):
+                continue
+            for item in linked_documents:
+                if not isinstance(item, dict):
+                    continue
+                doc_url = str(item.get("url", "")).strip()
+                doc_title = str(item.get("title", "")).strip()
+                doc_type = str(item.get("document_type", "")).strip()
+                if doc_url:
+                    maybe_add_job(
+                        label=doc_title or page_title or "Linked legal document",
+                        url=doc_url,
+                        source_type=_guess_discovered_legal_source_type(
+                            source_kind=source_kind,
+                            document_type=doc_type,
+                            url=doc_url,
+                        ),
+                    )
+
+    return spawned
+
+
+def build_spawned_news_source_jobs(
+    request: ReportRequest,
+    runs: list[TinyfishRunRecord],
+    default_browser_profile: str,
+    existing_urls: set[str],
+) -> list[SourceJob]:
+    spawned: list[SourceJob] = []
+    proxy_country = request.primary_jurisdiction[:2].upper()
+
+    def maybe_add_job(
+        *,
+        label: str,
+        url: str,
+        source_type: str,
+    ) -> None:
+        normalized = _normalize_url(url)
+        if not normalized or normalized in existing_urls:
+            return
+        existing_urls.add(normalized)
+        spawned.append(
+            SourceJob(
+                label=label,
+                category="news",
+                url=url,
+                goal=build_news_goal(
+                    request,
+                    source_type=source_type,
+                    label=label,
+                    url=url,
+                ),
+                **_job_defaults(
+                    request,
+                    default_browser_profile,
+                    source_type=source_type,
+                    category="news",
+                    proxy_country_code=proxy_country,
+                ),
+            )
+        )
+
+    for run in runs:
+        if run.category != "news" or not isinstance(run.result, dict):
+            continue
+        sources = run.result.get("sources")
+        if not isinstance(sources, list):
+            continue
+        for source in sources:
+            if not isinstance(source, dict):
+                continue
+            final_url = str(source.get("final_url", "")).strip()
+            page_title = str(source.get("page_title", "")).strip()
+            source_kind = str(source.get("source_kind", "")).strip()
+            if final_url:
+                source_type = _guess_discovered_news_source_type(
+                    source_kind=source_kind,
+                    url=final_url,
+                )
+                maybe_add_job(
+                    label=page_title or f"Discovered {source_kind or 'news source'}",
+                    url=final_url,
+                    source_type=source_type,
+                )
+
+            linked_documents = source.get("linked_documents")
+            if not isinstance(linked_documents, list):
+                continue
+            for item in linked_documents:
+                if not isinstance(item, dict):
+                    continue
+                doc_url = str(item.get("url", "")).strip()
+                doc_title = str(item.get("title", "")).strip()
+                if doc_url:
+                    maybe_add_job(
+                        label=doc_title or page_title or "Linked news article",
+                        url=doc_url,
+                        source_type=_guess_discovered_news_source_type(
+                            source_kind=source_kind,
+                            url=doc_url,
+                        ),
+                    )
 
     return spawned
 
@@ -519,6 +1056,213 @@ def build_raw_financial_source_refs(
                     discovery_origin="tinyfish_linked_document",
                     discovery_run_id=run.run_id,
                 )
+
+    return refs
+
+
+def build_raw_legal_source_refs(
+    request: ReportRequest,
+    runs: list[TinyfishRunRecord],
+) -> list[dict[str, Any]]:
+    refs: list[dict[str, Any]] = []
+    seen_urls: set[str] = set()
+
+    def maybe_add(
+        *,
+        label: str,
+        url: str,
+        source_type: str,
+        source_kind: str = "",
+        notes: str = "",
+        discovery_origin: str = "",
+        discovery_run_id: str = "",
+    ) -> None:
+        normalized = _normalize_url(url)
+        if not normalized or normalized in seen_urls:
+            return
+        seen_urls.add(normalized)
+        refs.append(
+            {
+                "label": label,
+                "url": url,
+                "source_type": source_type,
+                "source_kind": source_kind,
+                "reporting_period": "",
+                "notes": notes,
+                "discovery_origin": discovery_origin,
+                "discovery_run_id": discovery_run_id,
+            }
+        )
+
+    for index, url in enumerate(request.legal_source_urls, start=1):
+        if url.strip():
+            maybe_add(
+                label=f"Legal source {index}",
+                url=url.strip(),
+                source_type="legal_document",
+                discovery_origin="request_hint",
+            )
+
+    for run in runs:
+        if run.category != "legal":
+            continue
+        if not isinstance(run.result, dict):
+            if run.source_type in {"legal_court_records", "legal_enforcement", "legal_document"}:
+                maybe_add(
+                    label=run.label,
+                    url=run.url,
+                    source_type=run.source_type,
+                    discovery_origin="tinyfish_seeded_url",
+                    discovery_run_id=run.run_id,
+                )
+            continue
+
+        sources = run.result.get("sources")
+        if not isinstance(sources, list):
+            continue
+        for source in sources:
+            if not isinstance(source, dict):
+                continue
+            page_title = str(source.get("page_title", "")).strip()
+            final_url = str(source.get("final_url", "")).strip()
+            source_kind = str(source.get("source_kind", "")).strip()
+            notes = str(source.get("notes", "")).strip()
+            if final_url:
+                maybe_add(
+                    label=page_title or run.label,
+                    url=final_url,
+                    source_type=_guess_discovered_legal_source_type(
+                        source_kind=source_kind,
+                        document_type="",
+                        url=final_url,
+                    ),
+                    source_kind=source_kind,
+                    notes=notes,
+                    discovery_origin="tinyfish_discovery",
+                    discovery_run_id=run.run_id,
+                )
+
+            linked_documents = source.get("linked_documents")
+            if not isinstance(linked_documents, list):
+                continue
+            for item in linked_documents:
+                if not isinstance(item, dict):
+                    continue
+                document_url = str(item.get("url", "")).strip()
+                document_title = str(item.get("title", "")).strip()
+                document_type = str(item.get("document_type", "")).strip()
+                if document_url:
+                    maybe_add(
+                        label=document_title or page_title or "Linked legal document",
+                        url=document_url,
+                        source_type=_guess_discovered_legal_source_type(
+                            source_kind=source_kind,
+                            document_type=document_type,
+                            url=document_url,
+                        ),
+                        source_kind=document_type or source_kind,
+                        notes=notes,
+                        discovery_origin="tinyfish_linked_document",
+                        discovery_run_id=run.run_id,
+                    )
+
+    return refs
+
+
+def build_raw_news_source_refs(
+    request: ReportRequest,
+    runs: list[TinyfishRunRecord],
+) -> list[dict[str, Any]]:
+    refs: list[dict[str, Any]] = []
+    seen_urls: set[str] = set()
+
+    def maybe_add(
+        *,
+        label: str,
+        url: str,
+        source_type: str,
+        source_kind: str = "",
+        notes: str = "",
+        discovery_origin: str = "",
+        discovery_run_id: str = "",
+    ) -> None:
+        normalized = _normalize_url(url)
+        if not normalized or normalized in seen_urls:
+            return
+        seen_urls.add(normalized)
+        refs.append(
+            {
+                "label": label,
+                "url": url,
+                "source_type": source_type,
+                "source_kind": source_kind,
+                "reporting_period": "",
+                "notes": notes,
+                "discovery_origin": discovery_origin,
+                "discovery_run_id": discovery_run_id,
+            }
+        )
+
+    for index, url in enumerate(request.news_source_urls, start=1):
+        if url.strip():
+            maybe_add(
+                label=f"News source {index}",
+                url=url.strip(),
+                source_type="news_article",
+                discovery_origin="request_hint",
+            )
+
+    for run in runs:
+        if run.category != "news":
+            continue
+        if not isinstance(run.result, dict):
+            continue
+
+        sources = run.result.get("sources")
+        if not isinstance(sources, list):
+            continue
+        for source in sources:
+            if not isinstance(source, dict):
+                continue
+            page_title = str(source.get("page_title", "")).strip()
+            final_url = str(source.get("final_url", "")).strip()
+            source_kind = str(source.get("source_kind", "")).strip()
+            notes = str(source.get("notes", "")).strip()
+            if final_url:
+                maybe_add(
+                    label=page_title or run.label,
+                    url=final_url,
+                    source_type=_guess_discovered_news_source_type(
+                        source_kind=source_kind,
+                        url=final_url,
+                    ),
+                    source_kind=source_kind,
+                    notes=notes,
+                    discovery_origin="tinyfish_discovery",
+                    discovery_run_id=run.run_id,
+                )
+
+            linked_documents = source.get("linked_documents")
+            if not isinstance(linked_documents, list):
+                continue
+            for item in linked_documents:
+                if not isinstance(item, dict):
+                    continue
+                document_url = str(item.get("url", "")).strip()
+                document_title = str(item.get("title", "")).strip()
+                if document_url:
+                    maybe_add(
+                        label=document_title or page_title or "Linked news article",
+                        url=document_url,
+                        source_type=_guess_discovered_news_source_type(
+                            source_kind=source_kind,
+                            url=document_url,
+                        ),
+                        source_kind=source_kind,
+                        notes=notes,
+                        discovery_origin="tinyfish_linked_document",
+                        discovery_run_id=run.run_id,
+                    )
 
     return refs
 
@@ -737,9 +1481,9 @@ def select_evidence_for_extraction_agent(
 def build_risk_matrix(verified_claims: list[VerifiedClaim]) -> list[RiskMatrixEntry]:
     entries: list[RiskMatrixEntry] = []
     recommendations = {
-        "legal": "Escalate to counsel and validate current case or enforcement status before using this report in a transaction.",
+        "legal": "Escalate to counsel for independent verification. Confirm case status, jurisdiction exposure, and potential liability before proceeding with any transaction.",
         "financials": "Request primary financial statements and reconcile any quantitative exposure before relying on the claim.",
-        "news": "Check whether the event remains current and whether it materially changes the company narrative.",
+        "news": "Verify whether the event remains current, assess reputational impact, and determine whether it materially changes the investment thesis or company narrative.",
         "risk_signals": "Treat this as a decision blocker until the issue is independently cleared or contextualized.",
     }
     for claim in verified_claims:
@@ -917,11 +1661,25 @@ class ReportPipeline:
                     total=len(scheduled_jobs),
                 )
 
-                spawned_jobs = build_spawned_financial_source_jobs(
-                    request,
-                    wave_runs,
-                    self.config.tinyfish_default_browser_profile,
-                    seen_urls,
+                spawned_jobs = (
+                    build_spawned_financial_source_jobs(
+                        request,
+                        wave_runs,
+                        self.config.tinyfish_default_browser_profile,
+                        seen_urls,
+                    )
+                    + build_spawned_legal_source_jobs(
+                        request,
+                        wave_runs,
+                        self.config.tinyfish_default_browser_profile,
+                        seen_urls,
+                    )
+                    + build_spawned_news_source_jobs(
+                        request,
+                        wave_runs,
+                        self.config.tinyfish_default_browser_profile,
+                        seen_urls,
+                    )
                 )
                 if not spawned_jobs:
                     pending_jobs = []
@@ -975,45 +1733,63 @@ class ReportPipeline:
                 "tinyfish_runs.json",
                 [record.to_dict() for record in tinyfish_runs],
             )
-            raw_source_refs = build_raw_financial_source_refs(request, tinyfish_runs)
+            raw_financial_refs = build_raw_financial_source_refs(request, tinyfish_runs)
+            raw_legal_refs = build_raw_legal_source_refs(request, tinyfish_runs)
+            raw_news_refs = build_raw_news_source_refs(request, tinyfish_runs)
+            all_raw_refs = raw_financial_refs + raw_legal_refs + raw_news_refs
             self._write_artifact(
                 run_dir,
                 "raw_source_refs.json",
-                raw_source_refs,
+                all_raw_refs,
             )
             self._emit_stage_event(
                 stage="acquisition",
                 status="running",
                 message=(
-                    f"Directly fetching {len(raw_source_refs)} raw financial source "
-                    f"{'artifacts' if len(raw_source_refs) != 1 else 'artifact'}."
+                    f"Directly fetching {len(all_raw_refs)} raw source "
+                    f"{'artifacts' if len(all_raw_refs) != 1 else 'artifact'} "
+                    f"({len(raw_financial_refs)} financial, {len(raw_legal_refs)} legal, "
+                    f"{len(raw_news_refs)} news)."
                 ),
                 current=len(tinyfish_runs),
                 total=len(scheduled_jobs),
             )
 
-            raw_evidence, raw_source_manifest = self.raw_source_client.collect_evidence(
-                source_refs=raw_source_refs,
-                run_dir=run_dir,
-                category="financials",
-            )
+            all_raw_evidence: list[EvidenceItem] = []
+            all_raw_manifests: list[dict[str, Any]] = []
+            for category_label, category_refs in [
+                ("financials", raw_financial_refs),
+                ("legal", raw_legal_refs),
+                ("news", raw_news_refs),
+            ]:
+                if not category_refs:
+                    continue
+                cat_evidence, cat_manifest = self.raw_source_client.collect_evidence(
+                    source_refs=category_refs,
+                    run_dir=run_dir,
+                    category=category_label,
+                )
+                all_raw_evidence.extend(cat_evidence)
+                all_raw_manifests.extend(cat_manifest)
+
             self._write_artifact(
                 run_dir,
                 "raw_source_manifest.json",
-                raw_source_manifest,
+                all_raw_manifests,
             )
             self._emit_stage_event(
                 stage="acquisition",
                 status="completed",
                 message=(
                     f"Completed acquisition: {len(tinyfish_runs)} Tinyfish discovery jobs and "
-                    f"{len(raw_evidence)} directly fetched raw sources."
+                    f"{len(all_raw_evidence)} directly fetched raw sources."
                 ),
-                current=len(raw_evidence),
-                total=max(len(raw_source_refs), 1),
+                current=len(all_raw_evidence),
+                total=max(len(all_raw_refs), 1),
             )
 
-            evidence = raw_evidence or normalize_tinyfish_runs(tinyfish_runs)
+            tinyfish_evidence = normalize_tinyfish_runs(tinyfish_runs)
+            evidence = all_raw_evidence + tinyfish_evidence if all_raw_evidence else tinyfish_evidence
             self._write_artifact(
                 run_dir, "evidence.json", [item.to_dict() for item in evidence]
             )
@@ -1356,11 +2132,7 @@ class ReportPipeline:
             )
             claims = grouped_claims.get(agent.section, [])
             if claims:
-                schema = (
-                    financial_section_summary_schema()
-                    if agent.section == "financials"
-                    else section_summary_schema()
-                )
+                schema = self._section_schema_for(agent.section)
                 payload = self.openai.structured_response(
                     schema_name=f"{agent.section}_section_summary",
                     schema=schema,
@@ -1386,24 +2158,14 @@ class ReportPipeline:
                     for item in payload.get("recommendations", [])
                     if str(item).strip()
                 ]
-                structured_data = {}
-                if agent.section == "financials":
-                    structured_data = {
-                        "key_metrics": payload.get("key_metrics", []),
-                        "red_flags": payload.get("red_flags", []),
-                        "data_gaps": payload.get("data_gaps", []),
-                    }
+                structured_data = self._extract_structured_data(agent.section, payload)
             else:
                 summary = "Insufficient verified evidence for this section."
                 highlights = []
                 recommendations = [
                     "Add stronger primary sources for this section before relying on it in a decision."
                 ]
-                structured_data = (
-                    {"key_metrics": [], "red_flags": [], "data_gaps": []}
-                    if agent.section == "financials"
-                    else {}
-                )
+                structured_data = self._empty_structured_data(agent.section)
 
             sections.append(
                 ReportSection(
@@ -1441,6 +2203,64 @@ class ReportPipeline:
             total=total_sections,
         )
         return sections
+
+    @staticmethod
+    def _section_schema_for(section: str) -> dict:
+        if section == "financials":
+            return financial_section_summary_schema()
+        if section == "legal":
+            return legal_section_summary_schema()
+        if section == "news":
+            return news_section_summary_schema()
+        return section_summary_schema()
+
+    @staticmethod
+    def _extract_structured_data(section: str, payload: dict[str, Any]) -> dict[str, Any]:
+        if section == "financials":
+            return {
+                "key_metrics": payload.get("key_metrics", []),
+                "red_flags": payload.get("red_flags", []),
+                "data_gaps": payload.get("data_gaps", []),
+            }
+        if section == "legal":
+            return {
+                "active_matters": payload.get("active_matters", []),
+                "sanctions_flags": payload.get("sanctions_flags", []),
+                "regulatory_exposure": payload.get("regulatory_exposure", []),
+                "red_flags": payload.get("red_flags", []),
+                "data_gaps": payload.get("data_gaps", []),
+            }
+        if section == "news":
+            return {
+                "material_events": payload.get("material_events", []),
+                "coverage_sentiment": payload.get("coverage_sentiment", ""),
+                "coverage_density": payload.get("coverage_density", ""),
+                "negative_signals": payload.get("negative_signals", []),
+                "data_gaps": payload.get("data_gaps", []),
+            }
+        return {}
+
+    @staticmethod
+    def _empty_structured_data(section: str) -> dict[str, Any]:
+        if section == "financials":
+            return {"key_metrics": [], "red_flags": [], "data_gaps": []}
+        if section == "legal":
+            return {
+                "active_matters": [],
+                "sanctions_flags": [],
+                "regulatory_exposure": [],
+                "red_flags": [],
+                "data_gaps": [],
+            }
+        if section == "news":
+            return {
+                "material_events": [],
+                "coverage_sentiment": "",
+                "coverage_density": "",
+                "negative_signals": [],
+                "data_gaps": [],
+            }
+        return {}
 
     def _section_synthesis_prompt(
         self,

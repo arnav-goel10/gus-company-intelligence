@@ -83,6 +83,8 @@ class ReportRequest:
     ticker: str = ""
     investor_relations_url: str = ""
     financial_source_urls: list[str] = field(default_factory=list)
+    legal_source_urls: list[str] = field(default_factory=list)
+    news_source_urls: list[str] = field(default_factory=list)
     tinyfish_use_vault: bool = False
     tinyfish_credential_item_ids: list[str] = field(default_factory=list)
     tinyfish_enable_agent_memory: bool = False
@@ -106,6 +108,12 @@ class ReportRequest:
             investor_relations_url=str(data.get("investor_relations_url", "")).strip(),
             financial_source_urls=[
                 str(item).strip() for item in data.get("financial_source_urls", [])
+            ],
+            legal_source_urls=[
+                str(item).strip() for item in data.get("legal_source_urls", [])
+            ],
+            news_source_urls=[
+                str(item).strip() for item in data.get("news_source_urls", [])
             ],
             tinyfish_use_vault=_coerce_bool(data.get("tinyfish_use_vault", False)),
             tinyfish_credential_item_ids=[

@@ -177,6 +177,154 @@ def financial_section_summary_schema() -> dict:
     }
 
 
+def legal_section_summary_schema() -> dict:
+    return {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "summary": {"type": "string"},
+            "highlights": {
+                "type": "array",
+                "items": {"type": "string"},
+            },
+            "recommendations": {
+                "type": "array",
+                "items": {"type": "string"},
+            },
+            "active_matters": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "properties": {
+                        "matter_type": {"type": "string"},
+                        "description": {"type": "string"},
+                        "jurisdiction": {"type": "string"},
+                        "status": {"type": "string"},
+                        "severity": {
+                            "type": "string",
+                            "enum": ["high", "medium", "low"],
+                        },
+                        "date_filed_or_announced": {"type": "string"},
+                        "evidence_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                        },
+                    },
+                    "required": [
+                        "matter_type",
+                        "description",
+                        "jurisdiction",
+                        "status",
+                        "severity",
+                        "date_filed_or_announced",
+                        "evidence_ids",
+                    ],
+                },
+            },
+            "sanctions_flags": {
+                "type": "array",
+                "items": {"type": "string"},
+            },
+            "regulatory_exposure": {
+                "type": "array",
+                "items": {"type": "string"},
+            },
+            "red_flags": {
+                "type": "array",
+                "items": {"type": "string"},
+            },
+            "data_gaps": {
+                "type": "array",
+                "items": {"type": "string"},
+            },
+        },
+        "required": [
+            "summary",
+            "highlights",
+            "recommendations",
+            "active_matters",
+            "sanctions_flags",
+            "regulatory_exposure",
+            "red_flags",
+            "data_gaps",
+        ],
+    }
+
+
+def news_section_summary_schema() -> dict:
+    return {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "summary": {"type": "string"},
+            "highlights": {
+                "type": "array",
+                "items": {"type": "string"},
+            },
+            "recommendations": {
+                "type": "array",
+                "items": {"type": "string"},
+            },
+            "material_events": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "properties": {
+                        "event_type": {"type": "string"},
+                        "headline": {"type": "string"},
+                        "date": {"type": "string"},
+                        "source_publisher": {"type": "string"},
+                        "sentiment": {
+                            "type": "string",
+                            "enum": ["positive", "negative", "neutral"],
+                        },
+                        "evidence_ids": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                        },
+                    },
+                    "required": [
+                        "event_type",
+                        "headline",
+                        "date",
+                        "source_publisher",
+                        "sentiment",
+                        "evidence_ids",
+                    ],
+                },
+            },
+            "coverage_sentiment": {
+                "type": "string",
+                "enum": ["net_positive", "net_negative", "mixed", "insufficient"],
+            },
+            "coverage_density": {
+                "type": "string",
+                "enum": ["heavy", "moderate", "light", "dark"],
+            },
+            "negative_signals": {
+                "type": "array",
+                "items": {"type": "string"},
+            },
+            "data_gaps": {
+                "type": "array",
+                "items": {"type": "string"},
+            },
+        },
+        "required": [
+            "summary",
+            "highlights",
+            "recommendations",
+            "material_events",
+            "coverage_sentiment",
+            "coverage_density",
+            "negative_signals",
+            "data_gaps",
+        ],
+    }
+
+
 def executive_report_schema() -> dict:
     return {
         "type": "object",

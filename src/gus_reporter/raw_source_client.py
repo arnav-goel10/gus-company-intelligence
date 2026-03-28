@@ -120,10 +120,12 @@ class RawSourceClient:
         self,
         *,
         max_text_chars: int = 24000,
-        timeout_seconds: int = 90,
+        timeout_seconds: int | None = 90,
     ) -> None:
         self.max_text_chars = max(2000, max_text_chars)
-        self.timeout_seconds = max(10, timeout_seconds)
+        self.timeout_seconds = (
+            timeout_seconds if timeout_seconds and timeout_seconds > 0 else None
+        )
 
     def collect_evidence(
         self,
@@ -186,7 +188,14 @@ class RawSourceClient:
             },
         )
         try:
-            with urllib.request.urlopen(request, timeout=self.timeout_seconds) as response:
+            if self.timeout_seconds is None:
+                response_context = urllib.request.urlopen(request)
+            else:
+                response_context = urllib.request.urlopen(
+                    request,
+                    timeout=self.timeout_seconds,
+                )
+            with response_context as response:
                 body = response.read()
                 final_url = response.geturl()
                 content_type_header = response.headers.get("Content-Type", "")

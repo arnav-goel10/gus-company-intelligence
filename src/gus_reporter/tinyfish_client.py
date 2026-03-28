@@ -50,21 +50,27 @@ class TinyfishClient:
         api_key: str,
         base_url: str,
         poll_interval_seconds: int,
-        poll_timeout_seconds: int,
+        poll_timeout_seconds: int | None,
         batch_size: int = 20,
         retry_with_stealth: bool = True,
         request_max_retries: int = 3,
         request_retry_backoff_seconds: float = 2.0,
+        request_timeout_seconds: int | None = 120,
         event_callback: Callable[[dict[str, Any]], None] | None = None,
     ) -> None:
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
         self.poll_interval_seconds = poll_interval_seconds
-        self.poll_timeout_seconds = poll_timeout_seconds
+        self.poll_timeout_seconds = (
+            poll_timeout_seconds if poll_timeout_seconds and poll_timeout_seconds > 0 else None
+        )
         self.batch_size = max(1, min(batch_size, 100))
         self.retry_with_stealth = retry_with_stealth
         self.request_max_retries = max(0, request_max_retries)
         self.request_retry_backoff_seconds = max(0.1, request_retry_backoff_seconds)
+        self.request_timeout_seconds = (
+            request_timeout_seconds if request_timeout_seconds and request_timeout_seconds > 0 else None
+        )
         self.event_callback = event_callback
 
     def run_job(self, job: SourceJob) -> TinyfishRunRecord:
@@ -172,7 +178,11 @@ class TinyfishClient:
     ) -> dict[int, TinyfishRunRecord]:
         pending: dict[str, _PendingRun] = {}
         completed: dict[int, TinyfishRunRecord] = {}
-        deadline = time.time() + self.poll_timeout_seconds
+        deadline = (
+            time.time() + self.poll_timeout_seconds
+            if self.poll_timeout_seconds is not None
+            else None
+        )
 
         for start in range(0, len(indexed_jobs), self.batch_size):
             batch = indexed_jobs[start : start + self.batch_size]
@@ -180,7 +190,7 @@ class TinyfishClient:
                 pending[started.run_id] = started
 
         while pending:
-            if time.time() >= deadline:
+            if deadline is not None and time.time() >= deadline:
                 labels = ", ".join(sorted(item.job.label for item in pending.values()))
                 raise TimeoutError(
                     "Tinyfish batch poll timed out after "
@@ -342,8 +352,14 @@ class TinyfishClient:
         browser_profile: str,
         attempt_number: int,
     ) -> TinyfishRunRecord:
-        deadline = time.time() + self.poll_timeout_seconds
-        while time.time() < deadline:
+        deadline = (
+            time.time() + self.poll_timeout_seconds
+            if self.poll_timeout_seconds is not None
+            else None
+        )
+        while True:
+            if deadline is not None and time.time() >= deadline:
+                break
             data = self._request("GET", f"/runs/{urllib.parse.quote(run_id)}")
             status = str(data.get("status", "")).upper()
             if status in TERMINAL_RUN_STATUSES:
@@ -397,10 +413,14 @@ class TinyfishClient:
         fallback_started_at = ""
 
         try:
-            with urllib.request.urlopen(
-                request,
-                timeout=self.poll_timeout_seconds + 120,
-            ) as response:
+            if self.request_timeout_seconds is None:
+                response_context = urllib.request.urlopen(request)
+            else:
+                response_context = urllib.request.urlopen(
+                    request,
+                    timeout=self.request_timeout_seconds,
+                )
+            with response_context as response:
                 for raw_line in response:
                     line = raw_line.decode("utf-8", errors="replace").strip()
                     if not line.startswith("data:"):
@@ -643,7 +663,14 @@ class TinyfishClient:
                 },
             )
             try:
-                with urllib.request.urlopen(request, timeout=120) as response:
+                if self.request_timeout_seconds is None:
+                    response_context = urllib.request.urlopen(request)
+                else:
+                    response_context = urllib.request.urlopen(
+                        request,
+                        timeout=self.request_timeout_seconds,
+                    )
+                with response_context as response:
                     return json.loads(response.read().decode("utf-8"))
             except urllib.error.HTTPError as exc:
                 detail = exc.read().decode("utf-8", errors="replace")

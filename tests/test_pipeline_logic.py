@@ -6,7 +6,11 @@ from gus_reporter.agents import DOMAIN_AGENTS, get_extraction_agents
 from gus_reporter.models import EvidenceItem, ReportRequest, TinyfishRunRecord, VerifiedClaim
 from gus_reporter.pipeline import (
     build_raw_financial_source_refs,
+    build_raw_legal_source_refs,
+    build_raw_news_source_refs,
     build_spawned_financial_source_jobs,
+    build_spawned_legal_source_jobs,
+    build_spawned_news_source_jobs,
     compute_publish_decision,
     normalize_tinyfish_runs,
     seed_source_jobs,
@@ -33,13 +37,24 @@ class SeedSourceJobsTests(unittest.TestCase):
             primary_jurisdiction="US",
         )
         jobs = seed_source_jobs(request, "stealth")
-        self.assertEqual(6, len(jobs))
+        # 3 base (homepage, leadership, careers)
+        # + 1 newsroom (news category)
+        # + 2 financial IR candidates
+        # + 6 legal (4 search + CourtListener + OpenCorporates)
+        # + 4 news search seeds
+        self.assertEqual(16, len(jobs))
         self.assertEqual("https://example.com", jobs[0].url)
         self.assertEqual("https://example.com/leadership", jobs[1].url)
         self.assertEqual("stealth", jobs[0].browser_profile)
         self.assertEqual("company_homepage", jobs[0].source_type)
         self.assertEqual("financial_investor_candidate", jobs[4].source_type)
         self.assertEqual("lite", jobs[4].browser_profile)
+        # Verify legal and news categories are present
+        legal_jobs = [j for j in jobs if j.category == "legal"]
+        news_jobs = [j for j in jobs if j.category == "news"]
+        self.assertEqual(6, len(legal_jobs))
+        self.assertEqual(5, len(news_jobs))  # 1 newsroom + 4 search seeds
+        self.assertTrue(all(j.allow_stealth_fallback for j in legal_jobs))
 
     def test_financial_seed_jobs_include_ir_and_sec_when_available(self) -> None:
         request = ReportRequest(
@@ -298,6 +313,310 @@ class TinyfishEvidenceNormalizationTests(unittest.TestCase):
         self.assertIn("Apple Investor Relations", evidence[0].content)
         self.assertIn("$124.3 billion", evidence[0].content)
         self.assertIn("Q1 2026 10-Q", evidence[0].content)
+
+
+class LegalSubAgentTests(unittest.TestCase):
+    def test_legal_domain_fans_out_into_5_specialists(self) -> None:
+        agents = get_extraction_agents(DOMAIN_AGENTS["legal"])
+        self.assertEqual(5, len(agents))
+        self.assertEqual("legal_case_locator", agents[0].name)
+        self.assertEqual("legal_regulatory_agent", agents[1].name)
+        self.assertEqual("legal_sanctions_agent", agents[2].name)
+        self.assertEqual("legal_corporate_filings_agent", agents[3].name)
+        self.assertEqual("legal_risk_agent", agents[4].name)
+        self.assertTrue(agents[4].use_all_evidence)
+
+    def test_legal_specialist_prefers_matching_source_types(self) -> None:
+        specialist = get_extraction_agents(DOMAIN_AGENTS["legal"])[0]
+        evidence = [
+            EvidenceItem(
+                evidence_id="e1",
+                label="Court record",
+                category="legal",
+                url="https://courtlistener.com/docket/123",
+                retrieved_at="2026-03-28T00:00:00Z",
+                content="{}",
+                metadata={"tinyfish_source_type": "legal_court_records"},
+            ),
+            EvidenceItem(
+                evidence_id="e2",
+                label="Newsroom",
+                category="news",
+                url="https://example.com/news",
+                retrieved_at="2026-03-28T00:00:00Z",
+                content="{}",
+                metadata={"tinyfish_source_type": "newsroom_page"},
+            ),
+        ]
+        selected = select_evidence_for_extraction_agent(specialist, evidence)
+        self.assertEqual(["e1"], [item.evidence_id for item in selected])
+
+
+class NewsSubAgentTests(unittest.TestCase):
+    def test_news_domain_fans_out_into_4_specialists(self) -> None:
+        agents = get_extraction_agents(DOMAIN_AGENTS["news"])
+        self.assertEqual(4, len(agents))
+        self.assertEqual("news_event_locator", agents[0].name)
+        self.assertEqual("news_negative_signal_agent", agents[1].name)
+        self.assertEqual("news_sentiment_agent", agents[2].name)
+        self.assertEqual("news_coverage_gap_agent", agents[3].name)
+        self.assertTrue(agents[3].use_all_evidence)
+
+    def test_news_specialist_prefers_matching_source_types(self) -> None:
+        specialist = get_extraction_agents(DOMAIN_AGENTS["news"])[0]
+        evidence = [
+            EvidenceItem(
+                evidence_id="e1",
+                label="Reuters article",
+                category="news",
+                url="https://reuters.com/article/123",
+                retrieved_at="2026-03-28T00:00:00Z",
+                content="{}",
+                metadata={"tinyfish_source_type": "news_aggregator"},
+            ),
+            EvidenceItem(
+                evidence_id="e2",
+                label="IR page",
+                category="financials",
+                url="https://example.com/investors",
+                retrieved_at="2026-03-28T00:00:00Z",
+                content="{}",
+                metadata={"tinyfish_source_type": "financial_investor_relations"},
+            ),
+        ]
+        selected = select_evidence_for_extraction_agent(specialist, evidence)
+        self.assertEqual(["e1"], [item.evidence_id for item in selected])
+
+
+class LegalSourceSeedingTests(unittest.TestCase):
+    def test_legal_focus_area_seeds_search_discovery_jobs(self) -> None:
+        request = ReportRequest(
+            company_name="Acme Corp",
+            focus_areas=["legal"],
+        )
+        jobs = seed_source_jobs(request, "stealth")
+        self.assertTrue(len(jobs) >= 6)
+        self.assertTrue(all(j.category == "legal" for j in jobs))
+        search_jobs = [j for j in jobs if j.source_type == "legal_search_discovery"]
+        self.assertEqual(4, len(search_jobs))
+        court_jobs = [j for j in jobs if j.source_type == "legal_court_records"]
+        self.assertEqual(1, len(court_jobs))
+        self.assertIn("courtlistener.com", court_jobs[0].url)
+        registry_jobs = [j for j in jobs if j.source_type == "legal_corporate_registry"]
+        self.assertEqual(1, len(registry_jobs))
+        self.assertIn("opencorporates.com", registry_jobs[0].url)
+
+    def test_legal_source_urls_hint_creates_direct_jobs(self) -> None:
+        request = ReportRequest(
+            company_name="Acme Corp",
+            focus_areas=["legal"],
+            legal_source_urls=["https://example.com/case-filing.pdf"],
+        )
+        jobs = seed_source_jobs(request, "stealth")
+        direct_jobs = [j for j in jobs if j.source_type == "legal_document"]
+        self.assertEqual(1, len(direct_jobs))
+        self.assertEqual("https://example.com/case-filing.pdf", direct_jobs[0].url)
+
+    def test_ticker_adds_sec_enforcement_search_for_legal(self) -> None:
+        request = ReportRequest(
+            company_name="Acme Corp",
+            ticker="ACME",
+            focus_areas=["legal"],
+        )
+        jobs = seed_source_jobs(request, "stealth")
+        sec_jobs = [j for j in jobs if "SEC enforcement" in j.label]
+        self.assertTrue(len(sec_jobs) >= 1)
+
+
+class NewsSourceSeedingTests(unittest.TestCase):
+    def test_news_focus_area_seeds_aggregator_and_press_jobs(self) -> None:
+        request = ReportRequest(
+            company_name="Acme Corp",
+            focus_areas=["news"],
+        )
+        jobs = seed_source_jobs(request, "stealth")
+        self.assertEqual(4, len(jobs))
+        self.assertTrue(all(j.category == "news" for j in jobs))
+        labels = [j.label for j in jobs]
+        self.assertIn("Recent news search", labels)
+        self.assertIn("Negative news search", labels)
+        self.assertIn("Press release search", labels)
+        self.assertIn("Industry coverage search", labels)
+
+    def test_news_source_urls_hint_creates_direct_jobs(self) -> None:
+        request = ReportRequest(
+            company_name="Acme Corp",
+            focus_areas=["news"],
+            news_source_urls=["https://reuters.com/acme-article"],
+        )
+        jobs = seed_source_jobs(request, "stealth")
+        direct_jobs = [j for j in jobs if j.source_type == "news_document"]
+        self.assertEqual(1, len(direct_jobs))
+        self.assertEqual("https://reuters.com/acme-article", direct_jobs[0].url)
+
+
+class LegalSpawnedJobTests(unittest.TestCase):
+    def test_discovery_runs_spawn_child_legal_source_jobs(self) -> None:
+        request = ReportRequest(
+            company_name="Acme Corp",
+            focus_areas=["legal"],
+        )
+        runs = [
+            TinyfishRunRecord(
+                run_id="run_1",
+                status="COMPLETED",
+                goal="Discover legal sources",
+                label="Litigation search",
+                category="legal",
+                url="https://www.bing.com/search?q=acme+lawsuit",
+                source_type="legal_search_discovery",
+                result={
+                    "capture_mode": "legal_search_discovery",
+                    "sources": [
+                        {
+                            "page_title": "Acme Corp v. Rival Inc - Docket",
+                            "final_url": "https://www.courtlistener.com/docket/999/acme-v-rival/",
+                            "source_kind": "court_docket",
+                            "linked_documents": [
+                                {
+                                    "title": "Complaint",
+                                    "url": "https://storage.courtlistener.com/recap/complaint.pdf",
+                                    "document_type": "complaint",
+                                }
+                            ],
+                        }
+                    ],
+                },
+            )
+        ]
+        existing_urls: set[str] = set()
+        spawned = build_spawned_legal_source_jobs(
+            request, runs, "stealth", existing_urls,
+        )
+        spawned_urls = [j.url for j in spawned]
+        self.assertIn(
+            "https://www.courtlistener.com/docket/999/acme-v-rival/",
+            spawned_urls,
+        )
+        self.assertIn(
+            "https://storage.courtlistener.com/recap/complaint.pdf",
+            spawned_urls,
+        )
+        self.assertTrue(all(j.category == "legal" for j in spawned))
+
+
+class NewsSpawnedJobTests(unittest.TestCase):
+    def test_discovery_runs_spawn_child_news_source_jobs(self) -> None:
+        request = ReportRequest(
+            company_name="Acme Corp",
+            focus_areas=["news"],
+        )
+        runs = [
+            TinyfishRunRecord(
+                run_id="run_1",
+                status="COMPLETED",
+                goal="Discover news sources",
+                label="Recent news search",
+                category="news",
+                url="https://www.bing.com/news/search?q=acme",
+                source_type="news_search_discovery",
+                result={
+                    "capture_mode": "news_search_discovery",
+                    "sources": [
+                        {
+                            "page_title": "Acme Corp announces layoffs",
+                            "final_url": "https://reuters.com/acme-layoffs",
+                            "source_kind": "news_article",
+                            "linked_documents": [],
+                        }
+                    ],
+                },
+            )
+        ]
+        existing_urls: set[str] = set()
+        spawned = build_spawned_news_source_jobs(
+            request, runs, "stealth", existing_urls,
+        )
+        spawned_urls = [j.url for j in spawned]
+        self.assertIn("https://reuters.com/acme-layoffs", spawned_urls)
+        self.assertTrue(all(j.category == "news" for j in spawned))
+
+
+class LegalRawSourceRefTests(unittest.TestCase):
+    def test_raw_legal_source_refs_include_discovered_documents(self) -> None:
+        request = ReportRequest(
+            company_name="Acme Corp",
+            focus_areas=["legal"],
+            legal_source_urls=["https://example.com/case-filing.pdf"],
+        )
+        runs = [
+            TinyfishRunRecord(
+                run_id="run_1",
+                status="COMPLETED",
+                goal="Discover legal sources",
+                label="Litigation search",
+                category="legal",
+                url="https://www.bing.com/search?q=acme+lawsuit",
+                source_type="legal_search_discovery",
+                result={
+                    "capture_mode": "legal_search_discovery",
+                    "sources": [
+                        {
+                            "page_title": "Acme enforcement action",
+                            "final_url": "https://sec.gov/litigation/acme",
+                            "source_kind": "enforcement",
+                            "linked_documents": [
+                                {
+                                    "title": "Order",
+                                    "url": "https://sec.gov/litigation/acme-order.pdf",
+                                    "document_type": "order",
+                                }
+                            ],
+                        }
+                    ],
+                },
+            )
+        ]
+        refs = build_raw_legal_source_refs(request, runs)
+        ref_urls = [item["url"] for item in refs]
+        self.assertIn("https://example.com/case-filing.pdf", ref_urls)
+        self.assertIn("https://sec.gov/litigation/acme", ref_urls)
+        self.assertIn("https://sec.gov/litigation/acme-order.pdf", ref_urls)
+
+
+class NewsRawSourceRefTests(unittest.TestCase):
+    def test_raw_news_source_refs_include_discovered_articles(self) -> None:
+        request = ReportRequest(
+            company_name="Acme Corp",
+            focus_areas=["news"],
+            news_source_urls=["https://reuters.com/acme-direct"],
+        )
+        runs = [
+            TinyfishRunRecord(
+                run_id="run_1",
+                status="COMPLETED",
+                goal="Discover news sources",
+                label="Recent news search",
+                category="news",
+                url="https://www.bing.com/news/search?q=acme",
+                source_type="news_search_discovery",
+                result={
+                    "capture_mode": "news_search_discovery",
+                    "sources": [
+                        {
+                            "page_title": "Acme raises $100M",
+                            "final_url": "https://techcrunch.com/acme-funding",
+                            "source_kind": "news_article",
+                            "linked_documents": [],
+                        }
+                    ],
+                },
+            )
+        ]
+        refs = build_raw_news_source_refs(request, runs)
+        ref_urls = [item["url"] for item in refs]
+        self.assertIn("https://reuters.com/acme-direct", ref_urls)
+        self.assertIn("https://techcrunch.com/acme-funding", ref_urls)
 
 
 if __name__ == "__main__":

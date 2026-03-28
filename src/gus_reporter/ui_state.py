@@ -142,6 +142,19 @@ class RunStateStore:
                 run.status = "failed"
                 run.run_dir = str(normalized.get("run_dir", run.run_dir)).strip()
                 run.error = str(normalized.get("error", "Unknown error")).strip()
+                failed_stage = str(normalized.get("stage", run.current_stage)).strip()
+                if failed_stage in run.stages:
+                    stage_state = run.stages[failed_stage]
+                    stage_state["status"] = "failed"
+                    if run.error:
+                        stage_state["message"] = run.error
+                    run.current_stage = failed_stage
+
+                for item in run.source_jobs:
+                    if item["status"] in {"queued", "running", "retrying"}:
+                        item["status"] = "failed"
+                        if not item["message"]:
+                            item["message"] = "Run aborted before completion."
 
             if event_name == "artifact_written":
                 relative_path = str(normalized.get("relative_path", "")).strip()

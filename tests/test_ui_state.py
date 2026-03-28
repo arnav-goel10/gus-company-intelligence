@@ -81,6 +81,75 @@ class RunStateStoreTests(unittest.TestCase):
         self.assertEqual("completed", run["status"])
         self.assertEqual("blocked", run["final_report"]["publish_decision"])
 
+    def test_pipeline_failed_marks_active_stage_and_pending_jobs_failed(self) -> None:
+        store = RunStateStore()
+        run_id = store.create_run({"company_name": "Example Corp"})
+        store.record_event(
+            run_id,
+            {
+                "event": "stage_update",
+                "stage": "acquisition",
+                "status": "running",
+                "message": "Running Tinyfish across discovered sources.",
+                "current": 0,
+                "total": 2,
+                "jobs": [
+                    {
+                        "label": "Investor relations",
+                        "category": "financials",
+                        "url": "https://example.com/investors",
+                        "source_type": "financial_investor_relations",
+                        "browser_profile": "lite",
+                    },
+                    {
+                        "label": "Annual report",
+                        "category": "financials",
+                        "url": "https://example.com/annual-report.pdf",
+                        "source_type": "financial_document",
+                        "browser_profile": "lite",
+                    },
+                ],
+            },
+        )
+        store.record_event(
+            run_id,
+            {
+                "event": "source_job_update",
+                "stage": "acquisition",
+                "label": "Investor relations",
+                "category": "financials",
+                "url": "https://example.com/investors",
+                "source_type": "financial_investor_relations",
+                "status": "running",
+                "message": "Tinyfish run started.",
+                "run_id": "run_123",
+                "browser_profile": "lite",
+                "attempt_number": 1,
+            },
+        )
+        store.record_event(
+            run_id,
+            {
+                "event": "pipeline_failed",
+                "stage": "acquisition",
+                "error": "Tinyfish request failed.",
+            },
+        )
+
+        run = store.get_run(run_id)
+        assert run is not None
+        self.assertEqual("failed", run["status"])
+        self.assertEqual("acquisition", run["current_stage"])
+        self.assertEqual("failed", run["stages"]["acquisition"]["status"])
+        self.assertEqual("Tinyfish request failed.", run["stages"]["acquisition"]["message"])
+        self.assertEqual("failed", run["source_jobs"][0]["status"])
+        self.assertEqual("Tinyfish run started.", run["source_jobs"][0]["message"])
+        self.assertEqual("failed", run["source_jobs"][1]["status"])
+        self.assertEqual(
+            "Run aborted before completion.",
+            run["source_jobs"][1]["message"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

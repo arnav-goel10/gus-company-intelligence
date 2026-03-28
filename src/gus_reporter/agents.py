@@ -13,6 +13,16 @@ class DomainAgent:
     use_all_evidence: bool = False
 
 
+@dataclass(frozen=True)
+class ExtractionAgent:
+    name: str
+    section: str
+    preferred_categories: tuple[str, ...]
+    extraction_instruction: str
+    preferred_source_types: tuple[str, ...] = ()
+    use_all_evidence: bool = False
+
+
 DOMAIN_AGENTS: dict[str, DomainAgent] = {
     "company_overview": DomainAgent(
         name="overview_agent",
@@ -123,5 +133,96 @@ DOMAIN_AGENTS: dict[str, DomainAgent] = {
 }
 
 
+FINANCIAL_EXTRACTION_AGENTS: tuple[ExtractionAgent, ...] = (
+    ExtractionAgent(
+        name="financial_document_locator",
+        section="financials",
+        preferred_categories=("financials",),
+        preferred_source_types=(
+            "financial_investor_relations",
+            "financial_investor_candidate",
+            "financial_document",
+            "financial_sec_filings",
+        ),
+        extraction_instruction=(
+            "Focus on locating the newest financially material primary sources, including "
+            "annual reports, quarterly or interim results, filing indexes, investor "
+            "presentations, and official guidance documents. Extract claims only about "
+            "document recency, reporting periods, and what was formally disclosed."
+        ),
+    ),
+    ExtractionAgent(
+        name="financial_statement_agent",
+        section="financials",
+        preferred_categories=("financials",),
+        preferred_source_types=(
+            "financial_investor_relations",
+            "financial_document",
+            "financial_sec_filings",
+        ),
+        extraction_instruction=(
+            "Focus on income statement and cash flow facts: revenue, gross profit or gross "
+            "margin, EBITDA or operating income, net income, free cash flow, and reported "
+            "growth or decline across named periods. Prefer explicit numeric statements."
+        ),
+    ),
+    ExtractionAgent(
+        name="capital_structure_agent",
+        section="financials",
+        preferred_categories=("financials",),
+        preferred_source_types=(
+            "financial_investor_relations",
+            "financial_document",
+            "financial_sec_filings",
+        ),
+        extraction_instruction=(
+            "Focus on balance sheet and financing facts: cash, debt, liquidity, leverage, "
+            "credit facilities, buybacks, dividends, dilution, and other capital structure "
+            "signals stated in primary sources."
+        ),
+    ),
+    ExtractionAgent(
+        name="funding_guidance_agent",
+        section="financials",
+        preferred_categories=("financials", "news"),
+        preferred_source_types=(
+            "financial_investor_relations",
+            "financial_document",
+            "financial_sec_filings",
+        ),
+        extraction_instruction=(
+            "Focus on management guidance, fundraising, capital raises, debt issuance, "
+            "refinancing, and officially announced financially material events. Use news "
+            "only when it reflects an official company announcement."
+        ),
+    ),
+    ExtractionAgent(
+        name="financial_risk_agent",
+        section="financials",
+        preferred_categories=("financials", "news", "risk_signals"),
+        use_all_evidence=True,
+        extraction_instruction=(
+            "Focus only on finance-related red flags: missing disclosure, weak liquidity, "
+            "shrinking margins, losses, negative cash flow, refinancing pressure, "
+            "restatements, or contradictions between sources."
+        ),
+    ),
+)
+
+
 def get_active_agents(focus_areas: list[str]) -> list[DomainAgent]:
     return [DOMAIN_AGENTS[area] for area in focus_areas if area in DOMAIN_AGENTS]
+
+
+def get_extraction_agents(agent: DomainAgent) -> list[ExtractionAgent]:
+    if agent.section == "financials":
+        return list(FINANCIAL_EXTRACTION_AGENTS)
+    return [
+        ExtractionAgent(
+            name=agent.name,
+            section=agent.section,
+            preferred_categories=agent.preferred_categories,
+            extraction_instruction=agent.extraction_instruction,
+            use_all_evidence=agent.use_all_evidence,
+        )
+    ]

@@ -4,7 +4,12 @@ import json
 from collections import defaultdict
 from typing import Any
 
-from gus_reporter.agents import DomainAgent, get_active_agents
+from gus_reporter.agents import (
+    DomainAgent,
+    ExtractionAgent,
+    get_active_agents,
+    get_extraction_agents,
+)
 from gus_reporter.config import AppConfig
 from gus_reporter.models import (
     EvidenceItem,
@@ -333,6 +338,25 @@ def select_evidence_for_agent(
     return filtered or evidence
 
 
+def select_evidence_for_extraction_agent(
+    agent: ExtractionAgent, evidence: list[EvidenceItem]
+) -> list[EvidenceItem]:
+    if agent.use_all_evidence:
+        return evidence
+    preferred_categories = set(agent.preferred_categories)
+    filtered = [item for item in evidence if item.category in preferred_categories]
+    if agent.preferred_source_types:
+        preferred_source_types = set(agent.preferred_source_types)
+        filtered_by_source_type = [
+            item
+            for item in filtered
+            if item.metadata.get("tinyfish_source_type", "") in preferred_source_types
+        ]
+        if filtered_by_source_type:
+            return filtered_by_source_type
+    return filtered or evidence
+
+
 def build_risk_matrix(verified_claims: list[VerifiedClaim]) -> list[RiskMatrixEntry]:
     entries: list[RiskMatrixEntry] = []
     recommendations = {
@@ -427,49 +451,57 @@ class ReportPipeline:
     ) -> list[ExtractedClaim]:
         claims: list[ExtractedClaim] = []
         for agent in get_active_agents(request.focus_areas):
-            agent_evidence = select_evidence_for_agent(agent, evidence)
-            evidence_text = "\n\n".join(
-                [
-                    f"Evidence ID: {item.evidence_id}\n"
-                    f"Label: {item.label}\n"
-                    f"Category: {item.category}\n"
-                    f"URL: {item.url}\n"
-                    f"Retrieved at: {item.retrieved_at}\n"
-                    f"Content:\n{item.content}"
-                    for item in agent_evidence
-                ]
-            )
-            payload = self.openai.structured_response(
-                schema_name=f"{agent.section}_claim_extraction",
-                schema=extraction_schema([agent.section]),
-                system_prompt=(
-                    f"{EXTRACTION_SYSTEM_PROMPT}\n\n"
-                    f"Agent: {agent.name}\n"
-                    f"Section: {agent.section}\n"
-                    f"Instruction: {agent.extraction_instruction}"
-                ),
-                user_prompt=(
-                    f"Company: {request.company_name}\n"
-                    f"Jurisdiction: {request.primary_jurisdiction}\n"
-                    f"Target section: {agent.section}\n"
-                    f"Goal: {request.report_goal or 'Generate a source-backed diligence report.'}\n\n"
-                    f"Evidence bundle:\n{evidence_text}"
-                ),
-            )
-            for offset, claim in enumerate(payload.get("claims", []), start=1):
-                claims.append(
-                    ExtractedClaim(
-                        claim_id=f"{agent.section}_{offset:03d}",
-                        section=str(claim["section"]),
-                        statement=str(claim["statement"]).strip(),
-                        importance=str(claim["importance"]),
-                        confidence=float(claim["confidence"]),
-                        as_of=str(claim["as_of"]).strip(),
-                        source_quote=str(claim["source_quote"]).strip(),
-                        evidence_ids=[item.evidence_id for item in agent_evidence],
-                        raw_source_label=agent.name,
-                    )
+            extraction_agents = get_extraction_agents(agent)
+            for specialist in extraction_agents:
+                specialist_evidence = select_evidence_for_extraction_agent(
+                    specialist,
+                    select_evidence_for_agent(agent, evidence),
                 )
+                evidence_text = "\n\n".join(
+                    [
+                        f"Evidence ID: {item.evidence_id}\n"
+                        f"Label: {item.label}\n"
+                        f"Category: {item.category}\n"
+                        f"URL: {item.url}\n"
+                        f"Retrieved at: {item.retrieved_at}\n"
+                        f"Content:\n{item.content}"
+                        for item in specialist_evidence
+                    ]
+                )
+                payload = self.openai.structured_response(
+                    schema_name=f"{agent.section}_{specialist.name}_claim_extraction",
+                    schema=extraction_schema([agent.section]),
+                    system_prompt=(
+                        f"{EXTRACTION_SYSTEM_PROMPT}\n\n"
+                        f"Coordinator section: {agent.section}\n"
+                        f"Coordinator: {agent.name}\n"
+                        f"Specialist: {specialist.name}\n"
+                        f"Specialist instruction: {specialist.extraction_instruction}"
+                    ),
+                    user_prompt=(
+                        f"Company: {request.company_name}\n"
+                        f"Jurisdiction: {request.primary_jurisdiction}\n"
+                        f"Target section: {agent.section}\n"
+                        f"Goal: {request.report_goal or 'Generate a source-backed diligence report.'}\n\n"
+                        f"Evidence bundle:\n{evidence_text}"
+                    ),
+                )
+                for offset, claim in enumerate(payload.get("claims", []), start=1):
+                    claims.append(
+                        ExtractedClaim(
+                            claim_id=f"{agent.section}_{specialist.name}_{offset:03d}",
+                            section=str(claim["section"]),
+                            statement=str(claim["statement"]).strip(),
+                            importance=str(claim["importance"]),
+                            confidence=float(claim["confidence"]),
+                            as_of=str(claim["as_of"]).strip(),
+                            source_quote=str(claim["source_quote"]).strip(),
+                            evidence_ids=[
+                                item.evidence_id for item in specialist_evidence
+                            ],
+                            raw_source_label=specialist.name,
+                        )
+                    )
         return claims
 
     def _verify_claims(

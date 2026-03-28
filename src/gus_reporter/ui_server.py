@@ -18,6 +18,7 @@ from gus_reporter.ui_state import RunStateStore
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
 WEB_ROOT = PACKAGE_ROOT / "web"
+UI_FOCUS_AREAS = ["financials", "legal", "news"]
 
 
 def _coerce_bool(value: Any) -> bool:
@@ -48,7 +49,7 @@ class GusUIApplication:
             "missing_requirements": missing,
             "company_name_only_supported": True,
             "notes": [
-                "The UI is live and the financial pipeline is wired end to end.",
+                "The UI is live and the financial, legal, and news pipelines are wired end to end.",
                 "Company-name-only discovery now seeds web search acquisition paths, but coverage is still beta and should improve with stronger resolver logic.",
                 "Runtime becomes fully live when both OpenAI and Tinyfish keys are present.",
             ],
@@ -135,10 +136,10 @@ class GusUIApplication:
             "report_goal": str(
                 payload.get(
                     "report_goal",
-                    "Generate a source-backed financial intelligence report with no unsupported claims.",
+                    "Generate a source-backed multi-domain diligence report across financial, legal, and news evidence with no unsupported claims.",
                 )
             ).strip(),
-            "focus_areas": ["financials"],
+            "focus_areas": list(UI_FOCUS_AREAS),
         }
 
     def read_artifact(self, run_id: str, relative_path: str) -> dict[str, Any]:

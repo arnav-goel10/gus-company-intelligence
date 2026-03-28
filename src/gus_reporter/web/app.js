@@ -3,6 +3,7 @@ const state = {
   selectedRunId: null,
   selectedArtifactPath: null,
   pollHandle: null,
+  previewSelections: {},
   renderSignatures: {
     health: "",
     runs: "",
@@ -202,6 +203,22 @@ function summarizeVerification(events) {
   };
 }
 
+function sourceJobKey(job) {
+  return [job.label || "", job.url || "", job.run_id || ""].join("::");
+}
+
+function previewableSourceJobs(sourceJobs) {
+  const seen = new Set();
+  return sourceJobs.filter((job) => {
+    const streamingUrl = String(job.streaming_url || "").trim();
+    if (!streamingUrl || seen.has(streamingUrl)) {
+      return false;
+    }
+    seen.add(streamingUrl);
+    return true;
+  });
+}
+
 function buildSourceCards(sourceJobs) {
   return sourceJobs.map((job) => `
     <div class="detail-card">
@@ -212,6 +229,7 @@ function buildSourceCards(sourceJobs) {
       <p class="quiet">${escapeHtml(job.source_type || job.category)}</p>
       ${job.message ? `<p>${escapeHtml(job.message)}</p>` : ""}
       <p class="url-text">${escapeHtml(job.url)}</p>
+      ${job.streaming_url ? `<p class="quiet">Live preview is available in the inline Tinyfish panel.</p>` : ""}
       ${job.streaming_url ? `<a class="source-link" href="${escapeHtml(job.streaming_url)}" target="_blank" rel="noreferrer">Open Tinyfish live preview</a>` : ""}
     </div>
   `).join("");
@@ -231,16 +249,122 @@ function buildSpecialistCards(specialists) {
 }
 
 function buildTraceList(events) {
-  const recent = events
+  const compacted = [];
+  events
     .filter((event) => event.event !== "artifact_written")
-    .slice(-8)
-    .reverse();
+    .forEach((event) => {
+      const last = compacted[compacted.length - 1];
+      const eventKey = [
+        event.event || "",
+        event.message || "",
+        event.label || "",
+        event.stage || "",
+      ].join("::");
+      if (last && last._eventKey === eventKey) {
+        last.repeat_count += 1;
+        last.timestamp = event.timestamp;
+        return;
+      }
+      compacted.push({
+        ...event,
+        _eventKey: eventKey,
+        repeat_count: 1,
+      });
+    });
+
+  const recent = compacted.slice(-8).reverse();
   return recent.map((event) => `
     <div class="trace-row">
       <time>${escapeHtml(formatTime(event.timestamp))}</time>
-      <p>${escapeHtml(event.message || event.event)}</p>
+      <p>
+        ${escapeHtml(event.message || event.event)}
+        ${event.repeat_count > 1 ? `<span class="quiet">(${escapeHtml(String(event.repeat_count))}x)</span>` : ""}
+      </p>
     </div>
   `).join("");
+}
+
+function buildTraceDisclosure(events) {
+  const visibleEvents = (events || []).filter((event) => event.event !== "artifact_written");
+  if (!visibleEvents.length) {
+    return "";
+  }
+  const lastEvent = visibleEvents[visibleEvents.length - 1];
+  return `
+    <details class="trace-disclosure">
+      <summary>
+        <div class="trace-summary-copy">
+          <strong>Latest thread activity</strong>
+          <span>${escapeHtml(String(visibleEvents.length))} ${pluralize(visibleEvents.length, "update")}</span>
+        </div>
+        <div class="trace-summary-meta">
+          <span>${escapeHtml(formatTime(lastEvent.timestamp))}</span>
+          <span class="trace-summary-indicator" aria-hidden="true">+</span>
+        </div>
+      </summary>
+      <div class="trace-list">${buildTraceList(visibleEvents)}</div>
+    </details>
+  `;
+}
+
+function buildPreviewDeck(runId, sourceJobs) {
+  const previews = previewableSourceJobs(sourceJobs);
+  if (!previews.length) {
+    return "";
+  }
+
+  const prioritized = [
+    ...previews.filter((job) => ["running", "retrying", "queued"].includes(String(job.status || "").toLowerCase())),
+    ...previews.filter((job) => !["running", "retrying", "queued"].includes(String(job.status || "").toLowerCase())),
+  ];
+  const deduped = [];
+  const seenKeys = new Set();
+  prioritized.forEach((job) => {
+    const key = sourceJobKey(job);
+    if (!seenKeys.has(key)) {
+      seenKeys.add(key);
+      deduped.push(job);
+    }
+  });
+
+  const selectedKey = state.previewSelections[runId];
+  const selectedJob = deduped.find((job) => sourceJobKey(job) === selectedKey) || deduped[0];
+  state.previewSelections[runId] = sourceJobKey(selectedJob);
+
+  return `
+    <section class="preview-deck">
+      <div class="preview-head">
+        <div>
+          <p class="message-label">Tinyfish Live Preview</p>
+          <p class="quiet">Watch the acquisition browser in-place while the swarm works.</p>
+        </div>
+        <a class="source-link" href="${escapeHtml(selectedJob.streaming_url)}" target="_blank" rel="noreferrer">Open selected preview</a>
+      </div>
+      <div class="preview-tabs">
+        ${deduped.map((job) => `
+          <button
+            class="preview-tab ${sourceJobKey(job) === sourceJobKey(selectedJob) ? "active" : ""}"
+            type="button"
+            data-run-id="${escapeHtml(runId)}"
+            data-preview-key="${escapeHtml(sourceJobKey(job))}"
+          >
+            <span>${escapeHtml(job.label)}</span>
+            ${statusPill(job.status)}
+          </button>
+        `).join("")}
+      </div>
+      <div class="preview-frame-shell">
+        <iframe
+          class="preview-frame"
+          src="${escapeHtml(selectedJob.streaming_url)}"
+          title="${escapeHtml(selectedJob.label)} live preview"
+          loading="lazy"
+          referrerpolicy="no-referrer"
+        ></iframe>
+      </div>
+      <p class="quiet">If the preview host blocks embedding, use the open link above.</p>
+    </section>
+  `;
 }
 
 function buildReportMarkup(report) {
@@ -315,7 +439,14 @@ function messageMarkup({ role, label, title, body, meta = "", detail = "" }) {
 
 function renderThread(run) {
   const target = document.getElementById("thread");
-  const signature = signatureFor(run || { empty: true });
+  const signature = signatureFor(
+    run
+      ? {
+          run,
+          selectedPreview: state.previewSelections[run.run_id] || "",
+        }
+      : { empty: true }
+  );
   if (state.renderSignatures.thread === signature) {
     renderThreadHeader(run);
     return;
@@ -376,7 +507,10 @@ function renderThread(run) {
         label: "Discovery swarm",
         title: `${sourceJobs.length} source ${pluralize(sourceJobs.length, "agent")} planned for acquisition.`,
         body: `${sourceCounts.completed} completed, ${sourceCounts.running} running, ${sourceCounts.failed} failed, ${sourceCounts.retrying} retrying.`,
-        detail: `<div class="detail-grid">${buildSourceCards(sourceJobs)}</div>`,
+        detail: `
+          ${buildPreviewDeck(run.run_id, sourceJobs)}
+          <div class="detail-grid">${buildSourceCards(sourceJobs)}</div>
+        `,
       })
     );
   }
@@ -437,14 +571,20 @@ function renderThread(run) {
       messageMarkup({
         role: "trace",
         label: "Live trace",
-        title: "Latest thread activity",
-        body: "",
-        detail: `<div class="trace-list">${buildTraceList(run.events || [])}</div>`,
+        title: "Live trace",
+        body: "Background runtime events stay tucked away unless you want to inspect them.",
+        detail: buildTraceDisclosure(run.events || []),
       })
     );
   }
 
   target.innerHTML = detailMessages.join("");
+  target.querySelectorAll(".preview-tab").forEach((node) => {
+    node.addEventListener("click", async () => {
+      state.previewSelections[node.dataset.runId] = node.dataset.previewKey;
+      await refreshSelectedRun();
+    });
+  });
 }
 
 function renderSnapshot(run) {

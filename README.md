@@ -6,8 +6,11 @@ company intelligence pipeline using Tinyfish for acquisition and OpenAI
 
 The current scaffold is intentionally narrow:
 
-- Tinyfish executes URL batches, captures rich run metadata, and retries blocked
-  financial pages with `stealth` after a `lite` first pass.
+- Tinyfish executes discovery/navigation URL batches, captures source maps and
+  direct document links, and retries blocked financial pages with `stealth`
+  after a `lite` first pass.
+- Direct raw-source fetching downloads or references the actual HTML, text, and
+  PDF artifacts that OpenAI analyzes.
 - The financial coordinator now fans out into specialist sub-agents for document
   discovery, statement metrics, capital structure, guidance/funding, and
   finance-specific red flags.
@@ -29,6 +32,8 @@ There is no runtime human-in-the-loop path in this implementation.
 - `src/gus_reporter/agents.py`: domain-agent definitions and routing
 - `src/gus_reporter/tinyfish_client.py`: Tinyfish batch/async client with
   vault, agent-memory, and `lite -> stealth` retry support
+- `src/gus_reporter/raw_source_client.py`: direct raw HTML/text/PDF acquisition
+  layer used after Tinyfish discovery
 - `src/gus_reporter/openai_client.py`: Responses API client for the configured OpenAI model
 - `src/gus_reporter/pipeline.py`: end-to-end pipeline
 - `src/gus_reporter/ui_server.py`: zero-dependency local operator UI
@@ -51,6 +56,10 @@ Useful Tinyfish tuning variables:
 
 - `TINYFISH_DEFAULT_BROWSER_PROFILE` defaults to `lite`
 - `TINYFISH_BATCH_SIZE` controls `run-batch` chunking
+- `TINYFISH_MAX_TOTAL_JOBS` caps the total Tinyfish jobs a single run may fan
+  out into
+- `TINYFISH_MAX_ACQUISITION_WAVES` caps how many discovery-expansion waves the
+  financial crawler may execute
 - `TINYFISH_RETRY_WITH_STEALTH` enables automatic anti-bot retry for blocked
   financial jobs
 - `TINYFISH_REQUEST_MAX_RETRIES` and `TINYFISH_REQUEST_RETRY_BACKOFF_SECONDS`
@@ -87,7 +96,7 @@ Then open [http://127.0.0.1:8787](http://127.0.0.1:8787).
 
 The UI currently provides:
 
-- a financial-run launcher with optional advanced hints
+- a financial-run launcher from a single company-name prompt
 - live stage progress across planning, acquisition, extraction, verification, and reporting
 - per-source Tinyfish status tracking and preview links when available
 - final report rendering with risk matrix and section summaries

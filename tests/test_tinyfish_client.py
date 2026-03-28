@@ -3,7 +3,7 @@ from __future__ import annotations
 import unittest
 
 from gus_reporter.models import SourceJob
-from gus_reporter.tinyfish_client import TinyfishClient
+from gus_reporter.tinyfish_client import TinyfishClient, _PendingRun
 
 
 class FakeTinyfishClient(TinyfishClient):
@@ -99,6 +99,43 @@ class TinyfishClientTests(unittest.TestCase):
         self.assertEqual("COMPLETED", records[0].status)
         self.assertEqual(2, len(records[0].attempts))
         self.assertEqual("stealth", records[0].attempts[-1]["browser_profile"])
+
+    def test_completed_record_normalizes_string_none_streaming_url(self) -> None:
+        client = TinyfishClient(
+            api_key="test",
+            base_url="https://agent.tinyfish.ai/v1",
+            poll_interval_seconds=1,
+            poll_timeout_seconds=5,
+            batch_size=50,
+            retry_with_stealth=True,
+            request_max_retries=0,
+            request_retry_backoff_seconds=0.1,
+        )
+        job = SourceJob(
+            label="Investor relations",
+            category="financials",
+            url="https://example.com/investors",
+            goal="Extract financial disclosures",
+            source_type="financial_investor_relations",
+            browser_profile="lite",
+        )
+        pending = _PendingRun(
+            index=0,
+            job=job,
+            run_id="run_1",
+            browser_profile="lite",
+            attempt_number=1,
+        )
+        record = client._record_from_run_data(
+            data={
+                "run_id": pending.run_id,
+                "status": "COMPLETED",
+                "streaming_url": "None",
+                "result": {"success": True},
+            },
+            pending=pending,
+        )
+        self.assertEqual("", record.streaming_url)
 
 
 if __name__ == "__main__":

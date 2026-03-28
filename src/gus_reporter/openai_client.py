@@ -18,15 +18,18 @@ class OpenAIClient:
         schema_name: str,
         schema: dict[str, Any],
         system_prompt: str,
-        user_prompt: str,
+        user_prompt: str = "",
+        user_content: list[dict[str, Any]] | None = None,
         max_output_tokens: int = 4000,
         background: bool = True,
     ) -> dict[str, Any]:
+        if user_content is None:
+            user_content = [{"type": "input_text", "text": user_prompt}]
         payload: dict[str, Any] = {
             "model": self.model,
             "input": [
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
+                {"role": "user", "content": user_content},
             ],
             "text": {
                 "format": {

@@ -25,6 +25,13 @@ BLOCKED_MARKERS = (
 )
 
 
+def _clean_optional_text(value: Any) -> str:
+    text = str(value or "").strip()
+    if text.lower() in {"none", "null"}:
+        return ""
+    return text
+
+
 @dataclass
 class _PendingRun:
     index: int
@@ -187,8 +194,8 @@ class TinyfishClient:
                     continue
                 status = str(data.get("status", "")).upper()
                 if status not in TERMINAL_RUN_STATUSES:
-                    streaming_url = str(data.get("streaming_url", "")).strip()
-                    if streaming_url:
+                    streaming_url = _clean_optional_text(data.get("streaming_url"))
+                    if streaming_url and streaming_url != pending[run_id].streaming_url:
                         pending[run_id].streaming_url = streaming_url
                         self._emit_source_job_event(
                             job=pending[run_id].job,
@@ -556,7 +563,7 @@ class TinyfishClient:
             started_at=str(data.get("started_at", "")) or fallback_started_at,
             finished_at=str(data.get("finished_at", "")),
             num_of_steps=self._coerce_int(data.get("num_of_steps")),
-            streaming_url=str(data.get("streaming_url", "")).strip()
+            streaming_url=_clean_optional_text(data.get("streaming_url"))
             or pending.streaming_url,
             browser_config=data.get("browser_config")
             if isinstance(data.get("browser_config"), dict)

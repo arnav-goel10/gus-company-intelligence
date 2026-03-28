@@ -33,6 +33,7 @@ from gus_reporter.prompts import (
     VERIFICATION_SYSTEM_PROMPT,
     build_financial_tinyfish_goal,
 )
+from gus_reporter.raw_source_client import RawSourceClient
 from gus_reporter.schemas import (
     executive_report_schema,
     extraction_schema,
@@ -42,6 +43,9 @@ from gus_reporter.schemas import (
 )
 from gus_reporter.storage import RunStorage
 from gus_reporter.tinyfish_client import TinyfishClient
+
+MAX_TEXT_EVIDENCE_CHARS = 12000
+MAX_FILE_INPUTS_PER_REQUEST = 4
 
 
 def _job_defaults(
@@ -103,7 +107,6 @@ def _normalize_url(url: str) -> str:
             "",
         )
     )
-
 
 def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> list[SourceJob]:
     if request.source_jobs:
@@ -231,27 +234,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                     ),
                 ]
             )
-        for index, url in enumerate(request.financial_source_urls, start=1):
-            jobs.append(
-                SourceJob(
-                    label=f"Financial source {index}",
-                    category="financials",
-                    url=url,
-                    goal=build_financial_goal(
-                        request,
-                        source_type="financial_document",
-                        label=f"Financial source {index}",
-                        url=url,
-                    ),
-                    **_job_defaults(
-                        request,
-                        default_browser_profile,
-                        source_type="financial_document",
-                        category="financials",
-                        proxy_country_code=proxy_country,
-                    ),
-                )
-            )
         if request.ticker:
             jobs.append(
                 SourceJob(
@@ -330,12 +312,14 @@ def _guess_discovered_source_type(
     document_type = document_type.lower()
     url_lower = url.lower()
 
+    if any(marker in document_type for marker in {"annual", "quarter", "earnings", "presentation", "filing"}):
+        return "financial_document"
+    if any(url_lower.endswith(extension) for extension in {".pdf", ".htm", ".html", ".txt", ".xml", ".json", ".csv", ".xls", ".xlsx"}):
+        return "financial_document"
     if "investor" in source_kind:
         return "financial_investor_relations"
     if any(marker in source_kind for marker in {"filing", "sec", "edgar", "regulator"}):
         return "financial_sec_filings"
-    if any(marker in document_type for marker in {"annual", "quarter", "earnings", "presentation", "filing"}):
-        return "financial_document"
     if any(marker in url_lower for marker in {"investor", "investors"}):
         return "financial_investor_relations"
     if "sec.gov" in url_lower or "edgar" in url_lower:
@@ -401,10 +385,113 @@ def build_spawned_financial_source_jobs(
                     document_type="",
                     url=final_url,
                 )
-                maybe_add_job(
-                    label=page_title or f"Discovered {source_kind or 'financial source'}",
+                if source_type in {"financial_investor_relations", "financial_sec_filings"}:
+                    maybe_add_job(
+                        label=page_title or f"Discovered {source_kind or 'financial source'}",
+                        url=final_url,
+                        source_type=source_type,
+                    )
+
+            linked_documents = source.get("linked_documents")
+            if not isinstance(linked_documents, list):
+                continue
+
+    return spawned
+
+
+def build_raw_financial_source_refs(
+    request: ReportRequest,
+    runs: list[TinyfishRunRecord],
+) -> list[dict[str, Any]]:
+    refs: list[dict[str, Any]] = []
+    seen_urls: set[str] = set()
+
+    def maybe_add(
+        *,
+        label: str,
+        url: str,
+        source_type: str,
+        source_kind: str = "",
+        reporting_period: str = "",
+        notes: str = "",
+        discovery_origin: str = "",
+        discovery_run_id: str = "",
+    ) -> None:
+        normalized = _normalize_url(url)
+        if not normalized or normalized in seen_urls:
+            return
+        seen_urls.add(normalized)
+        refs.append(
+            {
+                "label": label,
+                "url": url,
+                "source_type": source_type,
+                "source_kind": source_kind,
+                "reporting_period": reporting_period,
+                "notes": notes,
+                "discovery_origin": discovery_origin,
+                "discovery_run_id": discovery_run_id,
+            }
+        )
+
+    if request.investor_relations_url:
+        maybe_add(
+            label="Investor relations",
+            url=request.investor_relations_url,
+            source_type="financial_investor_relations",
+            discovery_origin="request_hint",
+        )
+    for index, url in enumerate(request.financial_source_urls, start=1):
+        maybe_add(
+            label=f"Financial source {index}",
+            url=url,
+            source_type="financial_document",
+            discovery_origin="request_hint",
+        )
+
+    for run in runs:
+        if run.category != "financials":
+            continue
+        if not isinstance(run.result, dict):
+            if run.source_type in {
+                "financial_document",
+                "financial_investor_relations",
+                "financial_sec_filings",
+            }:
+                maybe_add(
+                    label=run.label,
+                    url=run.url,
+                    source_type=run.source_type,
+                    discovery_origin="tinyfish_seeded_url",
+                    discovery_run_id=run.run_id,
+                )
+            continue
+
+        sources = run.result.get("sources")
+        if not isinstance(sources, list):
+            continue
+        for source in sources:
+            if not isinstance(source, dict):
+                continue
+            page_title = str(source.get("page_title", "")).strip()
+            final_url = str(source.get("final_url", "")).strip()
+            source_kind = str(source.get("source_kind", "")).strip()
+            reporting_period = str(source.get("reporting_period", "")).strip()
+            notes = str(source.get("notes", "")).strip()
+            if final_url:
+                maybe_add(
+                    label=page_title or run.label,
                     url=final_url,
-                    source_type=source_type,
+                    source_type=_guess_discovered_source_type(
+                        source_kind=source_kind,
+                        document_type="",
+                        url=final_url,
+                    ),
+                    source_kind=source_kind,
+                    reporting_period=reporting_period,
+                    notes=notes,
+                    discovery_origin="tinyfish_discovery",
+                    discovery_run_id=run.run_id,
                 )
 
             linked_documents = source.get("linked_documents")
@@ -418,17 +505,22 @@ def build_spawned_financial_source_jobs(
                 document_type = str(item.get("document_type", "")).strip()
                 if not document_url:
                     continue
-                maybe_add_job(
-                    label=document_title or f"Linked {document_type or 'financial document'}",
+                maybe_add(
+                    label=document_title or page_title or "Linked financial document",
                     url=document_url,
                     source_type=_guess_discovered_source_type(
                         source_kind=source_kind,
                         document_type=document_type,
                         url=document_url,
                     ),
+                    source_kind=document_type or source_kind,
+                    reporting_period=reporting_period,
+                    notes=notes,
+                    discovery_origin="tinyfish_linked_document",
+                    discovery_run_id=run.run_id,
                 )
 
-    return spawned
+    return refs
 
 
 def _render_capture_sources(result: dict[str, Any]) -> list[str]:
@@ -460,8 +552,12 @@ def _render_capture_sources(result: dict[str, Any]) -> list[str]:
                         f"Final URL: {source.get('final_url', '')}",
                         f"Source kind: {source.get('source_kind', '')}",
                         f"Reporting period: {source.get('reporting_period', '')}",
-                        "Captured text:",
-                        str(source.get("captured_text", "")).strip(),
+                        (
+                            "Captured text:\n"
+                            + str(source.get("captured_text", "")).strip()
+                            if str(source.get("captured_text", "")).strip()
+                            else ""
+                        ),
                         "Linked documents:",
                         "\n".join(linked_lines) if linked_lines else "- None",
                         f"Notes: {source.get('notes', '')}",
@@ -545,6 +641,43 @@ def normalize_tinyfish_runs(runs: list[TinyfishRunRecord]) -> list[EvidenceItem]
             )
         )
     return evidence
+
+
+def _build_openai_user_content(
+    *,
+    preamble: str,
+    evidence: list[EvidenceItem],
+) -> list[dict[str, Any]]:
+    text_sections: list[str] = [preamble, "", "Evidence bundle:"]
+    file_inputs: list[dict[str, Any]] = []
+
+    for item in evidence:
+        file_url = str(item.metadata.get("openai_input_file_url", "")).strip()
+        if file_url and len(file_inputs) < MAX_FILE_INPUTS_PER_REQUEST:
+            file_inputs.append({"type": "input_file", "file_url": file_url})
+
+        raw_text = str(item.metadata.get("openai_input_text", "")).strip() or item.content
+        if len(raw_text) > MAX_TEXT_EVIDENCE_CHARS:
+            raw_text = raw_text[:MAX_TEXT_EVIDENCE_CHARS].rstrip() + "\n...[truncated]"
+
+        text_sections.append(
+            "\n".join(
+                [
+                    f"Evidence ID: {item.evidence_id}",
+                    f"Label: {item.label}",
+                    f"Category: {item.category}",
+                    f"URL: {item.url}",
+                    f"Source type: {item.metadata.get('source_type', item.metadata.get('tinyfish_source_type', ''))}",
+                    f"Retrieved at: {item.retrieved_at}",
+                    "Content:",
+                    raw_text,
+                ]
+            ).strip()
+        )
+
+    content: list[dict[str, Any]] = [{"type": "input_text", "text": "\n\n".join(text_sections).strip()}]
+    content.extend(file_inputs)
+    return content
 
 
 def compute_publish_decision(
@@ -669,6 +802,7 @@ class ReportPipeline:
             request_retry_backoff_seconds=config.tinyfish_request_retry_backoff_seconds,
             event_callback=progress_callback,
         )
+        self.raw_source_client = RawSourceClient()
         self.openai = OpenAIClient(
             api_key=config.openai_api_key,
             base_url=config.openai_base_url,
@@ -761,8 +895,14 @@ class ReportPipeline:
             tinyfish_runs: list[TinyfishRunRecord] = []
             seen_urls = {_normalize_url(job.url) for job in scheduled_jobs if job.url.strip()}
             acquisition_wave = 0
+            max_total_jobs = max(1, self.config.tinyfish_max_total_jobs)
+            max_acquisition_waves = max(1, self.config.tinyfish_max_acquisition_waves)
 
-            while pending_jobs and acquisition_wave < 3 and len(scheduled_jobs) <= 24:
+            while (
+                pending_jobs
+                and acquisition_wave < max_acquisition_waves
+                and len(scheduled_jobs) <= max_total_jobs
+            ):
                 wave_runs = self.tinyfish.run_jobs(pending_jobs)
                 tinyfish_runs.extend(wave_runs)
                 acquisition_wave += 1
@@ -787,7 +927,7 @@ class ReportPipeline:
                     pending_jobs = []
                     continue
 
-                remaining_capacity = max(0, 24 - len(scheduled_jobs))
+                remaining_capacity = max(0, max_total_jobs - len(scheduled_jobs))
                 if remaining_capacity == 0:
                     pending_jobs = []
                     continue
@@ -835,15 +975,45 @@ class ReportPipeline:
                 "tinyfish_runs.json",
                 [record.to_dict() for record in tinyfish_runs],
             )
+            raw_source_refs = build_raw_financial_source_refs(request, tinyfish_runs)
+            self._write_artifact(
+                run_dir,
+                "raw_source_refs.json",
+                raw_source_refs,
+            )
             self._emit_stage_event(
                 stage="acquisition",
-                status="completed",
-                message=f"Completed Tinyfish acquisition for {len(tinyfish_runs)} jobs.",
+                status="running",
+                message=(
+                    f"Directly fetching {len(raw_source_refs)} raw financial source "
+                    f"{'artifacts' if len(raw_source_refs) != 1 else 'artifact'}."
+                ),
                 current=len(tinyfish_runs),
                 total=len(scheduled_jobs),
             )
 
-            evidence = normalize_tinyfish_runs(tinyfish_runs)
+            raw_evidence, raw_source_manifest = self.raw_source_client.collect_evidence(
+                source_refs=raw_source_refs,
+                run_dir=run_dir,
+                category="financials",
+            )
+            self._write_artifact(
+                run_dir,
+                "raw_source_manifest.json",
+                raw_source_manifest,
+            )
+            self._emit_stage_event(
+                stage="acquisition",
+                status="completed",
+                message=(
+                    f"Completed acquisition: {len(tinyfish_runs)} Tinyfish discovery jobs and "
+                    f"{len(raw_evidence)} directly fetched raw sources."
+                ),
+                current=len(raw_evidence),
+                total=max(len(raw_source_refs), 1),
+            )
+
+            evidence = raw_evidence or normalize_tinyfish_runs(tinyfish_runs)
             self._write_artifact(
                 run_dir, "evidence.json", [item.to_dict() for item in evidence]
             )
@@ -919,17 +1089,6 @@ class ReportPipeline:
                     specialist,
                     select_evidence_for_agent(agent, evidence),
                 )
-                evidence_text = "\n\n".join(
-                    [
-                        f"Evidence ID: {item.evidence_id}\n"
-                        f"Label: {item.label}\n"
-                        f"Category: {item.category}\n"
-                        f"URL: {item.url}\n"
-                        f"Retrieved at: {item.retrieved_at}\n"
-                        f"Content:\n{item.content}"
-                        for item in specialist_evidence
-                    ]
-                )
                 payload = self.openai.structured_response(
                     schema_name=f"{agent.section}_{specialist.name}_claim_extraction",
                     schema=extraction_schema([agent.section]),
@@ -940,12 +1099,15 @@ class ReportPipeline:
                         f"Specialist: {specialist.name}\n"
                         f"Specialist instruction: {specialist.extraction_instruction}"
                     ),
-                    user_prompt=(
+                    user_content=_build_openai_user_content(
+                        preamble=(
                         f"Company: {request.company_name}\n"
                         f"Jurisdiction: {request.primary_jurisdiction}\n"
                         f"Target section: {agent.section}\n"
                         f"Goal: {request.report_goal or 'Generate a source-backed diligence report.'}\n\n"
-                        f"Evidence bundle:\n{evidence_text}"
+                        "Use attached PDFs and raw source text to extract only directly supported claims."
+                        ),
+                        evidence=specialist_evidence,
                     ),
                 )
                 for offset, claim in enumerate(payload.get("claims", []), start=1):
@@ -1009,25 +1171,19 @@ class ReportPipeline:
         )
         for claim in claims:
             referenced = [evidence_map[eid] for eid in claim.evidence_ids if eid in evidence_map]
-            evidence_text = "\n\n".join(
-                [
-                    f"Evidence ID: {item.evidence_id}\n"
-                    f"Label: {item.label}\n"
-                    f"URL: {item.url}\n"
-                    f"Content:\n{item.content}"
-                    for item in referenced
-                ]
-            )
             payload = self.openai.structured_response(
                 schema_name="claim_verification",
                 schema=verification_schema(),
                 system_prompt=VERIFICATION_SYSTEM_PROMPT,
-                user_prompt=(
+                user_content=_build_openai_user_content(
+                    preamble=(
                     f"Claim ID: {claim.claim_id}\n"
                     f"Section: {claim.section}\n"
                     f"Claim: {claim.statement}\n"
                     f"Quoted support from extraction: {claim.source_quote}\n\n"
-                    f"Evidence bundle:\n{evidence_text}"
+                    "Verify this claim only against the attached raw sources and text evidence."
+                    ),
+                    evidence=referenced,
                 ),
                 max_output_tokens=1200,
             )
@@ -1112,9 +1268,16 @@ class ReportPipeline:
                 "evidence_id": item.evidence_id,
                 "label": item.label,
                 "category": item.category,
-                "source_type": item.metadata.get("tinyfish_source_type", ""),
+                "source_type": item.metadata.get(
+                    "source_type", item.metadata.get("tinyfish_source_type", "")
+                ),
                 "url": item.url,
                 "retrieved_at": item.retrieved_at,
+                "direct_fetch_mode": item.metadata.get("direct_fetch_mode", ""),
+                "direct_fetch_artifact_path": item.metadata.get(
+                    "direct_fetch_artifact_path", ""
+                ),
+                "openai_input_file_url": item.metadata.get("openai_input_file_url", ""),
                 "tinyfish_status": item.metadata.get("tinyfish_status", ""),
                 "tinyfish_streaming_url": item.metadata.get(
                     "tinyfish_streaming_url", ""

@@ -57,6 +57,8 @@ class AppConfig:
     tinyfish_poll_interval_seconds: int
     tinyfish_poll_timeout_seconds: int
     tinyfish_batch_size: int
+    tinyfish_max_total_jobs: int
+    tinyfish_max_acquisition_waves: int
     tinyfish_retry_with_stealth: bool
     tinyfish_request_max_retries: int
     tinyfish_request_retry_backoff_seconds: float
@@ -88,7 +90,13 @@ class AppConfig:
             tinyfish_poll_timeout_seconds=int(
                 os.getenv("TINYFISH_POLL_TIMEOUT_SECONDS", "600")
             ),
-            tinyfish_batch_size=int(os.getenv("TINYFISH_BATCH_SIZE", "20")),
+            tinyfish_batch_size=int(os.getenv("TINYFISH_BATCH_SIZE", "50")),
+            tinyfish_max_total_jobs=int(
+                os.getenv("TINYFISH_MAX_TOTAL_JOBS", "50")
+            ),
+            tinyfish_max_acquisition_waves=int(
+                os.getenv("TINYFISH_MAX_ACQUISITION_WAVES", "6")
+            ),
             tinyfish_retry_with_stealth=_env_flag(
                 "TINYFISH_RETRY_WITH_STEALTH", "true"
             ),

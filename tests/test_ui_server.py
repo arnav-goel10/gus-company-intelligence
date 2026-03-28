@@ -24,6 +24,14 @@ class GusUIApplicationTests(unittest.TestCase):
         self.assertEqual("Broken configuration", run["error"])
         self.assertEqual("failed", run["stages"]["planning"]["status"])
 
+    def test_normalize_request_payload_defaults_to_three_domains(self) -> None:
+        app = GusUIApplication()
+
+        payload = app._normalize_request_payload({"company_name": "Example Corp"})
+
+        self.assertEqual(["financials", "legal", "news"], payload["focus_areas"])
+        self.assertIn("multi-domain diligence report", payload["report_goal"])
+
 
 if __name__ == "__main__":
     unittest.main()

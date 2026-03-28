@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
 from gus_reporter.ui_state import RunStateStore
 
@@ -148,6 +151,50 @@ class RunStateStoreTests(unittest.TestCase):
         self.assertEqual(
             "Run aborted before completion.",
             run["source_jobs"][1]["message"],
+        )
+
+    def test_store_hydrates_historical_runs_from_disk(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            run_dir = Path(temp_dir) / "20260328T120000000000Z-example-corp"
+            run_dir.mkdir(parents=True, exist_ok=True)
+            (run_dir / "request.json").write_text(
+                json.dumps({"company_name": "Example Corp"}),
+                encoding="utf-8",
+            )
+            (run_dir / "source_jobs.json").write_text(
+                json.dumps(
+                    [
+                        {
+                            "label": "Investor relations",
+                            "category": "financials",
+                            "url": "https://example.com/investors",
+                            "source_type": "financial_investor_relations",
+                            "browser_profile": "lite",
+                        }
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            (run_dir / "final_report.json").write_text(
+                json.dumps(
+                    {
+                        "company_name": "Example Corp",
+                        "publish_decision": "publish",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            store = RunStateStore(run_dir.parent)
+            runs = store.list_runs()
+            self.assertEqual(1, len(runs))
+            hydrated = store.get_run(runs[0]["run_id"])
+
+        assert hydrated is not None
+        self.assertEqual("completed", hydrated["status"])
+        self.assertEqual("Example Corp", hydrated["company_name"])
+        self.assertTrue(
+            any(item["relative_path"] == "final_report.json" for item in hydrated["artifacts"])
         )
 
 

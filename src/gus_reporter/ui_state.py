@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import json
 import threading
 import uuid
 from copy import deepcopy
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 from gus_reporter.models import utc_now_iso
@@ -31,6 +34,21 @@ def _default_stages() -> dict[str, dict[str, Any]]:
         }
         for stage in STAGE_ORDER
     }
+
+
+def _path_mtime_iso(path: Path) -> str:
+    return datetime.fromtimestamp(path.stat().st_mtime, tz=UTC).replace(
+        microsecond=0
+    ).isoformat()
+
+
+def _read_json_if_exists(path: Path) -> Any:
+    if not path.exists() or not path.is_file():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
 
 
 @dataclass
@@ -72,9 +90,11 @@ class RunState:
 
 
 class RunStateStore:
-    def __init__(self) -> None:
+    def __init__(self, base_dir: Path | None = None) -> None:
         self._lock = threading.Lock()
         self._runs: dict[str, RunState] = {}
+        self._base_dir = base_dir.expanduser().resolve() if base_dir else None
+        self._hydrate_runs_from_disk()
 
     def create_run(self, request: dict[str, Any]) -> str:
         run_id = uuid.uuid4().hex[:12]
@@ -115,6 +135,18 @@ class RunStateStore:
         with self._lock:
             run = self._runs.get(run_id)
             return None if run is None else run.to_dict()
+
+    def resolve_run_dir(self, run_id: str) -> str:
+        with self._lock:
+            run = self._runs.get(run_id)
+            if run is not None and run.run_dir:
+                return run.run_dir
+            if self._base_dir is None:
+                return ""
+            candidate = (self._base_dir / run_id).resolve()
+            if candidate.exists() and candidate.is_dir():
+                return str(candidate)
+            return ""
 
     def record_event(self, run_id: str, event: dict[str, Any]) -> None:
         with self._lock:
@@ -238,3 +270,139 @@ class RunStateStore:
         ).strip()
         if event.get("attempt_number") is not None:
             target["attempt_number"] = int(event["attempt_number"])
+
+    def _hydrate_runs_from_disk(self) -> None:
+        if self._base_dir is None or not self._base_dir.exists():
+            return
+        for run_dir in sorted(self._base_dir.iterdir(), reverse=True):
+            if not run_dir.is_dir():
+                continue
+            hydrated = self._hydrate_single_run(run_dir)
+            if hydrated is None:
+                continue
+            self._runs[hydrated.run_id] = hydrated
+
+    def _hydrate_single_run(self, run_dir: Path) -> RunState | None:
+        request = _read_json_if_exists(run_dir / "request.json")
+        final_report = _read_json_if_exists(run_dir / "final_report.json")
+        source_jobs = _read_json_if_exists(run_dir / "source_jobs.json")
+        tinyfish_runs = _read_json_if_exists(run_dir / "tinyfish_runs.json")
+
+        if not isinstance(request, dict) and not isinstance(final_report, dict):
+            return None
+
+        company_name = (
+            str((request or {}).get("company_name", "")).strip()
+            or str((final_report or {}).get("company_name", "")).strip()
+            or run_dir.name
+        )
+        created_at = _path_mtime_iso(run_dir / "request.json") if (run_dir / "request.json").exists() else _path_mtime_iso(run_dir)
+        updated_at = _path_mtime_iso(run_dir)
+        run = RunState(
+            run_id=run_dir.name,
+            company_name=company_name,
+            request=deepcopy(request) if isinstance(request, dict) else {},
+            created_at=created_at,
+            updated_at=updated_at,
+            run_dir=str(run_dir),
+            final_report=deepcopy(final_report) if isinstance(final_report, dict) else None,
+            artifacts=self._hydrate_artifacts(run_dir),
+        )
+
+        if isinstance(source_jobs, list):
+            self._set_source_jobs(run, source_jobs)
+        if isinstance(tinyfish_runs, list):
+            self._hydrate_source_job_states(run, tinyfish_runs)
+
+        self._hydrate_stage_projection(run, run_dir)
+        return run
+
+    def _hydrate_artifacts(self, run_dir: Path) -> list[dict[str, Any]]:
+        artifacts: list[dict[str, Any]] = []
+        for path in sorted(run_dir.rglob("*")):
+            if not path.is_file():
+                continue
+            if path.suffix.lower() not in {".json", ".txt", ".md"}:
+                continue
+            artifacts.append(
+                {
+                    "relative_path": str(path.relative_to(run_dir)),
+                    "run_dir": str(run_dir),
+                }
+            )
+        return artifacts
+
+    def _hydrate_source_job_states(
+        self, run: RunState, tinyfish_runs: list[dict[str, Any]]
+    ) -> None:
+        for record in tinyfish_runs:
+            if not isinstance(record, dict):
+                continue
+            attempts = record.get("attempts")
+            latest_attempt = attempts[-1] if isinstance(attempts, list) and attempts else {}
+            status = str(record.get("status", "")).strip().lower() or "completed"
+            self._update_source_job(
+                run,
+                {
+                    "label": str(record.get("label", "")).strip(),
+                    "category": str(record.get("category", "")).strip(),
+                    "url": str(record.get("url", "")).strip(),
+                    "source_type": str(record.get("source_type", "")).strip(),
+                    "status": status,
+                    "message": f"Recovered Tinyfish run with status {status}.",
+                    "run_id": str(record.get("run_id", "")).strip(),
+                    "browser_profile": str(
+                        latest_attempt.get("browser_profile", "")
+                    ).strip(),
+                    "streaming_url": str(record.get("streaming_url", "")).strip(),
+                    "attempt_number": latest_attempt.get("attempt_number") or 0,
+                },
+            )
+
+    def _hydrate_stage_projection(self, run: RunState, run_dir: Path) -> None:
+        artifact_names = {
+            path.name
+            for path in run_dir.rglob("*")
+            if path.is_file()
+        }
+        stage_artifacts = {
+            "planning": {"source_jobs.json"},
+            "acquisition": {"tinyfish_runs.json", "raw_source_manifest.json", "evidence.json"},
+            "extraction": {"extracted_claims.json"},
+            "verification": {"verified_claims.json"},
+            "reporting": {"final_report.json"},
+        }
+
+        completed_stages: list[str] = []
+        for stage in STAGE_ORDER:
+            if artifact_names.intersection(stage_artifacts[stage]):
+                completed_stages.append(stage)
+                run.stages[stage]["status"] = "completed"
+            else:
+                break
+
+        if "final_report.json" in artifact_names and isinstance(run.final_report, dict):
+            for stage in STAGE_ORDER:
+                run.stages[stage]["status"] = "completed"
+            run.status = "completed"
+            run.current_stage = "reporting"
+            return
+
+        if completed_stages:
+            next_index = min(len(completed_stages), len(STAGE_ORDER) - 1)
+            current_stage = STAGE_ORDER[next_index]
+            run.status = "failed"
+            run.current_stage = current_stage
+            run.error = (
+                "Recovered historical run without a final report. "
+                "The original server session likely stopped before completion."
+            )
+            run.stages[current_stage]["status"] = "failed"
+            run.stages[current_stage]["message"] = run.error
+            return
+
+        run.status = "failed"
+        run.current_stage = "planning"
+        run.error = "Recovered historical run without usable artifacts."
+        run.stages["planning"]["status"] = "failed"
+        run.stages["planning"]["message"] = run.error

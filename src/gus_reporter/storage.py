@@ -17,10 +17,19 @@ class RunStorage:
         self.base_dir = base_dir
 
     def create_run_dir(self, company_name: str) -> Path:
-        timestamp = datetime.now(tz=UTC).strftime("%Y%m%dT%H%M%SZ")
-        run_dir = self.base_dir / f"{timestamp}-{slugify(company_name)}"
-        run_dir.mkdir(parents=True, exist_ok=False)
-        return run_dir
+        self.base_dir.mkdir(parents=True, exist_ok=True)
+        timestamp = datetime.now(tz=UTC).strftime("%Y%m%dT%H%M%S%fZ")
+        base_name = f"{timestamp}-{slugify(company_name)}"
+        for suffix in ["", "-1", "-2", "-3", "-4", "-5"]:
+            run_dir = self.base_dir / f"{base_name}{suffix}"
+            try:
+                run_dir.mkdir(parents=True, exist_ok=False)
+                return run_dir
+            except FileExistsError:
+                continue
+        raise RuntimeError(
+            f"Could not create a unique run directory for company '{company_name}'."
+        )
 
     def write_json(self, run_dir: Path, relative_path: str, payload: Any) -> Path:
         target = run_dir / relative_path

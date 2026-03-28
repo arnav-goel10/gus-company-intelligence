@@ -53,6 +53,11 @@ def _env_optional_int(name: str, default: str) -> int | None:
     return value if value > 0 else None
 
 
+def resolve_report_output_dir() -> Path:
+    load_runtime_env()
+    return Path(os.getenv("REPORT_OUTPUT_DIR", "./runs")).expanduser()
+
+
 @dataclass(frozen=True)
 class AppConfig:
     openai_api_key: str
@@ -88,9 +93,7 @@ class AppConfig:
             tinyfish_base_url=os.getenv(
                 "TINYFISH_BASE_URL", "https://agent.tinyfish.ai/v1"
             ).rstrip("/"),
-            report_output_dir=Path(
-                os.getenv("REPORT_OUTPUT_DIR", "./runs")
-            ).expanduser(),
+            report_output_dir=resolve_report_output_dir(),
             tinyfish_default_browser_profile=os.getenv(
                 "TINYFISH_DEFAULT_BROWSER_PROFILE", "lite"
             ).strip()

@@ -82,7 +82,19 @@ class GusUIApplication:
                 progress_callback=lambda event: self.store.record_event(run_id, event),
             )
             pipeline.run(request)
-        except Exception:
+        except Exception as exc:
+            run = self.store.get_run(run_id) or {}
+            if run.get("status") != "failed":
+                self.store.record_event(
+                    run_id,
+                    {
+                        "event": "pipeline_failed",
+                        "run_dir": str(run.get("run_dir", "")).strip(),
+                        "stage": str(run.get("current_stage", "planning")).strip()
+                        or "planning",
+                        "error": str(exc),
+                    },
+                )
             return
 
     def _normalize_request_payload(self, payload: dict[str, Any]) -> dict[str, Any]:

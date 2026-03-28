@@ -3,6 +3,13 @@ const state = {
   selectedRunId: null,
   selectedArtifactPath: null,
   pollHandle: null,
+  renderSignatures: {
+    health: "",
+    runs: "",
+    thread: "",
+    snapshot: "",
+    artifacts: "",
+  },
 };
 
 const stageOrder = ["planning", "acquisition", "extraction", "verification", "reporting"];
@@ -52,8 +59,23 @@ function pluralize(count, singular, plural = `${singular}s`) {
   return count === 1 ? singular : plural;
 }
 
+function signatureFor(value) {
+  return JSON.stringify(value ?? null);
+}
+
 function renderHealth(health) {
   const target = document.getElementById("health-pills");
+  const signature = signatureFor({
+    openai: health.openai_api_key_present,
+    tinyfish: health.tinyfish_api_key_present,
+    missing: health.missing_requirements || [],
+    company_name_only_supported: health.company_name_only_supported,
+  });
+  if (state.renderSignatures.health === signature) {
+    syncComposerAvailability(health);
+    return;
+  }
+  state.renderSignatures.health = signature;
   const ready = health.openai_api_key_present && health.tinyfish_api_key_present;
   const pills = [
     `<span class="health-pill ${ready ? "ready" : ""}">${ready ? "Runtime ready" : "Keys missing"}</span>`,
@@ -79,6 +101,19 @@ function syncComposerAvailability(health) {
 
 function renderRuns() {
   const target = document.getElementById("runs");
+  const signature = signatureFor({
+    selectedRunId: state.selectedRunId,
+    runs: state.runs.map((run) => ({
+      run_id: run.run_id,
+      company_name: run.company_name,
+      status: run.status,
+    })),
+  });
+  if (state.renderSignatures.runs === signature) {
+    return;
+  }
+  state.renderSignatures.runs = signature;
+
   if (!state.runs.length) {
     target.innerHTML = `<p class="empty-state">Runs you start here will appear as reusable threads.</p>`;
     return;
@@ -280,6 +315,12 @@ function messageMarkup({ role, label, title, body, meta = "", detail = "" }) {
 
 function renderThread(run) {
   const target = document.getElementById("thread");
+  const signature = signatureFor(run || { empty: true });
+  if (state.renderSignatures.thread === signature) {
+    renderThreadHeader(run);
+    return;
+  }
+  state.renderSignatures.thread = signature;
   renderThreadHeader(run);
 
   if (!run) {
@@ -408,6 +449,23 @@ function renderThread(run) {
 
 function renderSnapshot(run) {
   const target = document.getElementById("run-snapshot");
+  const signature = signatureFor(
+    run
+      ? {
+          company_name: run.company_name,
+          status: run.status,
+          current_stage: run.current_stage,
+          openai_model: run.openai_model,
+          updated_at: run.updated_at,
+          run_dir: run.run_dir,
+        }
+      : { empty: true }
+  );
+  if (state.renderSignatures.snapshot === signature) {
+    return;
+  }
+  state.renderSignatures.snapshot = signature;
+
   if (!run) {
     target.innerHTML = "Select or launch a run to inspect the latest status.";
     return;
@@ -428,6 +486,16 @@ function renderSnapshot(run) {
 function renderArtifacts(run) {
   const artifactList = document.getElementById("artifact-list");
   const viewer = document.getElementById("artifact-viewer");
+  const signature = signatureFor({
+    run_id: run?.run_id || "",
+    artifacts: run?.artifacts || [],
+    selectedArtifactPath: state.selectedArtifactPath || "",
+  });
+  if (state.renderSignatures.artifacts === signature) {
+    return;
+  }
+  state.renderSignatures.artifacts = signature;
+
   if (!run || !run.artifacts.length) {
     artifactList.innerHTML = `<p class="empty-state">Artifact files will appear after the run starts.</p>`;
     viewer.textContent = "Select an artifact to inspect it.";

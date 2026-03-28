@@ -229,8 +229,24 @@ function buildReportMarkup(report) {
         <p>${escapeHtml(report.executive_summary || "No executive summary available.")}</p>
       </section>
       <section class="report-block">
+        <h4>Scope and limitations</h4>
+        <p>${escapeHtml(report.scope_and_limitations || "No scope statement available.")}</p>
+      </section>
+      <section class="report-block">
+        <h4>Methodology</h4>
+        <p>${escapeHtml(report.methodology || "No methodology available.")}</p>
+      </section>
+      <section class="report-block">
+        <h4>Entity profile</h4>
+        <p>${escapeHtml(report.entity_profile || "No entity profile available.")}</p>
+      </section>
+      <section class="report-block">
         <h4>Publish decision</h4>
         <p>${escapeHtml(report.publish_decision)}: ${escapeHtml(report.publish_reason)}</p>
+      </section>
+      <section class="report-block">
+        <h4>Decision path</h4>
+        <p>${escapeHtml(report.diligence_conclusion || "No decision-path narrative available.")}</p>
       </section>
       <section class="report-block">
         <h4>Key findings</h4>

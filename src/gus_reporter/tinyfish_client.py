@@ -6,9 +6,9 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Callable
 
-from gus_reporter.models import SourceJob, TinyfishRunRecord
+from gus_reporter.models import SourceJob, TinyfishRunRecord, utc_now_iso
 
 
 TERMINAL_RUN_STATUSES = {"COMPLETED", "FAILED", "CANCELLED"}
@@ -48,6 +48,7 @@ class TinyfishClient:
         retry_with_stealth: bool = True,
         request_max_retries: int = 3,
         request_retry_backoff_seconds: float = 2.0,
+        event_callback: Callable[[dict[str, Any]], None] | None = None,
     ) -> None:
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
@@ -57,6 +58,7 @@ class TinyfishClient:
         self.retry_with_stealth = retry_with_stealth
         self.request_max_retries = max(0, request_max_retries)
         self.request_retry_backoff_seconds = max(0.1, request_retry_backoff_seconds)
+        self.event_callback = event_callback
 
     def run_job(self, job: SourceJob) -> TinyfishRunRecord:
         return self.run_jobs([job])[0]
@@ -81,6 +83,39 @@ class TinyfishClient:
 
         return [record for record in ordered_records if record is not None]
 
+    def _emit_event(self, payload: dict[str, Any]) -> None:
+        if self.event_callback is None:
+            return
+        self.event_callback({"timestamp": utc_now_iso(), **payload})
+
+    def _emit_source_job_event(
+        self,
+        *,
+        job: SourceJob,
+        status: str,
+        message: str,
+        run_id: str = "",
+        browser_profile: str = "",
+        streaming_url: str = "",
+        attempt_number: int | None = None,
+    ) -> None:
+        self._emit_event(
+            {
+                "event": "source_job_update",
+                "stage": "acquisition",
+                "label": job.label,
+                "category": job.category,
+                "url": job.url,
+                "source_type": job.source_type,
+                "status": status,
+                "message": message,
+                "run_id": run_id,
+                "browser_profile": browser_profile,
+                "streaming_url": streaming_url,
+                "attempt_number": attempt_number,
+            }
+        )
+
     def _run_job_with_retry(self, job: SourceJob) -> TinyfishRunRecord:
         record = self._run_job_once(
             job=job,
@@ -90,6 +125,14 @@ class TinyfishClient:
         if self._should_retry_with_stealth(job, record, job.browser_profile):
             fallback_profile = self._fallback_profile(job, job.browser_profile)
             if fallback_profile:
+                self._emit_source_job_event(
+                    job=job,
+                    status="retrying",
+                    message="Retrying with stealth profile after likely anti-bot block.",
+                    run_id=record.run_id,
+                    browser_profile=fallback_profile,
+                    attempt_number=2,
+                )
                 retry_record = self._run_job_once(
                     job=job,
                     browser_profile=fallback_profile,
@@ -147,12 +190,30 @@ class TinyfishClient:
                     streaming_url = str(data.get("streaming_url", "")).strip()
                     if streaming_url:
                         pending[run_id].streaming_url = streaming_url
+                        self._emit_source_job_event(
+                            job=pending[run_id].job,
+                            status="running",
+                            message="Tinyfish live preview available.",
+                            run_id=run_id,
+                            browser_profile=pending[run_id].browser_profile,
+                            streaming_url=streaming_url,
+                            attempt_number=pending[run_id].attempt_number,
+                        )
                     continue
 
                 current = pending.pop(run_id)
                 record = self._record_from_run_data(
                     data=data,
                     pending=current,
+                )
+                self._emit_source_job_event(
+                    job=current.job,
+                    status=record.status.lower(),
+                    message=f"Tinyfish run finished with status {record.status.lower()}.",
+                    run_id=record.run_id,
+                    browser_profile=current.browser_profile,
+                    streaming_url=record.streaming_url,
+                    attempt_number=current.attempt_number,
                 )
                 if self._should_retry_with_stealth(
                     current.job,
@@ -209,6 +270,14 @@ class TinyfishClient:
 
         pending_runs: list[_PendingRun] = []
         for (index, job), run_id in zip(indexed_jobs, run_ids, strict=True):
+            self._emit_source_job_event(
+                job=job,
+                status="running",
+                message="Tinyfish run started.",
+                run_id=run_id,
+                browser_profile=job.browser_profile,
+                attempt_number=1,
+            )
             pending_runs.append(
                 _PendingRun(
                     index=index,
@@ -229,10 +298,19 @@ class TinyfishClient:
         attempt_number: int,
         prior_attempts: list[dict[str, Any]] | None = None,
     ) -> _PendingRun:
+        run_id = self._start_async_run(job, browser_profile)
+        self._emit_source_job_event(
+            job=job,
+            status="running",
+            message="Tinyfish run started.",
+            run_id=run_id,
+            browser_profile=browser_profile,
+            attempt_number=attempt_number,
+        )
         return _PendingRun(
             index=index,
             job=job,
-            run_id=self._start_async_run(job, browser_profile),
+            run_id=run_id,
             browser_profile=browser_profile,
             attempt_number=attempt_number,
             prior_attempts=list(prior_attempts or []),
@@ -262,7 +340,7 @@ class TinyfishClient:
             data = self._request("GET", f"/runs/{urllib.parse.quote(run_id)}")
             status = str(data.get("status", "")).upper()
             if status in TERMINAL_RUN_STATUSES:
-                return self._record_from_run_data(
+                record = self._record_from_run_data(
                     data=data,
                     pending=_PendingRun(
                         index=0,
@@ -272,6 +350,16 @@ class TinyfishClient:
                         attempt_number=attempt_number,
                     ),
                 )
+                self._emit_source_job_event(
+                    job=job,
+                    status=record.status.lower(),
+                    message=f"Tinyfish run finished with status {record.status.lower()}.",
+                    run_id=record.run_id,
+                    browser_profile=browser_profile,
+                    streaming_url=record.streaming_url,
+                    attempt_number=attempt_number,
+                )
+                return record
             time.sleep(self.poll_interval_seconds)
         raise TimeoutError(
             f"Tinyfish run {run_id} for job '{job.label}' timed out after "
@@ -318,9 +406,26 @@ class TinyfishClient:
                     if event_type == "STARTED":
                         run_id = str(event.get("run_id", "")).strip()
                         fallback_started_at = str(event.get("started_at", "")).strip()
+                        self._emit_source_job_event(
+                            job=job,
+                            status="running",
+                            message="Tinyfish stream started.",
+                            run_id=run_id,
+                            browser_profile=browser_profile,
+                            attempt_number=attempt_number,
+                        )
                         continue
                     if event_type == "STREAMING_URL":
                         streaming_url = str(event.get("streaming_url", "")).strip()
+                        self._emit_source_job_event(
+                            job=job,
+                            status="running",
+                            message="Tinyfish live preview available.",
+                            run_id=run_id,
+                            browser_profile=browser_profile,
+                            streaming_url=streaming_url,
+                            attempt_number=attempt_number,
+                        )
                         continue
                     if event_type == "PROGRESS":
                         summary = (
@@ -330,6 +435,15 @@ class TinyfishClient:
                         )
                         if summary:
                             progress_log.append(summary)
+                            self._emit_source_job_event(
+                                job=job,
+                                status="running",
+                                message=summary,
+                                run_id=run_id,
+                                browser_profile=browser_profile,
+                                streaming_url=streaming_url,
+                                attempt_number=attempt_number,
+                            )
                         continue
                     if event_type in {"COMPLETE", "FAILED", "CANCELLED", "ERROR"}:
                         run_payload = (
@@ -337,7 +451,7 @@ class TinyfishClient:
                             if isinstance(event.get("run"), dict)
                             else event
                         )
-                        return self._record_from_run_data(
+                        record = self._record_from_run_data(
                             data=run_payload,
                             pending=_PendingRun(
                                 index=0,
@@ -350,6 +464,16 @@ class TinyfishClient:
                             ),
                             fallback_started_at=fallback_started_at,
                         )
+                        self._emit_source_job_event(
+                            job=job,
+                            status=record.status.lower(),
+                            message=f"Tinyfish run finished with status {record.status.lower()}.",
+                            run_id=record.run_id,
+                            browser_profile=browser_profile,
+                            streaming_url=record.streaming_url,
+                            attempt_number=attempt_number,
+                        )
+                        return record
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="replace")
             raise RuntimeError(
@@ -361,7 +485,7 @@ class TinyfishClient:
                 f"Tinyfish SSE stream ended before returning a run_id for job: {job.label}"
             )
         data = self._request("GET", f"/runs/{urllib.parse.quote(run_id)}")
-        return self._record_from_run_data(
+        record = self._record_from_run_data(
             data=data,
             pending=_PendingRun(
                 index=0,
@@ -374,6 +498,16 @@ class TinyfishClient:
             ),
             fallback_started_at=fallback_started_at,
         )
+        self._emit_source_job_event(
+            job=job,
+            status=record.status.lower(),
+            message=f"Tinyfish run finished with status {record.status.lower()}.",
+            run_id=record.run_id,
+            browser_profile=browser_profile,
+            streaming_url=record.streaming_url,
+            attempt_number=attempt_number,
+        )
+        return record
 
     def _fetch_runs_batch(self, run_ids: list[str]) -> dict[str, dict[str, Any]]:
         if len(run_ids) == 1:

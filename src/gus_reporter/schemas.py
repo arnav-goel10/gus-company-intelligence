@@ -183,8 +183,10 @@ def executive_report_schema() -> dict:
         "additionalProperties": False,
         "properties": {
             "executive_summary": {"type": "string"},
+            "scope_and_limitations": {"type": "string"},
             "methodology": {"type": "string"},
             "entity_profile": {"type": "string"},
+            "diligence_conclusion": {"type": "string"},
             "key_findings": {
                 "type": "array",
                 "items": {"type": "string"},
@@ -193,12 +195,19 @@ def executive_report_schema() -> dict:
                 "type": "array",
                 "items": {"type": "string"},
             },
+            "pdf_section_order": {
+                "type": "array",
+                "items": {"type": "string"},
+            },
         },
         "required": [
             "executive_summary",
+            "scope_and_limitations",
             "methodology",
             "entity_profile",
+            "diligence_conclusion",
             "key_findings",
             "recommendations",
+            "pdf_section_order",
         ],
     }

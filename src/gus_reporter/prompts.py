@@ -42,10 +42,31 @@ Rules:
 - If coverage is weak, say so directly.
 - Keep summaries decision-useful and compact.
 - Preserve a neutral, analyst-grade tone.
+- Write section output so it can drop cleanly into a formal due diligence PDF.
 """
 
 
-EXECUTIVE_AGGREGATION_SYSTEM_PROMPT = """You are the coordinating editor for a multi-agent due diligence report.
+DUE_DILIGENCE_REPORT_STRUCTURE = """Target PDF structure:
+1. Executive Summary
+   Include the headline decision, overall risk posture, major blockers, and highest-value takeaways.
+2. Scope and Methodology
+   State scope, focus areas covered, source classes used, evidence freshness, and material limitations.
+3. Entity Profile
+   Summarize company identity, jurisdiction, business model, and other core orientation facts.
+4. Domain Analysis
+   Present each diligence section as its own analysis chapter, led by financials in this slice.
+5. Key Findings
+   Rank findings by materiality and decision relevance.
+6. Risk Matrix
+   Show severity, issue, supporting evidence, and mitigation or next-step recommendation.
+7. Recommendations and Decision Path
+   State proceed / proceed with conditions / do not proceed logic and next actions.
+8. Appendix / Source Log
+   End with traceable evidence references, source timestamps, and retrieval metadata.
+"""
+
+
+EXECUTIVE_AGGREGATION_SYSTEM_PROMPT = f"""You are the coordinating editor for a multi-agent due diligence report.
 
 Rules:
 - Use only section summaries and verified findings supplied in the prompt.
@@ -53,67 +74,45 @@ Rules:
 - Make the methodology explicit and defensible.
 - Keep key findings ranked by materiality.
 - Recommendations should be actionable and tied to evidence gaps or risks.
+- The final output will be rendered into a formal PDF, so follow this structure exactly:
+{DUE_DILIGENCE_REPORT_STRUCTURE}
+- Keep the tone factual, audit-ready, and suitable for investors, counsel, risk teams, or compliance reviewers.
 """
 
 
-FINANCIAL_RESULT_SHAPE = """{
+FINANCIAL_SOURCE_CAPTURE_SHAPE = """{
   "success": true,
-  "source_type": "investor_relations_hub",
-  "documents": [
+  "capture_mode": "search_discovery",
+  "sources": [
     {
-      "title": "Annual Report 2025",
-      "document_type": "annual_report",
-      "period": "FY2025",
-      "url": "https://example.com/investors/annual-report-2025.pdf",
-      "notes": "Audited consolidated financial statements"
+      "page_title": "Apple Investor Relations",
+      "final_url": "https://investor.apple.com/",
+      "source_kind": "investor_relations_hub",
+      "reporting_period": "",
+      "captured_text": "Verbatim or near-verbatim financial source text captured from the page or document. Preserve numbers exactly as shown.",
+      "linked_documents": [
+        {
+          "title": "Annual Report 2025",
+          "url": "https://investor.apple.com/annual-report-2025.pdf",
+          "document_type": "annual_report"
+        }
+      ],
+      "notes": "Official investor relations hub with links to results, SEC filings, and annual reports."
     }
-  ],
-  "metrics": [
-    {
-      "metric": "revenue",
-      "value": "1240000000",
-      "unit": "USD",
-      "period": "FY2025",
-      "source_document": "Annual Report 2025",
-      "confidence": "high"
-    }
-  ],
-  "capital_structure": [
-    {
-      "metric": "cash_and_equivalents",
-      "value": "280000000",
-      "unit": "USD",
-      "period": "FY2025"
-    }
-  ],
-  "guidance": [
-    {
-      "metric": "revenue",
-      "value": "1300000000 to 1350000000",
-      "period": "FY2026",
-      "source_document": "Q4 2025 Shareholder Letter"
-    }
-  ],
-  "red_flags": [
-    "Negative operating cash flow in FY2025"
   ],
   "coverage_gaps": [
-    "Gross margin was not disclosed on the investor relations landing page"
+    "Latest quarterly document was not reachable from this path"
   ],
   "error": null
 }"""
 
 
-FINANCIAL_ERROR_SHAPE = """{
+FINANCIAL_SOURCE_CAPTURE_ERROR_SHAPE = """{
   "success": false,
-  "source_type": "investor_relations_hub",
-  "documents": [],
-  "metrics": [],
-  "capital_structure": [],
-  "guidance": [],
-  "red_flags": [],
+  "capture_mode": "search_discovery",
+  "sources": [],
   "coverage_gaps": [
-    "Page required login"
+    "Search results were blocked by CAPTCHA"
   ],
   "error": {
     "type": "blocked",
@@ -131,27 +130,32 @@ def build_financial_tinyfish_goal(
 ) -> str:
     source_focus = {
         "investor_relations_hub": (
-            "Find the latest annual report, interim or quarterly results, investor "
-            "presentations, filing links, and any guidance or capital-structure "
-            "disclosures."
+            "Capture the investor relations hub itself, then collect raw source text and "
+            "document links for the newest clearly relevant annual report, quarterly or "
+            "interim results, investor presentation, and filing index."
         ),
         "investor_relations_candidate": (
             "First determine whether this is a real investor-relations page. If it is, "
-            "collect the latest filings, reports, and quantified financial disclosures."
+            "capture raw source text plus any linked reports, results releases, or filing pages."
         ),
         "official_filing_index": (
-            "Identify the latest annual filing, latest interim or quarterly filing, "
-            "material 8-K or 6-K updates, and any clearly stated revenue, profit, cash, "
-            "debt, and guidance metrics."
+            "Capture the filing index page and the newest clearly relevant annual and "
+            "quarterly or interim filing materials you can reach from it."
         ),
         "financial_document": (
-            "Extract the company's most material financial metrics, balance-sheet facts, "
-            "guidance, and any explicit red flags from this source."
+            "Capture raw text, reporting period labels, and any linked finance documents from "
+            "this financial source. Do not summarize the business performance."
+        ),
+        "search_discovery": (
+            "Starting from search results, locate official financial sources such as the "
+            "company investor-relations hub, annual report, quarterly or interim results, "
+            "earnings release, investor presentation, or regulator filing pages. Open the "
+            "best primary-source paths and capture raw source material."
         ),
     }
     source_hint = source_focus.get(
         source_type,
-        "Collect primary-source financial metrics, document links, and disclosure gaps.",
+        "Capture raw primary-source financial material and relevant finance document links.",
     )
     ticker_hint = (
         f" The public ticker or filing identifier is {ticker}."
@@ -159,24 +163,27 @@ def build_financial_tinyfish_goal(
         else ""
     )
     return (
-        f"You are collecting primary-source financial evidence for {company_name} from the "
+        f"You are collecting raw financial source material for {company_name} from the "
         f"source labeled '{source_label}'.{ticker_hint}\n\n"
         "Instructions:\n"
         f"1. {source_hint}\n"
-        "2. Prefer official company or regulator documents over summaries.\n"
-        "3. Navigate through links when needed, but stop once the newest clearly relevant "
-        "financial disclosures have been captured.\n"
-        "4. Capture explicit values only when the source states them. Do not infer missing "
-        "numbers or calculate your own ratios.\n"
-        "5. If a page is blocked, irrelevant, or requires login, return a structured error.\n\n"
+        "2. Prefer official company or regulator sources over third-party summaries.\n"
+        "3. Capture source material, not your own analysis. Preserve reported figures, dates, "
+        "period labels, and wording exactly when possible.\n"
+        "4. For each relevant page or document you open, return the page title, final URL, "
+        "source kind, reporting period if explicitly stated, captured raw text, and any "
+        "linked financial documents.\n"
+        "5. Do not calculate ratios, infer missing numbers, or summarize performance beyond "
+        "brief source notes that identify what the page is.\n"
+        "6. If a page is blocked, irrelevant, or requires login, return a structured error or "
+        "coverage gap instead of guessing.\n\n"
         "Termination conditions:\n"
-        "- Stop once you have identified the latest annual disclosure and the latest interim "
-        "or quarterly disclosure, or after collecting five relevant finance documents.\n"
+        "- Stop after capturing up to five clearly relevant financial sources.\n"
+        "- Stop after six meaningful navigation steps if the source path is weak.\n"
         "- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or "
         "access-denied message.\n\n"
         "Return JSON matching this exact shape:\n"
-        f"{FINANCIAL_RESULT_SHAPE}\n\n"
-        "If extraction fails or the source is not a real financial source, return this "
-        "shape instead:\n"
-        f"{FINANCIAL_ERROR_SHAPE}"
+        f"{FINANCIAL_SOURCE_CAPTURE_SHAPE}\n\n"
+        "If capture fails, return this shape instead:\n"
+        f"{FINANCIAL_SOURCE_CAPTURE_ERROR_SHAPE}"
     )

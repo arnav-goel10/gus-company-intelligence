@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import urllib.parse
 from collections import defaultdict
 from typing import Any, Callable
 
@@ -77,12 +78,30 @@ def build_financial_goal(
         "financial_investor_candidate": "investor_relations_candidate",
         "financial_document": "financial_document",
         "financial_sec_filings": "official_filing_index",
+        "financial_search_discovery": "search_discovery",
     }
     return build_financial_tinyfish_goal(
         company_name=request.company_name,
         source_label=label,
         source_type=source_type_map.get(source_type, "financial_document"),
         ticker=request.ticker,
+    )
+
+
+def _build_search_url(query: str) -> str:
+    return f"https://www.bing.com/search?q={urllib.parse.quote_plus(query)}"
+
+
+def _normalize_url(url: str) -> str:
+    parsed = urllib.parse.urlsplit(url.strip())
+    return urllib.parse.urlunsplit(
+        (
+            parsed.scheme.lower(),
+            parsed.netloc.lower(),
+            parsed.path,
+            parsed.query,
+            "",
+        )
     )
 
 
@@ -254,33 +273,258 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                     ),
                 )
             )
+        if not any(
+            [
+                request.company_website,
+                request.investor_relations_url,
+                request.financial_source_urls,
+                request.ticker,
+            ]
+        ):
+            discovery_queries = [
+                (
+                    "Financial source discovery",
+                    f"\"{request.company_name}\" investor relations annual report quarterly results",
+                ),
+                (
+                    "Annual report discovery",
+                    f"\"{request.company_name}\" annual report pdf financial statements",
+                ),
+                (
+                    "Earnings and filings discovery",
+                    f"\"{request.company_name}\" earnings release quarterly results filing",
+                ),
+            ]
+            for label, query in discovery_queries:
+                search_url = _build_search_url(query)
+                jobs.append(
+                    SourceJob(
+                        label=label,
+                        category="financials",
+                        url=search_url,
+                        goal=build_financial_goal(
+                            request,
+                            source_type="financial_search_discovery",
+                            label=label,
+                            url=search_url,
+                        ),
+                        **_job_defaults(
+                            request,
+                            default_browser_profile,
+                            source_type="financial_search_discovery",
+                            category="financials",
+                            proxy_country_code=proxy_country,
+                        ),
+                    )
+                )
     return jobs
+
+
+def _guess_discovered_source_type(
+    *,
+    source_kind: str,
+    document_type: str,
+    url: str,
+) -> str:
+    source_kind = source_kind.lower()
+    document_type = document_type.lower()
+    url_lower = url.lower()
+
+    if "investor" in source_kind:
+        return "financial_investor_relations"
+    if any(marker in source_kind for marker in {"filing", "sec", "edgar", "regulator"}):
+        return "financial_sec_filings"
+    if any(marker in document_type for marker in {"annual", "quarter", "earnings", "presentation", "filing"}):
+        return "financial_document"
+    if any(marker in url_lower for marker in {"investor", "investors"}):
+        return "financial_investor_relations"
+    if "sec.gov" in url_lower or "edgar" in url_lower:
+        return "financial_sec_filings"
+    return "financial_document"
+
+
+def build_spawned_financial_source_jobs(
+    request: ReportRequest,
+    runs: list[TinyfishRunRecord],
+    default_browser_profile: str,
+    existing_urls: set[str],
+) -> list[SourceJob]:
+    spawned: list[SourceJob] = []
+    proxy_country = request.primary_jurisdiction[:2].upper()
+
+    def maybe_add_job(
+        *,
+        label: str,
+        url: str,
+        source_type: str,
+    ) -> None:
+        normalized = _normalize_url(url)
+        if not normalized or normalized in existing_urls:
+            return
+        existing_urls.add(normalized)
+        spawned.append(
+            SourceJob(
+                label=label,
+                category="financials",
+                url=url,
+                goal=build_financial_goal(
+                    request,
+                    source_type=source_type,
+                    label=label,
+                    url=url,
+                ),
+                **_job_defaults(
+                    request,
+                    default_browser_profile,
+                    source_type=source_type,
+                    category="financials",
+                    proxy_country_code="US" if source_type == "financial_sec_filings" else proxy_country,
+                ),
+            )
+        )
+
+    for run in runs:
+        if run.category != "financials" or not isinstance(run.result, dict):
+            continue
+        sources = run.result.get("sources")
+        if not isinstance(sources, list):
+            continue
+        for source in sources:
+            if not isinstance(source, dict):
+                continue
+            final_url = str(source.get("final_url", "")).strip()
+            page_title = str(source.get("page_title", "")).strip()
+            source_kind = str(source.get("source_kind", "")).strip()
+            if final_url:
+                source_type = _guess_discovered_source_type(
+                    source_kind=source_kind,
+                    document_type="",
+                    url=final_url,
+                )
+                maybe_add_job(
+                    label=page_title or f"Discovered {source_kind or 'financial source'}",
+                    url=final_url,
+                    source_type=source_type,
+                )
+
+            linked_documents = source.get("linked_documents")
+            if not isinstance(linked_documents, list):
+                continue
+            for item in linked_documents:
+                if not isinstance(item, dict):
+                    continue
+                document_url = str(item.get("url", "")).strip()
+                document_title = str(item.get("title", "")).strip()
+                document_type = str(item.get("document_type", "")).strip()
+                if not document_url:
+                    continue
+                maybe_add_job(
+                    label=document_title or f"Linked {document_type or 'financial document'}",
+                    url=document_url,
+                    source_type=_guess_discovered_source_type(
+                        source_kind=source_kind,
+                        document_type=document_type,
+                        url=document_url,
+                    ),
+                )
+
+    return spawned
+
+
+def _render_capture_sources(result: dict[str, Any]) -> list[str]:
+    rendered: list[str] = []
+    sources = result.get("sources")
+    if isinstance(sources, list):
+        for index, source in enumerate(sources, start=1):
+            if not isinstance(source, dict):
+                continue
+            linked_documents = source.get("linked_documents")
+            linked_lines: list[str] = []
+            if isinstance(linked_documents, list):
+                for item in linked_documents:
+                    if not isinstance(item, dict):
+                        continue
+                    title = str(item.get("title", "")).strip()
+                    url = str(item.get("url", "")).strip()
+                    document_type = str(item.get("document_type", "")).strip()
+                    if title or url:
+                        linked_lines.append(
+                            f"- {title or 'Document'} | {document_type or 'unknown'} | {url}"
+                        )
+
+            rendered.append(
+                "\n".join(
+                    [
+                        f"Captured source {index}",
+                        f"Page title: {source.get('page_title', '')}",
+                        f"Final URL: {source.get('final_url', '')}",
+                        f"Source kind: {source.get('source_kind', '')}",
+                        f"Reporting period: {source.get('reporting_period', '')}",
+                        "Captured text:",
+                        str(source.get("captured_text", "")).strip(),
+                        "Linked documents:",
+                        "\n".join(linked_lines) if linked_lines else "- None",
+                        f"Notes: {source.get('notes', '')}",
+                    ]
+                ).strip()
+            )
+    return rendered
+
+
+def _render_tinyfish_evidence(run: TinyfishRunRecord) -> str:
+    sections = [
+        f"Run status: {run.status}",
+        f"Source label: {run.label}",
+        f"Source type: {run.source_type}",
+        f"Source URL: {run.url}",
+    ]
+    if isinstance(run.result, dict):
+        capture_mode = str(run.result.get("capture_mode", "")).strip()
+        if capture_mode:
+            sections.append(f"Capture mode: {capture_mode}")
+        sections.extend(_render_capture_sources(run.result))
+        coverage_gaps = run.result.get("coverage_gaps")
+        if isinstance(coverage_gaps, list) and coverage_gaps:
+            sections.append(
+                "Coverage gaps:\n" + "\n".join(f"- {str(item).strip()}" for item in coverage_gaps)
+            )
+    elif run.result is not None:
+        sections.append(
+            "Result payload:\n"
+            + json.dumps(run.result, indent=2, sort_keys=True, ensure_ascii=True)
+        )
+
+    if run.error:
+        sections.append(
+            "Error payload:\n"
+            + json.dumps(run.error, indent=2, sort_keys=True, ensure_ascii=True)
+        )
+
+    step_trace = [
+        {
+            "timestamp": step.get("timestamp"),
+            "status": step.get("status"),
+            "action": step.get("action"),
+            "duration": step.get("duration"),
+        }
+        for step in run.steps[:20]
+    ]
+    if step_trace:
+        sections.append(
+            "Tinyfish step trace:\n"
+            + json.dumps(step_trace, indent=2, sort_keys=True, ensure_ascii=True)
+        )
+    if run.attempts:
+        sections.append(
+            "Tinyfish attempts:\n"
+            + json.dumps(run.attempts, indent=2, sort_keys=True, ensure_ascii=True)
+        )
+    return "\n\n".join(section for section in sections if section).strip()
 
 
 def normalize_tinyfish_runs(runs: list[TinyfishRunRecord]) -> list[EvidenceItem]:
     evidence: list[EvidenceItem] = []
     for index, run in enumerate(runs, start=1):
-        normalized_payload = {
-            "status": run.status,
-            "source_type": run.source_type,
-            "result": run.result,
-            "error": run.error,
-            "num_of_steps": run.num_of_steps,
-            "browser_config": run.browser_config,
-            "step_trace": [
-                {
-                    "timestamp": step.get("timestamp"),
-                    "status": step.get("status"),
-                    "action": step.get("action"),
-                    "duration": step.get("duration"),
-                }
-                for step in run.steps[:20]
-            ],
-            "attempts": run.attempts,
-        }
-        serialized = json.dumps(
-            normalized_payload, indent=2, sort_keys=True, ensure_ascii=True
-        )
         evidence.append(
             EvidenceItem(
                 evidence_id=f"evidence_{index:03d}",
@@ -288,7 +532,7 @@ def normalize_tinyfish_runs(runs: list[TinyfishRunRecord]) -> list[EvidenceItem]
                 category=run.category,
                 url=run.url,
                 retrieved_at=run.finished_at or run.started_at or run.created_at or utc_now_iso(),
-                content=serialized,
+                content=_render_tinyfish_evidence(run),
                 metadata={
                     "tinyfish_run_id": run.run_id,
                     "tinyfish_status": run.status,
@@ -385,6 +629,24 @@ def build_risk_matrix(verified_claims: list[VerifiedClaim]) -> list[RiskMatrixEn
             )
         )
     return entries[:12]
+
+
+def build_pdf_section_order(active_sections: list[ReportSection]) -> list[str]:
+    ordered = [
+        "Executive Summary",
+        "Scope and Methodology",
+        "Entity Profile",
+    ]
+    ordered.extend(section.name for section in active_sections)
+    ordered.extend(
+        [
+            "Key Findings",
+            "Risk Matrix",
+            "Recommendations and Decision Path",
+            "Appendix / Source Log",
+        ]
+    )
+    return ordered
 
 
 class ReportPipeline:
@@ -494,7 +756,80 @@ class ReportPipeline:
                 current=0,
                 total=len(source_jobs),
             )
-            tinyfish_runs = self.tinyfish.run_jobs(source_jobs)
+            scheduled_jobs = list(source_jobs)
+            pending_jobs = list(source_jobs)
+            tinyfish_runs: list[TinyfishRunRecord] = []
+            seen_urls = {_normalize_url(job.url) for job in scheduled_jobs if job.url.strip()}
+            acquisition_wave = 0
+
+            while pending_jobs and acquisition_wave < 3 and len(scheduled_jobs) <= 24:
+                wave_runs = self.tinyfish.run_jobs(pending_jobs)
+                tinyfish_runs.extend(wave_runs)
+                acquisition_wave += 1
+                self._emit_stage_event(
+                    stage="acquisition",
+                    status="running",
+                    message=(
+                        f"Completed acquisition wave {acquisition_wave}; "
+                        f"{len(tinyfish_runs)} of {len(scheduled_jobs)} source jobs processed."
+                    ),
+                    current=len(tinyfish_runs),
+                    total=len(scheduled_jobs),
+                )
+
+                spawned_jobs = build_spawned_financial_source_jobs(
+                    request,
+                    wave_runs,
+                    self.config.tinyfish_default_browser_profile,
+                    seen_urls,
+                )
+                if not spawned_jobs:
+                    pending_jobs = []
+                    continue
+
+                remaining_capacity = max(0, 24 - len(scheduled_jobs))
+                if remaining_capacity == 0:
+                    pending_jobs = []
+                    continue
+                if len(spawned_jobs) > remaining_capacity:
+                    spawned_jobs = spawned_jobs[:remaining_capacity]
+
+                scheduled_jobs.extend(spawned_jobs)
+                for job in spawned_jobs:
+                    self._emit_event(
+                        {
+                            "event": "source_job_update",
+                            "stage": "acquisition",
+                            "label": job.label,
+                            "category": job.category,
+                            "url": job.url,
+                            "source_type": job.source_type,
+                            "status": "queued",
+                            "message": "Spawned from discovered financial sources.",
+                            "browser_profile": job.browser_profile,
+                            "run_id": "",
+                            "streaming_url": "",
+                            "attempt_number": 0,
+                        }
+                    )
+
+                self._write_artifact(
+                    run_dir,
+                    "source_jobs.json",
+                    [job.to_dict() for job in scheduled_jobs],
+                )
+                self._emit_stage_event(
+                    stage="acquisition",
+                    status="running",
+                    message=(
+                        f"Spawned {len(spawned_jobs)} child source "
+                        f"{'agents' if len(spawned_jobs) != 1 else 'agent'} from discovered links."
+                    ),
+                    current=len(tinyfish_runs),
+                    total=len(scheduled_jobs),
+                )
+                pending_jobs = spawned_jobs
+
             self._write_artifact(
                 run_dir,
                 "tinyfish_runs.json",
@@ -505,7 +840,7 @@ class ReportPipeline:
                 status="completed",
                 message=f"Completed Tinyfish acquisition for {len(tinyfish_runs)} jobs.",
                 current=len(tinyfish_runs),
-                total=len(source_jobs),
+                total=len(scheduled_jobs),
             )
 
             evidence = normalize_tinyfish_runs(tinyfish_runs)
@@ -795,8 +1130,14 @@ class ReportPipeline:
             publish_decision=publish_decision,
             publish_reason=publish_reason,
             executive_summary=str(aggregation_payload.get("executive_summary", "")).strip(),
+            scope_and_limitations=str(
+                aggregation_payload.get("scope_and_limitations", "")
+            ).strip(),
             methodology=str(aggregation_payload.get("methodology", "")).strip(),
             entity_profile=str(aggregation_payload.get("entity_profile", "")).strip(),
+            diligence_conclusion=str(
+                aggregation_payload.get("diligence_conclusion", "")
+            ).strip(),
             key_findings=[
                 str(item).strip()
                 for item in aggregation_payload.get("key_findings", [])
@@ -807,6 +1148,12 @@ class ReportPipeline:
                 for item in aggregation_payload.get("recommendations", [])
                 if str(item).strip()
             ],
+            pdf_section_order=[
+                str(item).strip()
+                for item in aggregation_payload.get("pdf_section_order", [])
+                if str(item).strip()
+            ]
+            or build_pdf_section_order(sections),
             risk_matrix=risk_matrix,
             sections=sections,
             source_log=source_log,
@@ -968,6 +1315,13 @@ class ReportPipeline:
             f"Goal: {request.report_goal or 'Generate an evidence-backed company report.'}",
             f"Publish decision: {publish_decision}",
             f"Publish reason: {publish_reason}",
+            f"Requested PDF section order: {', '.join(build_pdf_section_order(sections))}",
+            "",
+            "Scope guidance:",
+            "- The report should read like an in-depth diligence memo for investors, legal, compliance, or risk teams.",
+            "- Keep section ordering consistent with the requested PDF structure.",
+            "- State limitations clearly when evidence is weak or missing.",
+            "- The appendix should be represented by the source log rather than narrative repetition.",
             "",
             "Section summaries:",
         ]

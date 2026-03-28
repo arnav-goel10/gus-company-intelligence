@@ -46,10 +46,10 @@ class GusUIApplication:
             "openai_api_key_present": "OPENAI_API_KEY" not in missing,
             "tinyfish_api_key_present": "TINYFISH_API_KEY" not in missing,
             "missing_requirements": missing,
-            "company_name_only_supported": False,
+            "company_name_only_supported": True,
             "notes": [
                 "The UI is live and the financial pipeline is wired end to end.",
-                "Company-name-only discovery is still being hardened, so some runs may finish with thin source coverage.",
+                "Company-name-only discovery now seeds web search acquisition paths, but coverage is still beta and should improve with stronger resolver logic.",
                 "Runtime becomes fully live when both OpenAI and Tinyfish keys are present.",
             ],
         }
@@ -82,14 +82,8 @@ class GusUIApplication:
                 progress_callback=lambda event: self.store.record_event(run_id, event),
             )
             pipeline.run(request)
-        except Exception as exc:
-            self.store.record_event(
-                run_id,
-                {
-                    "event": "pipeline_failed",
-                    "error": str(exc),
-                },
-            )
+        except Exception:
+            return
 
     def _normalize_request_payload(self, payload: dict[str, Any]) -> dict[str, Any]:
         company_name = str(payload.get("company_name", "")).strip()

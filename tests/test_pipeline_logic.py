@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import tempfile
 import unittest
+from pathlib import Path
 
 from gus_reporter.agents import DOMAIN_AGENTS, get_extraction_agents
 from gus_reporter.models import EvidenceItem, ReportRequest, TinyfishRunRecord, VerifiedClaim
 from gus_reporter.pipeline import (
+    _build_openai_user_content,
     build_raw_financial_source_refs,
     build_raw_legal_source_refs,
     build_raw_news_source_refs,
@@ -310,9 +313,44 @@ class TinyfishEvidenceNormalizationTests(unittest.TestCase):
         ]
         evidence = normalize_tinyfish_runs(runs)
         self.assertEqual(1, len(evidence))
+        self.assertEqual("tinyfish_financials_001", evidence[0].evidence_id)
         self.assertIn("Apple Investor Relations", evidence[0].content)
         self.assertIn("$124.3 billion", evidence[0].content)
         self.assertIn("Q1 2026 10-Q", evidence[0].content)
+
+    def test_build_openai_user_content_uses_local_pdf_artifact_when_available(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            run_dir = Path(temp_dir)
+            artifact_dir = run_dir / "raw_sources"
+            artifact_dir.mkdir(parents=True, exist_ok=True)
+            artifact_path = artifact_dir / "001-annual-report.pdf"
+            artifact_path.write_bytes(b"%PDF-1.4 local test")
+
+            evidence = [
+                EvidenceItem(
+                    evidence_id="direct_financials_001",
+                    label="Annual report",
+                    category="financials",
+                    url="https://example.com/report.pdf",
+                    retrieved_at="2026-03-28T00:00:00Z",
+                    content="Annual report artifact",
+                    metadata={
+                        "openai_input_file_url": "https://example.com/report.pdf",
+                        "openai_input_file_path": "raw_sources/001-annual-report.pdf",
+                        "openai_input_filename": "001-annual-report.pdf",
+                    },
+                )
+            ]
+
+            user_content = _build_openai_user_content(
+                preamble="Test preamble",
+                evidence=evidence,
+                run_dir=run_dir,
+            )
+
+        file_items = [item for item in user_content if item["type"] == "input_file"]
+        self.assertEqual(1, len(file_items))
+        self.assertTrue(file_items[0]["file_data"].startswith("data:application/pdf;base64,"))
 
 
 class LegalSubAgentTests(unittest.TestCase):

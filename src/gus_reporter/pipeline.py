@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import base64
 import json
 import urllib.parse
 from collections import defaultdict
+from pathlib import Path
 from typing import Any, Callable
 
 from gus_reporter.agents import (
@@ -1367,7 +1369,7 @@ def normalize_tinyfish_runs(runs: list[TinyfishRunRecord]) -> list[EvidenceItem]
     for index, run in enumerate(runs, start=1):
         evidence.append(
             EvidenceItem(
-                evidence_id=f"evidence_{index:03d}",
+                evidence_id=f"tinyfish_{run.category or 'general'}_{index:03d}",
                 label=run.label,
                 category=run.category,
                 url=run.url,
@@ -1391,14 +1393,19 @@ def _build_openai_user_content(
     *,
     preamble: str,
     evidence: list[EvidenceItem],
+    run_dir: Path | None = None,
 ) -> list[dict[str, Any]]:
     text_sections: list[str] = [preamble, "", "Evidence bundle:"]
     file_inputs: list[dict[str, Any]] = []
 
     for item in evidence:
-        file_url = str(item.metadata.get("openai_input_file_url", "")).strip()
-        if file_url and len(file_inputs) < MAX_FILE_INPUTS_PER_REQUEST:
-            file_inputs.append({"type": "input_file", "file_url": file_url})
+        file_input = _build_local_file_input(item, run_dir)
+        if file_input and len(file_inputs) < MAX_FILE_INPUTS_PER_REQUEST:
+            file_inputs.append(file_input)
+        elif len(file_inputs) < MAX_FILE_INPUTS_PER_REQUEST:
+            file_url = str(item.metadata.get("openai_input_file_url", "")).strip()
+            if file_url:
+                file_inputs.append({"type": "input_file", "file_url": file_url})
 
         raw_text = str(item.metadata.get("openai_input_text", "")).strip() or item.content
         if len(raw_text) > MAX_TEXT_EVIDENCE_CHARS:
@@ -1422,6 +1429,29 @@ def _build_openai_user_content(
     content: list[dict[str, Any]] = [{"type": "input_text", "text": "\n\n".join(text_sections).strip()}]
     content.extend(file_inputs)
     return content
+
+
+def _build_local_file_input(
+    item: EvidenceItem, run_dir: Path | None
+) -> dict[str, Any] | None:
+    if run_dir is None:
+        return None
+    artifact_relpath = str(item.metadata.get("openai_input_file_path", "")).strip()
+    if not artifact_relpath:
+        return None
+    candidate = (run_dir / artifact_relpath).resolve()
+    run_root = run_dir.resolve()
+    if run_root not in candidate.parents or not candidate.exists() or not candidate.is_file():
+        return None
+    if candidate.suffix.lower() != ".pdf":
+        return None
+    encoded = base64.b64encode(candidate.read_bytes()).decode("ascii")
+    return {
+        "type": "input_file",
+        "filename": str(item.metadata.get("openai_input_filename", "")).strip()
+        or candidate.name,
+        "file_data": f"data:application/pdf;base64,{encoded}",
+    }
 
 
 def compute_publish_decision(
@@ -1524,6 +1554,102 @@ def build_pdf_section_order(active_sections: list[ReportSection]) -> list[str]:
         ]
     )
     return ordered
+
+
+def _fallback_section_payload(
+    section: str, claims: list[VerifiedClaim], error: Exception | None = None
+) -> dict[str, Any]:
+    claim_statements = [claim.statement.strip() for claim in claims if claim.statement.strip()]
+    summary = (
+        " ".join(claim_statements[:2]).strip()
+        or "Insufficient verified evidence for this section."
+    )
+    if error is not None:
+        summary = (
+            f"{summary} Summary model fallback was used after an error: {str(error).strip()}."
+        ).strip()
+    payload: dict[str, Any] = {
+        "summary": summary,
+        "highlights": claim_statements[:5],
+        "recommendations": [
+            "Review the verified claims and underlying evidence directly before relying on this section."
+        ],
+    }
+    if section == "financials":
+        payload["key_metrics"] = []
+        payload["red_flags"] = claim_statements[:3]
+        payload["data_gaps"] = []
+    elif section == "legal":
+        payload["active_matters"] = []
+        payload["sanctions_flags"] = []
+        payload["regulatory_exposure"] = claim_statements[:3]
+        payload["red_flags"] = claim_statements[:3]
+        payload["data_gaps"] = []
+    elif section == "news":
+        payload["material_events"] = []
+        payload["coverage_sentiment"] = "mixed"
+        payload["coverage_density"] = "medium"
+        payload["negative_signals"] = claim_statements[:3]
+        payload["data_gaps"] = []
+    return payload
+
+
+def _fallback_aggregation_payload(
+    *,
+    request: ReportRequest,
+    sections: list[ReportSection],
+    risk_matrix: list[RiskMatrixEntry],
+    publish_decision: str,
+    publish_reason: str,
+    error: Exception | None = None,
+) -> dict[str, Any]:
+    supported_sections = [section for section in sections if section.status == "supported"]
+    findings = [
+        highlight
+        for section in supported_sections
+        for highlight in section.highlights[:2]
+    ][:8]
+    if not findings:
+        findings = [publish_reason]
+    methodology = (
+        "Tinyfish discovered and fetched raw sources, then OpenAI extracted, verified, "
+        "and synthesized only supported claims."
+    )
+    if error is not None:
+        methodology = (
+            f"{methodology} Executive aggregation fallback was used after an error: {str(error).strip()}."
+        )
+    entity_profile = next(
+        (
+            section.summary
+            for section in supported_sections
+            if section.name == "company_overview"
+        ),
+        f"{request.company_name} was reviewed across financial, legal, and news evidence.",
+    )
+    return {
+        "executive_summary": (
+            f"Publish decision: {publish_decision}. {publish_reason} "
+            f"{len(supported_sections)} section(s) have supported evidence."
+        ).strip(),
+        "scope_and_limitations": (
+            "This report is fully automated and only includes claims supported by the collected evidence bundle."
+        ),
+        "methodology": methodology,
+        "entity_profile": entity_profile,
+        "diligence_conclusion": (
+            f"{publish_decision.capitalize()} decision based on verified claims, "
+            f"{len(risk_matrix)} material risk item(s), and evidence-backed section summaries."
+        ),
+        "key_findings": findings,
+        "recommendations": [
+            recommendation
+            for section in sections
+            for recommendation in section.recommendations[:1]
+        ][:6]
+        or ["Collect stronger primary-source evidence before relying on this report."],
+        "pdf_section_order": build_pdf_section_order(sections),
+    }
 
 
 class ReportPipeline:
@@ -1798,14 +1924,14 @@ class ReportPipeline:
                 run_dir, "evidence.json", [item.to_dict() for item in evidence]
             )
 
-            extracted_claims = self._extract_claims(request, evidence)
+            extracted_claims = self._extract_claims(request, evidence, run_dir)
             self._write_artifact(
                 run_dir,
                 "extracted_claims.json",
                 [claim.to_dict() for claim in extracted_claims],
             )
 
-            verified_claims = self._verify_claims(extracted_claims, evidence)
+            verified_claims = self._verify_claims(extracted_claims, evidence, run_dir)
             self._write_artifact(
                 run_dir,
                 "verified_claims.json",
@@ -1833,7 +1959,7 @@ class ReportPipeline:
             raise
 
     def _extract_claims(
-        self, request: ReportRequest, evidence: list[EvidenceItem]
+        self, request: ReportRequest, evidence: list[EvidenceItem], run_dir: Path
     ) -> list[ExtractedClaim]:
         claims: list[ExtractedClaim] = []
         extraction_units = [
@@ -1869,27 +1995,52 @@ class ReportPipeline:
                     specialist,
                     select_evidence_for_agent(agent, evidence),
                 )
-                payload = self.openai.structured_response(
-                    schema_name=f"{agent.section}_{specialist.name}_claim_extraction",
-                    schema=extraction_schema([agent.section]),
-                    system_prompt=(
-                        f"{EXTRACTION_SYSTEM_PROMPT}\n\n"
-                        f"Coordinator section: {agent.section}\n"
-                        f"Coordinator: {agent.name}\n"
-                        f"Specialist: {specialist.name}\n"
-                        f"Specialist instruction: {specialist.extraction_instruction}"
-                    ),
-                    user_content=_build_openai_user_content(
-                        preamble=(
-                        f"Company: {request.company_name}\n"
-                        f"Jurisdiction: {request.primary_jurisdiction}\n"
-                        f"Target section: {agent.section}\n"
-                        f"Goal: {request.report_goal or 'Generate a source-backed diligence report.'}\n\n"
-                        "Use attached PDFs and raw source text to extract only directly supported claims."
+                try:
+                    payload = self.openai.structured_response(
+                        schema_name=f"{agent.section}_{specialist.name}_claim_extraction",
+                        schema=extraction_schema([agent.section]),
+                        system_prompt=(
+                            f"{EXTRACTION_SYSTEM_PROMPT}\n\n"
+                            f"Coordinator section: {agent.section}\n"
+                            f"Coordinator: {agent.name}\n"
+                            f"Specialist: {specialist.name}\n"
+                            f"Specialist instruction: {specialist.extraction_instruction}"
                         ),
-                        evidence=specialist_evidence,
-                    ),
-                )
+                        user_content=_build_openai_user_content(
+                            preamble=(
+                            f"Company: {request.company_name}\n"
+                            f"Jurisdiction: {request.primary_jurisdiction}\n"
+                            f"Target section: {agent.section}\n"
+                            f"Goal: {request.report_goal or 'Generate a source-backed diligence report.'}\n\n"
+                            "Use attached PDFs and raw source text to extract only directly supported claims."
+                            ),
+                            evidence=specialist_evidence,
+                            run_dir=run_dir,
+                        ),
+                    )
+                except Exception as exc:
+                    completed_specialists += 1
+                    self._emit_event(
+                        {
+                            "event": "specialist_update",
+                            "stage": "extraction",
+                            "status": "failed",
+                            "section": agent.section,
+                            "specialist": specialist.name,
+                            "message": f"{specialist.name} failed and was skipped: {str(exc).strip()}",
+                            "current": completed_specialists,
+                            "total": total_specialists,
+                            "claims_extracted": 0,
+                        }
+                    )
+                    self._emit_stage_event(
+                        stage="extraction",
+                        status="running",
+                        message="Extracting structured claims from evidence bundles.",
+                        current=completed_specialists,
+                        total=total_specialists,
+                    )
+                    continue
                 for offset, claim in enumerate(payload.get("claims", []), start=1):
                     claims.append(
                         ExtractedClaim(
@@ -1937,7 +2088,7 @@ class ReportPipeline:
         return claims
 
     def _verify_claims(
-        self, claims: list[ExtractedClaim], evidence: list[EvidenceItem]
+        self, claims: list[ExtractedClaim], evidence: list[EvidenceItem], run_dir: Path
     ) -> list[VerifiedClaim]:
         evidence_map = {item.evidence_id: item for item in evidence}
         verified: list[VerifiedClaim] = []
@@ -1951,24 +2102,25 @@ class ReportPipeline:
         )
         for claim in claims:
             referenced = [evidence_map[eid] for eid in claim.evidence_ids if eid in evidence_map]
-            payload = self.openai.structured_response(
-                schema_name="claim_verification",
-                schema=verification_schema(),
-                system_prompt=VERIFICATION_SYSTEM_PROMPT,
-                user_content=_build_openai_user_content(
-                    preamble=(
-                    f"Claim ID: {claim.claim_id}\n"
-                    f"Section: {claim.section}\n"
-                    f"Claim: {claim.statement}\n"
-                    f"Quoted support from extraction: {claim.source_quote}\n\n"
-                    "Verify this claim only against the attached raw sources and text evidence."
+            try:
+                payload = self.openai.structured_response(
+                    schema_name="claim_verification",
+                    schema=verification_schema(),
+                    system_prompt=VERIFICATION_SYSTEM_PROMPT,
+                    user_content=_build_openai_user_content(
+                        preamble=(
+                        f"Claim ID: {claim.claim_id}\n"
+                        f"Section: {claim.section}\n"
+                        f"Claim: {claim.statement}\n"
+                        f"Quoted support from extraction: {claim.source_quote}\n\n"
+                        "Verify this claim only against the attached raw sources and text evidence."
+                        ),
+                        evidence=referenced,
+                        run_dir=run_dir,
                     ),
-                    evidence=referenced,
-                ),
-                max_output_tokens=1200,
-            )
-            verified.append(
-                VerifiedClaim(
+                    max_output_tokens=1200,
+                )
+                verified_claim = VerifiedClaim(
                     claim_id=claim.claim_id,
                     section=claim.section,
                     statement=claim.statement,
@@ -1986,7 +2138,21 @@ class ReportPipeline:
                     importance=claim.importance,
                     as_of=claim.as_of,
                 )
-            )
+            except Exception as exc:
+                verified_claim = VerifiedClaim(
+                    claim_id=claim.claim_id,
+                    section=claim.section,
+                    statement=claim.statement,
+                    status="insufficient_evidence",
+                    confidence=0.0,
+                    rationale=f"Verification fallback used after error: {str(exc).strip()}",
+                    evidence_ids=claim.evidence_ids,
+                    blocking_issues=[str(exc).strip()],
+                    source_quote=claim.source_quote,
+                    importance=claim.importance,
+                    as_of=claim.as_of,
+                )
+            verified.append(verified_claim)
             self._emit_event(
                 {
                     "event": "verification_update",
@@ -1996,7 +2162,7 @@ class ReportPipeline:
                     "current": len(verified),
                     "total": total_claims,
                     "claim_id": claim.claim_id,
-                    "claim_status": verified[-1].status,
+                    "claim_status": verified_claim.status,
                 }
             )
         self._emit_stage_event(
@@ -2029,19 +2195,29 @@ class ReportPipeline:
         )
         sections = self._build_section_reports(request, grouped)
         risk_matrix = build_risk_matrix(verified_claims)
-        aggregation_payload = self.openai.structured_response(
-            schema_name="executive_company_report",
-            schema=executive_report_schema(),
-            system_prompt=EXECUTIVE_AGGREGATION_SYSTEM_PROMPT,
-            user_prompt=self._executive_aggregation_prompt(
+        try:
+            aggregation_payload = self.openai.structured_response(
+                schema_name="executive_company_report",
+                schema=executive_report_schema(),
+                system_prompt=EXECUTIVE_AGGREGATION_SYSTEM_PROMPT,
+                user_prompt=self._executive_aggregation_prompt(
+                    request=request,
+                    sections=sections,
+                    risk_matrix=risk_matrix,
+                    publish_decision=publish_decision,
+                    publish_reason=publish_reason,
+                ),
+                max_output_tokens=2200,
+            )
+        except Exception as exc:
+            aggregation_payload = _fallback_aggregation_payload(
                 request=request,
                 sections=sections,
                 risk_matrix=risk_matrix,
                 publish_decision=publish_decision,
                 publish_reason=publish_reason,
-            ),
-            max_output_tokens=2200,
-        )
+                error=exc,
+            )
 
         source_log = [
             {
@@ -2057,6 +2233,7 @@ class ReportPipeline:
                 "direct_fetch_artifact_path": item.metadata.get(
                     "direct_fetch_artifact_path", ""
                 ),
+                "openai_input_file_path": item.metadata.get("openai_input_file_path", ""),
                 "openai_input_file_url": item.metadata.get("openai_input_file_url", ""),
                 "tinyfish_status": item.metadata.get("tinyfish_status", ""),
                 "tinyfish_streaming_url": item.metadata.get(
@@ -2137,20 +2314,27 @@ class ReportPipeline:
             claims = grouped_claims.get(agent.section, [])
             if claims:
                 schema = self._section_schema_for(agent.section)
-                payload = self.openai.structured_response(
-                    schema_name=f"{agent.section}_section_summary",
-                    schema=schema,
-                    system_prompt=(
-                        f"{REPORT_SYNTHESIS_SYSTEM_PROMPT}\n\n"
-                        f"Agent: {agent.name}\n"
-                        f"Section: {agent.section}\n"
-                        f"Instruction: {agent.synthesis_instruction}"
-                    ),
-                    user_prompt=self._section_synthesis_prompt(
-                        request.company_name, agent, claims
-                    ),
-                    max_output_tokens=1400,
-                )
+                try:
+                    payload = self.openai.structured_response(
+                        schema_name=f"{agent.section}_section_summary",
+                        schema=schema,
+                        system_prompt=(
+                            f"{REPORT_SYNTHESIS_SYSTEM_PROMPT}\n\n"
+                            f"Agent: {agent.name}\n"
+                            f"Section: {agent.section}\n"
+                            f"Instruction: {agent.synthesis_instruction}"
+                        ),
+                        user_prompt=self._section_synthesis_prompt(
+                            request.company_name, agent, claims
+                        ),
+                        max_output_tokens=1400,
+                    )
+                except Exception as exc:
+                    payload = _fallback_section_payload(
+                        agent.section,
+                        claims,
+                        error=exc,
+                    )
                 summary = str(payload.get("summary", "")).strip()
                 highlights = [
                     str(item).strip()

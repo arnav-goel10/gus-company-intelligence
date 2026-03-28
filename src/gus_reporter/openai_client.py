@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import time
 import urllib.error
 import urllib.request
 from typing import Any
@@ -70,9 +71,12 @@ class OpenAIClient:
         if not response_id:
             raise RuntimeError("OpenAI background response did not return an id.")
         status = str(response.get("status", ""))
+        poll_delay_seconds = 1.0
         while status in {"queued", "in_progress"}:
+            time.sleep(poll_delay_seconds)
             response = self._request("GET", f"/responses/{response_id}")
             status = str(response.get("status", ""))
+            poll_delay_seconds = min(poll_delay_seconds * 1.5, 5.0)
         if status != "completed":
             raise RuntimeError(
                 f"OpenAI response {response_id} finished with status '{status}': "

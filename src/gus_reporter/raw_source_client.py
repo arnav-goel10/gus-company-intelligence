@@ -270,9 +270,11 @@ class RawSourceClient:
         }
         if fetch_mode == "pdf_file_url":
             metadata["openai_input_file_url"] = final_url
+            metadata["openai_input_file_path"] = artifact_relpath
+            metadata["openai_input_filename"] = artifact_name
 
         evidence = EvidenceItem(
-            evidence_id=f"evidence_{index:03d}",
+            evidence_id=f"direct_{_slugify(category)}_{index:03d}",
             label=label,
             category=category,
             url=final_url,

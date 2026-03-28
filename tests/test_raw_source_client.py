@@ -63,6 +63,7 @@ class RawSourceClientTests(unittest.TestCase):
 
         self.assertEqual(1, len(evidence))
         self.assertEqual(1, len(manifest))
+        self.assertEqual("direct_financials_001", evidence[0].evidence_id)
         self.assertEqual("html_text", evidence[0].metadata["direct_fetch_mode"])
         self.assertIn("$124.3 billion", evidence[0].metadata["openai_input_text"])
 
@@ -93,10 +94,15 @@ class RawSourceClientTests(unittest.TestCase):
 
         self.assertEqual(1, len(evidence))
         self.assertEqual(1, len(manifest))
+        self.assertEqual("direct_financials_001", evidence[0].evidence_id)
         self.assertEqual("pdf_file_url", evidence[0].metadata["direct_fetch_mode"])
         self.assertEqual(
             "https://example.com/report.pdf",
             evidence[0].metadata["openai_input_file_url"],
+        )
+        self.assertEqual(
+            manifest[0]["artifact_path"],
+            evidence[0].metadata["openai_input_file_path"],
         )
 
 

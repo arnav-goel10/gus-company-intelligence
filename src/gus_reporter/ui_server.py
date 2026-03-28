@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, unquote, urlparse
 
-from gus_reporter.config import AppConfig
+from gus_reporter.config import AppConfig, resolve_report_output_dir
 from gus_reporter.models import ReportRequest
 from gus_reporter.pipeline import ReportPipeline
 from gus_reporter.ui_state import RunStateStore
@@ -31,7 +31,7 @@ def _coerce_bool(value: Any) -> bool:
 
 class GusUIApplication:
     def __init__(self) -> None:
-        self.store = RunStateStore()
+        self.store = RunStateStore(resolve_report_output_dir())
 
     def _missing_runtime_requirements(self) -> list[str]:
         missing: list[str] = []
@@ -144,9 +144,9 @@ class GusUIApplication:
 
     def read_artifact(self, run_id: str, relative_path: str) -> dict[str, Any]:
         run = self.store.get_run(run_id)
-        if run is None:
+        run_dir_value = self.store.resolve_run_dir(run_id)
+        if run is None and not run_dir_value:
             raise FileNotFoundError("Unknown run id")
-        run_dir_value = str(run.get("run_dir", "")).strip()
         if not run_dir_value:
             raise FileNotFoundError("Run directory is not available yet")
         run_dir = Path(run_dir_value)

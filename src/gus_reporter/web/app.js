@@ -259,6 +259,10 @@ function previewableSourceJobs(sourceJobs) {
   });
 }
 
+function isTerminalSourceStatus(status) {
+  return ["completed", "failed", "cancelled"].includes(String(status || "").toLowerCase());
+}
+
 function categoryBadge(category) {
   const cat = (category || "other").toLowerCase();
   const label = domainLabels[cat] || cat;
@@ -403,15 +407,29 @@ function buildPreviewDeck(runId, sourceJobs) {
   const selectedKey = state.previewSelections[runId];
   const selectedJob = deduped.find((job) => sourceJobKey(job) === selectedKey) || deduped[0];
   state.previewSelections[runId] = sourceJobKey(selectedJob);
+  const selectedStatus = String(selectedJob.status || "").toLowerCase();
+  const previewFinished = isTerminalSourceStatus(selectedStatus);
+  const previewBody = selectedJob.message
+    ? selectedJob.message
+    : previewFinished
+      ? "This Tinyfish run has ended. The last visible browser state is preserved here."
+      : "Live browser capture is active for this source agent.";
+  const previewTitle = previewFinished ? "Tinyfish Preview Ended" : "Tinyfish Live Preview";
+  const previewLinkLabel = previewFinished ? "Open final preview" : "Open live preview";
 
   return `
     <section class="preview-deck">
       <div class="preview-head">
         <div>
-          <p class="message-label">Tinyfish Live Preview</p>
-          <p class="quiet">Watch the acquisition browser while the swarm works.</p>
+          <p class="message-label">${escapeHtml(previewTitle)}</p>
+          <div class="preview-selected-meta">
+            ${statusPill(selectedJob.status)}
+            ${categoryBadge(selectedJob.category)}
+            ${selectedJob.source_type ? `<span class="preview-source-type">${escapeHtml(selectedJob.source_type)}</span>` : ""}
+          </div>
+          <p class="quiet">${escapeHtml(previewBody)}</p>
         </div>
-        <a class="source-link" href="${escapeHtml(selectedJob.streaming_url)}" target="_blank" rel="noreferrer">Open preview</a>
+        <a class="source-link" href="${escapeHtml(selectedJob.streaming_url)}" target="_blank" rel="noreferrer">${escapeHtml(previewLinkLabel)}</a>
       </div>
       <div class="preview-tabs">
         ${deduped.map((job) => `
@@ -426,7 +444,7 @@ function buildPreviewDeck(runId, sourceJobs) {
           </button>
         `).join("")}
       </div>
-      <div class="preview-frame-shell">
+      <div class="preview-frame-shell ${previewFinished ? "ended" : "live"}">
         <iframe
           class="preview-frame"
           src="${escapeHtml(selectedJob.streaming_url)}"
@@ -434,6 +452,10 @@ function buildPreviewDeck(runId, sourceJobs) {
           loading="lazy"
           referrerpolicy="no-referrer"
         ></iframe>
+      </div>
+      <div class="preview-footnote">
+        <span>${escapeHtml(selectedJob.label)}</span>
+        <span>${escapeHtml(previewFinished ? "Preview session finished." : "Preview session active.")}</span>
       </div>
       <p class="quiet">If the preview host blocks embedding, use the open link above.</p>
     </section>

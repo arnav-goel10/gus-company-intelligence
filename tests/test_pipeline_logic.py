@@ -2,8 +2,13 @@ from __future__ import annotations
 
 import unittest
 
-from gus_reporter.models import ReportRequest, VerifiedClaim
-from gus_reporter.pipeline import compute_publish_decision, seed_source_jobs
+from gus_reporter.agents import DOMAIN_AGENTS, get_extraction_agents
+from gus_reporter.models import EvidenceItem, ReportRequest, VerifiedClaim
+from gus_reporter.pipeline import (
+    compute_publish_decision,
+    seed_source_jobs,
+    select_evidence_for_extraction_agent,
+)
 
 
 class SeedSourceJobsTests(unittest.TestCase):
@@ -60,6 +65,42 @@ class SeedSourceJobsTests(unittest.TestCase):
         self.assertTrue(all(job.use_vault for job in jobs))
         self.assertEqual(["item_abc123"], jobs[0].credential_item_ids)
         self.assertTrue(all(job.enable_agent_memory for job in jobs))
+
+
+class FinancialSubAgentTests(unittest.TestCase):
+    def test_financial_domain_fans_out_into_specialists(self) -> None:
+        agents = get_extraction_agents(DOMAIN_AGENTS["financials"])
+        self.assertEqual(5, len(agents))
+        self.assertEqual("financial_document_locator", agents[0].name)
+        self.assertEqual("financial_statement_agent", agents[1].name)
+        self.assertEqual("capital_structure_agent", agents[2].name)
+        self.assertEqual("funding_guidance_agent", agents[3].name)
+        self.assertEqual("financial_risk_agent", agents[4].name)
+
+    def test_financial_specialist_prefers_matching_source_types(self) -> None:
+        specialist = get_extraction_agents(DOMAIN_AGENTS["financials"])[1]
+        evidence = [
+            EvidenceItem(
+                evidence_id="e1",
+                label="IR page",
+                category="financials",
+                url="https://example.com/investors",
+                retrieved_at="2026-03-28T00:00:00Z",
+                content="{}",
+                metadata={"tinyfish_source_type": "financial_investor_relations"},
+            ),
+            EvidenceItem(
+                evidence_id="e2",
+                label="Newsroom",
+                category="news",
+                url="https://example.com/news",
+                retrieved_at="2026-03-28T00:00:00Z",
+                content="{}",
+                metadata={"tinyfish_source_type": "newsroom_page"},
+            ),
+        ]
+        selected = select_evidence_for_extraction_agent(specialist, evidence)
+        self.assertEqual(["e1"], [item.evidence_id for item in selected])
 
 
 class PublishDecisionTests(unittest.TestCase):

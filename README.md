@@ -8,6 +8,9 @@ The current scaffold is intentionally narrow:
 
 - Tinyfish executes URL batches, captures rich run metadata, and retries blocked
   financial pages with `stealth` after a `lite` first pass.
+- The financial coordinator now fans out into specialist sub-agents for document
+  discovery, statement metrics, capital structure, guidance/funding, and
+  finance-specific red flags.
 - Domain agents focus on individual sections such as financials, legal, news,
   leadership, workforce, and risk.
 - OpenAI `gpt-5.4` extracts typed claims for each domain agent.

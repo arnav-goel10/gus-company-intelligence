@@ -89,7 +89,6 @@ FINANCIAL_SOURCE_CAPTURE_SHAPE = """{
       "final_url": "https://investor.apple.com/",
       "source_kind": "investor_relations_hub",
       "reporting_period": "",
-      "captured_text": "Verbatim or near-verbatim financial source text captured from the page or document. Preserve numbers exactly as shown.",
       "linked_documents": [
         {
           "title": "Annual Report 2025",
@@ -97,7 +96,7 @@ FINANCIAL_SOURCE_CAPTURE_SHAPE = """{
           "document_type": "annual_report"
         }
       ],
-      "notes": "Official investor relations hub with links to results, SEC filings, and annual reports."
+      "notes": "Official investor relations hub with links to results, SEC filings, and annual reports. Keep notes short and source-oriented."
     }
   ],
   "coverage_gaps": [
@@ -139,18 +138,18 @@ def build_financial_tinyfish_goal(
             "capture raw source text plus any linked reports, results releases, or filing pages."
         ),
         "official_filing_index": (
-            "Capture the filing index page and the newest clearly relevant annual and "
-            "quarterly or interim filing materials you can reach from it."
+        "Capture the filing index page and the newest clearly relevant annual and "
+        "quarterly or interim filing materials you can reach from it."
         ),
         "financial_document": (
-            "Capture raw text, reporting period labels, and any linked finance documents from "
-            "this financial source. Do not summarize the business performance."
+            "Confirm the direct document URL, reporting period labels if explicit, and any "
+            "related linked source material. Do not extract financial figures or summarize performance."
         ),
         "search_discovery": (
             "Starting from search results, locate official financial sources such as the "
             "company investor-relations hub, annual report, quarterly or interim results, "
             "earnings release, investor presentation, or regulator filing pages. Open the "
-            "best primary-source paths and capture raw source material."
+            "best primary-source paths and return the direct source URLs and linked documents."
         ),
     }
     source_hint = source_focus.get(
@@ -168,13 +167,11 @@ def build_financial_tinyfish_goal(
         "Instructions:\n"
         f"1. {source_hint}\n"
         "2. Prefer official company or regulator sources over third-party summaries.\n"
-        "3. Capture source material, not your own analysis. Preserve reported figures, dates, "
-        "period labels, and wording exactly when possible.\n"
+        "3. Your job is source discovery and direct-link collection, not financial analysis.\n"
         "4. For each relevant page or document you open, return the page title, final URL, "
-        "source kind, reporting period if explicitly stated, captured raw text, and any "
-        "linked financial documents.\n"
-        "5. Do not calculate ratios, infer missing numbers, or summarize performance beyond "
-        "brief source notes that identify what the page is.\n"
+        "source kind, reporting period if explicitly stated, and any linked financial documents.\n"
+        "5. Do not calculate ratios, infer missing numbers, or extract large blocks of financial text. "
+        "Keep notes short and focused on what the source is.\n"
         "6. If a page is blocked, irrelevant, or requires login, return a structured error or "
         "coverage gap instead of guessing.\n\n"
         "Termination conditions:\n"

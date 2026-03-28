@@ -5,6 +5,7 @@ import unittest
 from gus_reporter.agents import DOMAIN_AGENTS, get_extraction_agents
 from gus_reporter.models import EvidenceItem, ReportRequest, TinyfishRunRecord, VerifiedClaim
 from gus_reporter.pipeline import (
+    build_raw_financial_source_refs,
     build_spawned_financial_source_jobs,
     compute_publish_decision,
     normalize_tinyfish_runs,
@@ -54,7 +55,6 @@ class SeedSourceJobsTests(unittest.TestCase):
         financial_jobs = [job for job in jobs if job.category == "financials"]
         financial_urls = [job.url for job in financial_jobs]
         self.assertIn("https://example.com/investors", financial_urls)
-        self.assertIn("https://example.com/annual-report", financial_urls)
         self.assertIn(
             "https://www.sec.gov/edgar/browse/?CIK=EXMPL&owner=exclude",
             financial_urls,
@@ -123,9 +123,54 @@ class SeedSourceJobsTests(unittest.TestCase):
         )
         spawned_urls = [job.url for job in spawned]
         self.assertIn("https://investor.apple.com/", spawned_urls)
-        self.assertIn("https://investor.apple.com/q1-2026-10q.pdf", spawned_urls)
+        self.assertNotIn("https://investor.apple.com/q1-2026-10q.pdf", spawned_urls)
         self.assertEqual("financial_investor_relations", spawned[0].source_type)
         self.assertTrue(all(job.category == "financials" for job in spawned))
+
+    def test_raw_source_refs_include_direct_documents_without_tinyfish_fanout(self) -> None:
+        request = ReportRequest(
+            company_name="Apple",
+            focus_areas=["financials"],
+            financial_source_urls=["https://example.com/direct-annual-report.pdf"],
+        )
+        runs = [
+            TinyfishRunRecord(
+                run_id="run_1",
+                status="COMPLETED",
+                goal="Discover sources",
+                label="Financial source discovery",
+                category="financials",
+                url="https://www.bing.com/search?q=apple+investor+relations",
+                source_type="financial_search_discovery",
+                result={
+                    "capture_mode": "search_discovery",
+                    "sources": [
+                        {
+                            "page_title": "Apple Investor Relations",
+                            "final_url": "https://investor.apple.com/",
+                            "source_kind": "investor_relations_hub",
+                            "linked_documents": [
+                                {
+                                    "title": "Q1 2026 10-Q",
+                                    "url": "https://investor.apple.com/q1-2026-10q.pdf",
+                                    "document_type": "quarterly_filing",
+                                }
+                            ],
+                        }
+                    ],
+                },
+            )
+        ]
+        refs = build_raw_financial_source_refs(request, runs)
+        ref_urls = [item["url"] for item in refs]
+        self.assertIn("https://example.com/direct-annual-report.pdf", ref_urls)
+        self.assertIn("https://investor.apple.com/", ref_urls)
+        self.assertIn("https://investor.apple.com/q1-2026-10q.pdf", ref_urls)
+        linked_ref = next(
+            item for item in refs if item["url"] == "https://investor.apple.com/q1-2026-10q.pdf"
+        )
+        self.assertEqual("tinyfish_linked_document", linked_ref["discovery_origin"])
+        self.assertEqual("financial_document", linked_ref["source_type"])
 
 
 class FinancialSubAgentTests(unittest.TestCase):

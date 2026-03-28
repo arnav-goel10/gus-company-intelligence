@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from gus_reporter.config import load_runtime_env
+from gus_reporter.config import AppConfig, load_runtime_env
 
 
 class RuntimeEnvTests(unittest.TestCase):
@@ -35,6 +35,21 @@ class RuntimeEnvTests(unittest.TestCase):
             with patch.dict(os.environ, {"OPENAI_API_KEY": "shell-openai"}, clear=True):
                 load_runtime_env(dotenv_path)
                 self.assertEqual(os.environ["OPENAI_API_KEY"], "shell-openai")
+
+    def test_app_config_defaults_to_pro_friendly_tinyfish_limits(self) -> None:
+        with patch.dict(
+            os.environ,
+            {
+                "OPENAI_API_KEY": "test-openai",
+                "TINYFISH_API_KEY": "test-tinyfish",
+            },
+            clear=True,
+        ):
+            with patch("gus_reporter.config.load_runtime_env"):
+                config = AppConfig.from_env()
+        self.assertEqual(50, config.tinyfish_batch_size)
+        self.assertEqual(50, config.tinyfish_max_total_jobs)
+        self.assertEqual(6, config.tinyfish_max_acquisition_waves)
 
 
 if __name__ == "__main__":

@@ -22,6 +22,17 @@ const stageLabels = {
   reporting: "Report assembly",
 };
 
+const domainLabels = {
+  financials: "Financial",
+  legal: "Legal",
+  news: "News",
+  company_overview: "Overview",
+  industry: "Industry",
+  leadership: "Leadership",
+  employees: "Employees",
+  risk_signals: "Risk signals",
+};
+
 async function api(path, options = {}) {
   const response = await fetch(path, {
     headers: { "Content-Type": "application/json" },
@@ -64,6 +75,12 @@ function signatureFor(value) {
   return JSON.stringify(value ?? null);
 }
 
+/* Note: All innerHTML assignments in this file use only values that have been
+   processed through escapeHtml() which replaces &, <, >, ", and ' with their
+   HTML entity equivalents. No raw user input is ever inserted into the DOM
+   without escaping. Status values, labels, URLs, and all other dynamic content
+   pass through escapeHtml before being placed into markup strings. */
+
 function renderHealth(health) {
   const target = document.getElementById("health-pills");
   const signature = signatureFor({
@@ -80,8 +97,8 @@ function renderHealth(health) {
   const ready = health.openai_api_key_present && health.tinyfish_api_key_present;
   const pills = [
     `<span class="health-pill ${ready ? "ready" : ""}">${ready ? "Runtime ready" : "Keys missing"}</span>`,
-    `<span class="health-pill muted">Financial workflow</span>`,
-    `<span class="health-pill muted">${health.company_name_only_supported ? "Discovery beta on" : "Discovery unavailable"}</span>`,
+    `<span class="health-pill muted">Financial · Legal · News</span>`,
+    `<span class="health-pill muted">${health.company_name_only_supported ? "Discovery on" : "Discovery off"}</span>`,
   ];
   target.innerHTML = pills.join("");
   syncComposerAvailability(health);
@@ -96,7 +113,7 @@ function syncComposerAvailability(health) {
   button.disabled = !ready;
   button.textContent = ready ? "Run" : "Setup required";
   note.textContent = ready
-    ? "Financial mode only for now."
+    ? "Financial · Legal · News"
     : `Add ${missing.join(" and ")} to enable live runs.`;
 }
 
@@ -116,7 +133,7 @@ function renderRuns() {
   state.renderSignatures.runs = signature;
 
   if (!state.runs.length) {
-    target.innerHTML = `<p class="empty-state">Runs you start here will appear as reusable threads.</p>`;
+    target.innerHTML = `<p class="empty-state">Runs you start will appear here.</p>`;
     return;
   }
 
@@ -139,14 +156,17 @@ function renderRuns() {
 
 function renderThreadHeader(run) {
   const title = document.getElementById("thread-title");
+  const subtitle = document.getElementById("thread-subtitle");
   const meta = document.getElementById("thread-meta");
   if (!run) {
-    title.textContent = "Company intelligence in motion";
-    meta.textContent = "Start a run to open the live research thread.";
+    title.textContent = "Intelligence thread";
+    subtitle.textContent = "Launch a run to begin multi-domain source acquisition.";
+    meta.innerHTML = "";
     return;
   }
 
-  title.textContent = `${run.company_name} financial thread`;
+  title.textContent = `${run.company_name}`;
+  subtitle.textContent = "Due diligence thread — financial, legal, and news acquisition running in parallel.";
   meta.innerHTML = `
     ${statusPill(run.status)}
     <span>${escapeHtml(stageLabels[run.current_stage] || run.current_stage || "queued")}</span>
@@ -176,6 +196,16 @@ function summarizeSourceJobs(sourceJobs) {
   return counts;
 }
 
+function summarizeSourceJobsByCategory(sourceJobs) {
+  const categories = {};
+  sourceJobs.forEach((job) => {
+    const cat = job.category || "other";
+    if (!categories[cat]) categories[cat] = [];
+    categories[cat].push(job);
+  });
+  return categories;
+}
+
 function summarizeSpecialists(events) {
   const specialists = new Map();
   events
@@ -185,6 +215,16 @@ function summarizeSpecialists(events) {
       specialists.set(specialist, event);
     });
   return Array.from(specialists.values());
+}
+
+function groupSpecialistsBySection(specialists) {
+  const sections = {};
+  specialists.forEach((event) => {
+    const section = event.section || "other";
+    if (!sections[section]) sections[section] = [];
+    sections[section].push(event);
+  });
+  return sections;
 }
 
 function summarizeVerification(events) {
@@ -219,6 +259,12 @@ function previewableSourceJobs(sourceJobs) {
   });
 }
 
+function categoryBadge(category) {
+  const cat = (category || "other").toLowerCase();
+  const label = domainLabels[cat] || cat;
+  return `<span class="category-badge ${escapeHtml(cat)}">${escapeHtml(label)}</span>`;
+}
+
 function buildSourceCards(sourceJobs) {
   return sourceJobs.map((job) => `
     <div class="detail-card">
@@ -226,13 +272,26 @@ function buildSourceCards(sourceJobs) {
         <strong>${escapeHtml(job.label)}</strong>
         ${statusPill(job.status)}
       </div>
-      <p class="quiet">${escapeHtml(job.source_type || job.category)}</p>
-      ${job.message ? `<p>${escapeHtml(job.message)}</p>` : ""}
+      <p class="quiet">${categoryBadge(job.category)} ${escapeHtml(job.source_type || "")}</p>
+      ${job.message ? `<p class="quiet">${escapeHtml(job.message)}</p>` : ""}
       <p class="url-text">${escapeHtml(job.url)}</p>
-      ${job.streaming_url ? `<p class="quiet">Live preview is available in the inline Tinyfish panel.</p>` : ""}
-      ${job.streaming_url ? `<a class="source-link" href="${escapeHtml(job.streaming_url)}" target="_blank" rel="noreferrer">Open Tinyfish live preview</a>` : ""}
+      ${job.streaming_url ? `<a class="source-link" href="${escapeHtml(job.streaming_url)}" target="_blank" rel="noreferrer">Open Tinyfish preview</a>` : ""}
     </div>
   `).join("");
+}
+
+function buildGroupedSourceCards(sourceJobs) {
+  const byCat = summarizeSourceJobsByCategory(sourceJobs);
+  const order = ["financials", "legal", "news"];
+  const allCats = [...order.filter((c) => byCat[c]), ...Object.keys(byCat).filter((c) => !order.includes(c))];
+  return allCats.map((cat) => {
+    const jobs = byCat[cat];
+    const dotClass = cat === "financials" ? "financial" : cat === "legal" ? "legal" : cat === "news" ? "news" : "other";
+    return `
+      <div class="domain-group-header"><span class="domain-dot ${dotClass}"></span>${escapeHtml(domainLabels[cat] || cat)} sources (${escapeHtml(String(jobs.length))})</div>
+      <div class="detail-grid">${buildSourceCards(jobs)}</div>
+    `;
+  }).join("");
 }
 
 function buildSpecialistCards(specialists) {
@@ -242,10 +301,24 @@ function buildSpecialistCards(specialists) {
         <strong>${escapeHtml(event.specialist)}</strong>
         ${statusPill(event.status)}
       </div>
-      <p>${escapeHtml(event.message || "")}</p>
+      <p class="quiet">${escapeHtml(event.message || "")}</p>
       ${typeof event.claims_extracted === "number" ? `<p class="quiet">${escapeHtml(String(event.claims_extracted))} ${pluralize(event.claims_extracted, "claim")} extracted</p>` : ""}
     </div>
   `).join("");
+}
+
+function buildGroupedSpecialistCards(specialists) {
+  const bySection = groupSpecialistsBySection(specialists);
+  const order = ["financials", "legal", "news"];
+  const allSections = [...order.filter((s) => bySection[s]), ...Object.keys(bySection).filter((s) => !order.includes(s))];
+  return allSections.map((section) => {
+    const items = bySection[section];
+    const dotClass = section === "financials" ? "financial" : section === "legal" ? "legal" : section === "news" ? "news" : "other";
+    return `
+      <div class="domain-group-header"><span class="domain-dot ${dotClass}"></span>${escapeHtml(domainLabels[section] || section)} specialists (${escapeHtml(String(items.length))})</div>
+      <div class="detail-grid">${buildSpecialistCards(items)}</div>
+    `;
+  }).join("");
 }
 
 function buildTraceList(events) {
@@ -294,7 +367,7 @@ function buildTraceDisclosure(events) {
     <details class="trace-disclosure">
       <summary>
         <div class="trace-summary-copy">
-          <strong>Latest thread activity</strong>
+          <strong>Thread activity</strong>
           <span>${escapeHtml(String(visibleEvents.length))} ${pluralize(visibleEvents.length, "update")}</span>
         </div>
         <div class="trace-summary-meta">
@@ -336,9 +409,9 @@ function buildPreviewDeck(runId, sourceJobs) {
       <div class="preview-head">
         <div>
           <p class="message-label">Tinyfish Live Preview</p>
-          <p class="quiet">Watch the acquisition browser in-place while the swarm works.</p>
+          <p class="quiet">Watch the acquisition browser while the swarm works.</p>
         </div>
-        <a class="source-link" href="${escapeHtml(selectedJob.streaming_url)}" target="_blank" rel="noreferrer">Open selected preview</a>
+        <a class="source-link" href="${escapeHtml(selectedJob.streaming_url)}" target="_blank" rel="noreferrer">Open preview</a>
       </div>
       <div class="preview-tabs">
         ${deduped.map((job) => `
@@ -466,7 +539,7 @@ function buildReportMarkup(report) {
   const sections = (report.sections || []).map((section) => `
     <section class="report-block">
       <div class="detail-row">
-        <strong>${escapeHtml(section.name)}</strong>
+        <strong>${categoryBadge(section.name)} ${escapeHtml(domainLabels[section.name] || section.name)}</strong>
         ${statusPill(section.status)}
       </div>
       <p>${escapeHtml(section.summary)}</p>
@@ -555,10 +628,11 @@ function renderThread(run) {
         <div class="avatar">G</div>
         <div class="bubble">
           <p class="message-label">Orchestrator</p>
-          <h3>Enter a company name to start the financial swarm.</h3>
+          <h3>Enter a company to start the diligence swarm.</h3>
           <p>
-            The thread will show source discovery, Tinyfish acquisition,
-            specialist extraction, verification, and report assembly as they happen.
+            GUS runs financial, legal, and news source discovery in parallel,
+            then extracts and cross-verifies claims before assembling an
+            analyst-grade report.
           </p>
         </div>
       </article>
@@ -577,7 +651,7 @@ function renderThread(run) {
       role: "user",
       label: "You",
       title: run.company_name,
-      body: "Build a source-backed financial diligence report from primary financial evidence.",
+      body: "Build a multi-domain due diligence report from primary financial, legal, and news evidence.",
       meta: formatTime(run.created_at),
     })
   );
@@ -586,25 +660,27 @@ function renderThread(run) {
     messageMarkup({
       role: "assistant",
       label: "Orchestrator",
-      title: `${run.company_name} is ${run.status}.`,
+      title: `${run.company_name} — ${run.status}`,
       body: run.error
-        ? "The run hit an execution issue. The current thread still shows what was planned and what completed before the failure."
-        : "The orchestration layer is coordinating discovery, acquisition, extraction, verification, and final compilation.",
+        ? "The run hit an execution issue. The thread shows what was planned and completed before failure."
+        : "Coordinating parallel discovery across financial, legal, and news domains.",
       meta: run.openai_model || "",
       detail: `<div class="stage-strip">${stageChips(run)}</div>`,
     })
   );
 
   if (sourceJobs.length) {
+    const catSummary = summarizeSourceJobsByCategory(sourceJobs);
+    const catCounts = Object.entries(catSummary).map(([cat, jobs]) => `${jobs.length} ${domainLabels[cat] || cat}`).join(", ");
     detailMessages.push(
       messageMarkup({
         role: "agent",
         label: "Discovery swarm",
-        title: `${sourceJobs.length} source ${pluralize(sourceJobs.length, "agent")} planned for acquisition.`,
-        body: `${sourceCounts.completed} completed, ${sourceCounts.running} running, ${sourceCounts.failed} failed, ${sourceCounts.retrying} retrying.`,
+        title: `${sourceJobs.length} source ${pluralize(sourceJobs.length, "agent")} across domains`,
+        body: `${catCounts}. ${sourceCounts.completed} completed, ${sourceCounts.running} running, ${sourceCounts.failed} failed.`,
         detail: `
           ${buildPreviewDeck(run.run_id, sourceJobs)}
-          <div class="detail-grid">${buildSourceCards(sourceJobs)}</div>
+          ${buildGroupedSourceCards(sourceJobs)}
         `,
       })
     );
@@ -615,10 +691,10 @@ function renderThread(run) {
     detailMessages.push(
       messageMarkup({
         role: "agent",
-        label: "Financial specialists",
-        title: `${completedSpecialists}/${specialists.length} specialist ${pluralize(specialists.length, "agent")} reported.`,
-        body: "These specialists divide the work across document discovery, statement metrics, capital structure, guidance, and financial risk signals.",
-        detail: `<div class="detail-grid">${buildSpecialistCards(specialists)}</div>`,
+        label: "Extraction specialists",
+        title: `${completedSpecialists}/${specialists.length} specialist ${pluralize(specialists.length, "agent")} reported`,
+        body: "Domain-specific specialists extract structured claims from acquired evidence.",
+        detail: buildGroupedSpecialistCards(specialists),
       })
     );
   }
@@ -629,10 +705,10 @@ function renderThread(run) {
         role: "agent",
         label: "Verifier",
         title: verification.latest
-          ? `${verification.latest.current}/${verification.latest.total} extracted claims checked.`
-          : "Verification is queued behind extraction.",
+          ? `${verification.latest.current}/${verification.latest.total} claims checked`
+          : "Verification queued behind extraction",
         body: verification.total
-          ? `${verification.counts.supported || 0} supported, ${verification.counts.insufficient_evidence || 0} insufficient evidence, ${verification.counts.unsupported || 0} unsupported, ${verification.counts.contradicted || 0} contradicted so far.`
+          ? `${verification.counts.supported || 0} supported, ${verification.counts.insufficient_evidence || 0} insufficient, ${verification.counts.unsupported || 0} unsupported, ${verification.counts.contradicted || 0} contradicted.`
           : run.stages.verification.message || "Waiting for extracted claims.",
       })
     );
@@ -643,8 +719,8 @@ function renderThread(run) {
       messageMarkup({
         role: "assistant",
         label: "Report compiler",
-        title: "Verified financial output",
-        body: "Only verified claims are being used to assemble this report.",
+        title: "Verified diligence output",
+        body: "Only cross-verified claims are used in this report.",
         detail: buildReportMarkup(run.final_report),
       })
     );
@@ -667,7 +743,7 @@ function renderThread(run) {
         role: "trace",
         label: "Live trace",
         title: "Live trace",
-        body: "Background runtime events stay tucked away unless you want to inspect them.",
+        body: "Background runtime events are tucked away unless you inspect them.",
         detail: buildTraceDisclosure(run.events || []),
       })
     );
@@ -702,7 +778,7 @@ function renderSnapshot(run) {
   state.renderSignatures.snapshot = signature;
 
   if (!run) {
-    target.innerHTML = "Select or launch a run to inspect the latest status.";
+    target.innerHTML = "Select or launch a run to inspect status.";
     return;
   }
 
@@ -710,7 +786,7 @@ function renderSnapshot(run) {
     <div class="snapshot-list">
       <div class="snapshot-row"><span>Company</span><strong>${escapeHtml(run.company_name)}</strong></div>
       <div class="snapshot-row"><span>Status</span>${statusPill(run.status)}</div>
-      <div class="snapshot-row"><span>Current stage</span><strong>${escapeHtml(stageLabels[run.current_stage] || run.current_stage || "queued")}</strong></div>
+      <div class="snapshot-row"><span>Stage</span><strong>${escapeHtml(stageLabels[run.current_stage] || run.current_stage || "queued")}</strong></div>
       <div class="snapshot-row"><span>Model</span><strong>${escapeHtml(run.openai_model || "pending")}</strong></div>
       <div class="snapshot-row"><span>Updated</span><strong>${escapeHtml(formatTime(run.updated_at))}</strong></div>
       ${run.run_dir ? `<div class="snapshot-row"><span>Run dir</span><strong>${escapeHtml(run.run_dir)}</strong></div>` : ""}
@@ -732,8 +808,8 @@ function renderArtifacts(run) {
   state.renderSignatures.artifacts = signature;
 
   if (!run || !run.artifacts.length) {
-    artifactList.innerHTML = `<p class="empty-state">Artifact files will appear after the run starts.</p>`;
-    viewer.textContent = "Select an artifact to inspect it.";
+    artifactList.innerHTML = `<p class="empty-state">Artifacts appear after the run starts.</p>`;
+    viewer.textContent = "Select an artifact to inspect.";
     return;
   }
 
@@ -789,7 +865,7 @@ async function refreshSelectedRun() {
 function autosizeComposer() {
   const input = document.getElementById("company_name");
   input.style.height = "auto";
-  input.style.height = `${Math.min(input.scrollHeight, 220)}px`;
+  input.style.height = `${Math.min(input.scrollHeight, 200)}px`;
 }
 
 async function submitRun(event) {

@@ -3,29 +3,30 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>GUS</title>
+    <title>GUS — Due Diligence Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
     <div class="shell">
       <header class="topbar">
         <div class="brand-lockup">
-          <p class="eyebrow">Automated Financial Diligence</p>
           <h1>GUS</h1>
+          <p class="brand-tagline">Automated Due Diligence</p>
         </div>
-        <div id="health-pills" class="health-pills">Checking runtime…</div>
+        <div id="health-pills" class="health-pills">Checking runtime&hellip;</div>
       </header>
 
       <main class="app-layout">
         <section class="thread-shell">
           <div class="thread-head">
             <div>
-              <p class="eyebrow">Research Thread</p>
-              <h2 id="thread-title">Company intelligence in motion</h2>
+              <h2 id="thread-title">Intelligence thread</h2>
+              <p class="thread-subtitle" id="thread-subtitle">Launch a run to begin multi-domain source acquisition.</p>
             </div>
-            <div id="thread-meta" class="thread-meta">
-              Start a run to open the live research thread.
-            </div>
+            <div id="thread-meta" class="thread-meta"></div>
           </div>
 
           <div id="thread" class="thread">
@@ -33,11 +34,11 @@
               <div class="avatar">G</div>
               <div class="bubble">
                 <p class="message-label">Orchestrator</p>
-                <h3>Enter a company name to start the financial swarm.</h3>
+                <h3>Enter a company to start the diligence swarm.</h3>
                 <p>
-                  The thread will show source discovery, Tinyfish acquisition,
-                  specialist extraction, verification, and report assembly as
-                  they happen.
+                  GUS runs financial, legal, and news source discovery in parallel,
+                  then extracts and cross-verifies claims before assembling an
+                  analyst-grade report.
                 </p>
               </div>
             </article>
@@ -49,11 +50,11 @@
               id="company_name"
               name="company_name"
               rows="1"
-              placeholder="Apple"
+              placeholder="e.g. Stripe, Revolut, Klarna…"
               required
             ></textarea>
             <div class="composer-actions">
-              <p class="quiet" id="composer-note">Financial mode only for now.</p>
+              <p class="quiet" id="composer-note">Financial &middot; Legal &middot; News</p>
               <button type="submit" id="run-submit">Run</button>
             </div>
           </form>
@@ -72,7 +73,7 @@
               <span>Run Snapshot</span>
             </div>
             <div id="run-snapshot" class="snapshot empty-state">
-              Select or launch a run to inspect the latest status.
+              Select or launch a run to inspect status.
             </div>
           </section>
 
@@ -81,11 +82,9 @@
               <span>Artifacts</span>
             </div>
             <div id="artifact-list" class="artifact-list empty-state">
-              Artifact files will appear after the run starts.
+              Artifacts appear after the run starts.
             </div>
-            <pre id="artifact-viewer" class="artifact-viewer">
-Select an artifact to inspect it.
-            </pre>
+            <pre id="artifact-viewer" class="artifact-viewer">Select an artifact to inspect.</pre>
           </section>
         </aside>
       </main>

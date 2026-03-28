@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from collections import defaultdict
-from typing import Any
+from typing import Any, Callable
 
 from gus_reporter.agents import (
     DomainAgent,
@@ -388,8 +388,13 @@ def build_risk_matrix(verified_claims: list[VerifiedClaim]) -> list[RiskMatrixEn
 
 
 class ReportPipeline:
-    def __init__(self, config: AppConfig) -> None:
+    def __init__(
+        self,
+        config: AppConfig,
+        progress_callback: Callable[[dict[str, Any]], None] | None = None,
+    ) -> None:
         self.config = config
+        self.progress_callback = progress_callback
         self.storage = RunStorage(config.report_output_dir)
         self.tinyfish = TinyfishClient(
             api_key=config.tinyfish_api_key,
@@ -400,6 +405,7 @@ class ReportPipeline:
             retry_with_stealth=config.tinyfish_retry_with_stealth,
             request_max_retries=config.tinyfish_request_max_retries,
             request_retry_backoff_seconds=config.tinyfish_request_retry_backoff_seconds,
+            event_callback=progress_callback,
         )
         self.openai = OpenAIClient(
             api_key=config.openai_api_key,
@@ -407,52 +413,173 @@ class ReportPipeline:
             model=config.openai_model,
         )
 
+    def _emit_event(self, payload: dict[str, Any]) -> None:
+        if self.progress_callback is None:
+            return
+        self.progress_callback({"timestamp": utc_now_iso(), **payload})
+
+    def _emit_stage_event(
+        self,
+        *,
+        stage: str,
+        status: str,
+        message: str,
+        current: int | None = None,
+        total: int | None = None,
+        extra: dict[str, Any] | None = None,
+    ) -> None:
+        payload: dict[str, Any] = {
+            "event": "stage_update",
+            "stage": stage,
+            "status": status,
+            "message": message,
+        }
+        if current is not None:
+            payload["current"] = current
+        if total is not None:
+            payload["total"] = total
+        if extra:
+            payload.update(extra)
+        self._emit_event(payload)
+
+    def _write_artifact(self, run_dir: Any, relative_path: str, payload: Any) -> None:
+        self.storage.write_json(run_dir, relative_path, payload)
+        self._emit_event(
+            {
+                "event": "artifact_written",
+                "relative_path": relative_path,
+                "run_dir": str(run_dir),
+            }
+        )
+
     def run(self, request: ReportRequest) -> tuple[FinalReport, str]:
         run_dir = self.storage.create_run_dir(request.company_name)
-        self.storage.write_json(run_dir, "request.json", request.to_dict())
-
-        source_jobs = seed_source_jobs(
-            request, self.config.tinyfish_default_browser_profile
+        self._emit_event(
+            {
+                "event": "pipeline_started",
+                "company_name": request.company_name,
+                "run_dir": str(run_dir),
+                "openai_model": self.config.openai_model,
+            }
         )
-        self.storage.write_json(
-            run_dir, "source_jobs.json", [job.to_dict() for job in source_jobs]
-        )
+        try:
+            self._emit_stage_event(
+                stage="planning",
+                status="running",
+                message="Building source plan for the requested company.",
+            )
+            self._write_artifact(run_dir, "request.json", request.to_dict())
 
-        tinyfish_runs = self.tinyfish.run_jobs(source_jobs)
-        self.storage.write_json(
-            run_dir, "tinyfish_runs.json", [record.to_dict() for record in tinyfish_runs]
-        )
+            source_jobs = seed_source_jobs(
+                request, self.config.tinyfish_default_browser_profile
+            )
+            self._write_artifact(
+                run_dir, "source_jobs.json", [job.to_dict() for job in source_jobs]
+            )
+            self._emit_stage_event(
+                stage="planning",
+                status="completed",
+                message=f"Planned {len(source_jobs)} source jobs.",
+                current=len(source_jobs),
+                total=len(source_jobs),
+                extra={
+                    "jobs": [job.to_dict() for job in source_jobs],
+                },
+            )
 
-        evidence = normalize_tinyfish_runs(tinyfish_runs)
-        self.storage.write_json(
-            run_dir, "evidence.json", [item.to_dict() for item in evidence]
-        )
+            self._emit_stage_event(
+                stage="acquisition",
+                status="running",
+                message="Running Tinyfish across discovered sources.",
+                current=0,
+                total=len(source_jobs),
+            )
+            tinyfish_runs = self.tinyfish.run_jobs(source_jobs)
+            self._write_artifact(
+                run_dir,
+                "tinyfish_runs.json",
+                [record.to_dict() for record in tinyfish_runs],
+            )
+            self._emit_stage_event(
+                stage="acquisition",
+                status="completed",
+                message=f"Completed Tinyfish acquisition for {len(tinyfish_runs)} jobs.",
+                current=len(tinyfish_runs),
+                total=len(source_jobs),
+            )
 
-        extracted_claims = self._extract_claims(request, evidence)
-        self.storage.write_json(
-            run_dir,
-            "extracted_claims.json",
-            [claim.to_dict() for claim in extracted_claims],
-        )
+            evidence = normalize_tinyfish_runs(tinyfish_runs)
+            self._write_artifact(
+                run_dir, "evidence.json", [item.to_dict() for item in evidence]
+            )
 
-        verified_claims = self._verify_claims(extracted_claims, evidence)
-        self.storage.write_json(
-            run_dir,
-            "verified_claims.json",
-            [claim.to_dict() for claim in verified_claims],
-        )
+            extracted_claims = self._extract_claims(request, evidence)
+            self._write_artifact(
+                run_dir,
+                "extracted_claims.json",
+                [claim.to_dict() for claim in extracted_claims],
+            )
 
-        final_report = self._build_report(request, verified_claims, evidence)
-        self.storage.write_json(run_dir, "final_report.json", final_report.to_dict())
-        return final_report, str(run_dir)
+            verified_claims = self._verify_claims(extracted_claims, evidence)
+            self._write_artifact(
+                run_dir,
+                "verified_claims.json",
+                [claim.to_dict() for claim in verified_claims],
+            )
+
+            final_report = self._build_report(request, verified_claims, evidence)
+            self._write_artifact(run_dir, "final_report.json", final_report.to_dict())
+            self._emit_event(
+                {
+                    "event": "pipeline_completed",
+                    "run_dir": str(run_dir),
+                    "final_report": final_report.to_dict(),
+                }
+            )
+            return final_report, str(run_dir)
+        except Exception as exc:
+            self._emit_event(
+                {
+                    "event": "pipeline_failed",
+                    "run_dir": str(run_dir),
+                    "error": str(exc),
+                }
+            )
+            raise
 
     def _extract_claims(
         self, request: ReportRequest, evidence: list[EvidenceItem]
     ) -> list[ExtractedClaim]:
         claims: list[ExtractedClaim] = []
+        extraction_units = [
+            specialist
+            for agent in get_active_agents(request.focus_areas)
+            for specialist in get_extraction_agents(agent)
+        ]
+        total_specialists = len(extraction_units)
+        completed_specialists = 0
+        self._emit_stage_event(
+            stage="extraction",
+            status="running",
+            message="Extracting structured claims from evidence bundles.",
+            current=0,
+            total=total_specialists,
+        )
         for agent in get_active_agents(request.focus_areas):
             extraction_agents = get_extraction_agents(agent)
             for specialist in extraction_agents:
+                self._emit_event(
+                    {
+                        "event": "specialist_update",
+                        "stage": "extraction",
+                        "status": "running",
+                        "section": agent.section,
+                        "specialist": specialist.name,
+                        "message": f"Running {specialist.name}.",
+                        "current": completed_specialists,
+                        "total": total_specialists,
+                    }
+                )
                 specialist_evidence = select_evidence_for_extraction_agent(
                     specialist,
                     select_evidence_for_agent(agent, evidence),
@@ -502,6 +629,34 @@ class ReportPipeline:
                             raw_source_label=specialist.name,
                         )
                     )
+                completed_specialists += 1
+                self._emit_event(
+                    {
+                        "event": "specialist_update",
+                        "stage": "extraction",
+                        "status": "completed",
+                        "section": agent.section,
+                        "specialist": specialist.name,
+                        "message": f"{specialist.name} extracted {len(payload.get('claims', []))} claims.",
+                        "current": completed_specialists,
+                        "total": total_specialists,
+                        "claims_extracted": len(payload.get("claims", [])),
+                    }
+                )
+                self._emit_stage_event(
+                    stage="extraction",
+                    status="running",
+                    message="Extracting structured claims from evidence bundles.",
+                    current=completed_specialists,
+                    total=total_specialists,
+                )
+        self._emit_stage_event(
+            stage="extraction",
+            status="completed",
+            message=f"Extracted {len(claims)} raw claims.",
+            current=total_specialists,
+            total=total_specialists,
+        )
         return claims
 
     def _verify_claims(
@@ -509,6 +664,14 @@ class ReportPipeline:
     ) -> list[VerifiedClaim]:
         evidence_map = {item.evidence_id: item for item in evidence}
         verified: list[VerifiedClaim] = []
+        total_claims = len(claims)
+        self._emit_stage_event(
+            stage="verification",
+            status="running",
+            message="Verifying extracted claims against evidence.",
+            current=0,
+            total=total_claims,
+        )
         for claim in claims:
             referenced = [evidence_map[eid] for eid in claim.evidence_ids if eid in evidence_map]
             evidence_text = "\n\n".join(
@@ -553,6 +716,25 @@ class ReportPipeline:
                     as_of=claim.as_of,
                 )
             )
+            self._emit_event(
+                {
+                    "event": "verification_update",
+                    "stage": "verification",
+                    "status": "running",
+                    "message": f"Verified {claim.claim_id}.",
+                    "current": len(verified),
+                    "total": total_claims,
+                    "claim_id": claim.claim_id,
+                    "claim_status": verified[-1].status,
+                }
+            )
+        self._emit_stage_event(
+            stage="verification",
+            status="completed",
+            message=f"Verification finished for {len(verified)} claims.",
+            current=len(verified),
+            total=total_claims,
+        )
         return verified
 
     def _build_report(
@@ -561,6 +743,11 @@ class ReportPipeline:
         verified_claims: list[VerifiedClaim],
         evidence: list[EvidenceItem],
     ) -> FinalReport:
+        self._emit_stage_event(
+            stage="reporting",
+            status="running",
+            message="Synthesizing final report and section summaries.",
+        )
         supported_claims = [claim for claim in verified_claims if claim.status == "supported"]
         grouped: dict[str, list[VerifiedClaim]] = defaultdict(list)
         for claim in supported_claims:
@@ -602,7 +789,7 @@ class ReportPipeline:
             for item in evidence
         ]
 
-        return FinalReport(
+        final_report = FinalReport(
             company_name=request.company_name,
             generated_at=utc_now_iso(),
             publish_decision=publish_decision,
@@ -628,6 +815,14 @@ class ReportPipeline:
             ),
             total_claims=len(verified_claims),
         )
+        self._emit_stage_event(
+            stage="reporting",
+            status="completed",
+            message="Final report assembled.",
+            current=len(sections),
+            total=len(sections),
+        )
+        return final_report
 
     def _build_section_reports(
         self,
@@ -635,7 +830,20 @@ class ReportPipeline:
         grouped_claims: dict[str, list[VerifiedClaim]],
     ) -> list[ReportSection]:
         sections: list[ReportSection] = []
-        for agent in get_active_agents(request.focus_areas):
+        active_agents = get_active_agents(request.focus_areas)
+        total_sections = len(active_agents)
+        for index, agent in enumerate(active_agents, start=1):
+            self._emit_event(
+                {
+                    "event": "report_section_update",
+                    "stage": "reporting",
+                    "status": "running",
+                    "section": agent.section,
+                    "current": index - 1,
+                    "total": total_sections,
+                    "message": f"Synthesizing section {agent.section}.",
+                }
+            )
             claims = grouped_claims.get(agent.section, [])
             if claims:
                 schema = (
@@ -704,6 +912,24 @@ class ReportPipeline:
                     structured_data=structured_data,
                 )
             )
+            self._emit_event(
+                {
+                    "event": "report_section_update",
+                    "stage": "reporting",
+                    "status": "completed",
+                    "section": agent.section,
+                    "current": index,
+                    "total": total_sections,
+                    "message": f"Section {agent.section} ready.",
+                }
+            )
+        self._emit_stage_event(
+            stage="reporting",
+            status="running",
+            message="Section synthesis complete. Building final report shell.",
+            current=len(sections),
+            total=total_sections,
+        )
         return sections
 
     def _section_synthesis_prompt(

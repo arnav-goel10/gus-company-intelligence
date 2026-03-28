@@ -2,7 +2,7 @@
 
 This repository is the first implementation slice of an automated multi-agent
 company intelligence pipeline using Tinyfish for acquisition and OpenAI
-`gpt-5.4` for structured extraction and verification.
+`gpt-5-mini` by default for structured extraction and verification.
 
 The current scaffold is intentionally narrow:
 
@@ -13,8 +13,8 @@ The current scaffold is intentionally narrow:
   finance-specific red flags.
 - Domain agents focus on individual sections such as financials, legal, news,
   leadership, workforce, and risk.
-- OpenAI `gpt-5.4` extracts typed claims for each domain agent.
-- OpenAI `gpt-5.4` verifies each claim against its source evidence.
+- OpenAI `gpt-5-mini` extracts typed claims for each domain agent by default.
+- OpenAI `gpt-5-mini` verifies each claim against its source evidence by default.
 - Section agents synthesize section summaries.
 - An executive aggregation pass compiles the overall report.
 - The report assembler publishes only verified claims and blocks output when
@@ -29,8 +29,10 @@ There is no runtime human-in-the-loop path in this implementation.
 - `src/gus_reporter/agents.py`: domain-agent definitions and routing
 - `src/gus_reporter/tinyfish_client.py`: Tinyfish batch/async client with
   vault, agent-memory, and `lite -> stealth` retry support
-- `src/gus_reporter/openai_client.py`: Responses API client for `gpt-5.4`
+- `src/gus_reporter/openai_client.py`: Responses API client for the configured OpenAI model
 - `src/gus_reporter/pipeline.py`: end-to-end pipeline
+- `src/gus_reporter/ui_server.py`: zero-dependency local operator UI
+- `src/gus_reporter/ui_state.py`: UI run-state projection for live progress
 - `src/gus_reporter/storage.py`: run artifact persistence
 - `examples/company_request.json`: example input
 - `tests/`: stdlib unit tests for deterministic logic
@@ -56,9 +58,8 @@ Useful Tinyfish tuning variables:
 
 Model policy:
 
-- The code enforces `gpt-5.4` only.
-- If your OpenAI account does not expose `gpt-5.4`, requests will fail until
-  that model is available to your project.
+- The default model is `gpt-5-mini`.
+- You can override it with `OPENAI_MODEL` when you want to switch back to a stronger model later.
 
 ## Usage
 
@@ -75,6 +76,22 @@ PYTHONPATH=src python3 -m gus_reporter.cli --request examples/company_request.js
 ```
 
 Artifacts are written under `runs/<timestamp>-<company-slug>/`.
+
+Run the operator UI:
+
+```bash
+PYTHONPATH=src python3 -m gus_reporter.ui_server --host 127.0.0.1 --port 8787
+```
+
+Then open [http://127.0.0.1:8787](http://127.0.0.1:8787).
+
+The UI currently provides:
+
+- a financial-run launcher with optional advanced hints
+- live stage progress across planning, acquisition, extraction, verification, and reporting
+- per-source Tinyfish status tracking and preview links when available
+- final report rendering with risk matrix and section summaries
+- artifact inspection for every JSON file written during the run
 
 ## Target Report Format
 
@@ -136,8 +153,11 @@ flags, and data gaps.
 - No external vector store or graph database is wired in yet.
 - Retrieval is source-bounded per claim in this slice.
 - Source planning is deterministic from the request plus explicit source jobs.
-- Live browser preview URLs are captured from Tinyfish runs but not yet surfaced
-  in an interactive UI.
+- The local UI surfaces Tinyfish live preview URLs when a run exposes them, but
+  the UI is still operator-facing rather than end-user polished.
+- Company-name-only source discovery is not implemented yet; the current live
+  flow still works best when the request includes website, ticker, or known
+  source URLs.
 - There is not yet a source-specific parser for SEC HTML or XBRL responses; the
   current financial slice still relies on Tinyfish page extraction plus OpenAI
   verification.

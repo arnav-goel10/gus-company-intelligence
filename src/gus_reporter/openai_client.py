@@ -7,10 +7,19 @@ from typing import Any
 
 
 class OpenAIClient:
-    def __init__(self, api_key: str, base_url: str, model: str) -> None:
+    def __init__(
+        self,
+        api_key: str,
+        base_url: str,
+        model: str,
+        request_timeout_seconds: int | None = 180,
+    ) -> None:
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
         self.model = model
+        self.request_timeout_seconds = (
+            request_timeout_seconds if request_timeout_seconds and request_timeout_seconds > 0 else None
+        )
 
     def structured_response(
         self,
@@ -111,7 +120,14 @@ class OpenAIClient:
             },
         )
         try:
-            with urllib.request.urlopen(request, timeout=180) as response:
+            if self.request_timeout_seconds is None:
+                response_context = urllib.request.urlopen(request)
+            else:
+                response_context = urllib.request.urlopen(
+                    request,
+                    timeout=self.request_timeout_seconds,
+                )
+            with response_context as response:
                 return json.loads(response.read().decode("utf-8"))
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="replace")

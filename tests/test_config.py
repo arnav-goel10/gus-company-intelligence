@@ -51,6 +51,26 @@ class RuntimeEnvTests(unittest.TestCase):
         self.assertEqual(50, config.tinyfish_max_total_jobs)
         self.assertEqual(6, config.tinyfish_max_acquisition_waves)
 
+    def test_app_config_treats_zero_timeouts_as_disabled(self) -> None:
+        with patch.dict(
+            os.environ,
+            {
+                "OPENAI_API_KEY": "test-openai",
+                "TINYFISH_API_KEY": "test-tinyfish",
+                "TINYFISH_POLL_TIMEOUT_SECONDS": "0",
+                "TINYFISH_REQUEST_TIMEOUT_SECONDS": "0",
+                "RAW_SOURCE_TIMEOUT_SECONDS": "0",
+                "OPENAI_REQUEST_TIMEOUT_SECONDS": "0",
+            },
+            clear=True,
+        ):
+            with patch("gus_reporter.config.load_runtime_env"):
+                config = AppConfig.from_env()
+        self.assertIsNone(config.tinyfish_poll_timeout_seconds)
+        self.assertIsNone(config.tinyfish_request_timeout_seconds)
+        self.assertIsNone(config.raw_source_timeout_seconds)
+        self.assertIsNone(config.openai_request_timeout_seconds)
+
 
 if __name__ == "__main__":
     unittest.main()

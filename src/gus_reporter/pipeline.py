@@ -1540,17 +1540,21 @@ class ReportPipeline:
             base_url=config.tinyfish_base_url,
             poll_interval_seconds=config.tinyfish_poll_interval_seconds,
             poll_timeout_seconds=config.tinyfish_poll_timeout_seconds,
+            request_timeout_seconds=config.tinyfish_request_timeout_seconds,
             batch_size=config.tinyfish_batch_size,
             retry_with_stealth=config.tinyfish_retry_with_stealth,
             request_max_retries=config.tinyfish_request_max_retries,
             request_retry_backoff_seconds=config.tinyfish_request_retry_backoff_seconds,
             event_callback=progress_callback,
         )
-        self.raw_source_client = RawSourceClient()
+        self.raw_source_client = RawSourceClient(
+            timeout_seconds=config.raw_source_timeout_seconds
+        )
         self.openai = OpenAIClient(
             api_key=config.openai_api_key,
             base_url=config.openai_base_url,
             model=config.openai_model,
+            request_timeout_seconds=config.openai_request_timeout_seconds,
         )
 
     def _emit_event(self, payload: dict[str, Any]) -> None:

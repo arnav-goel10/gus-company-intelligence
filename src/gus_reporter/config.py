@@ -45,6 +45,14 @@ def _env_flag(name: str, default: str) -> bool:
     return value in {"1", "true", "yes", "on"}
 
 
+def _env_optional_int(name: str, default: str) -> int | None:
+    raw_value = os.getenv(name, default).strip()
+    if not raw_value:
+        return None
+    value = int(raw_value)
+    return value if value > 0 else None
+
+
 @dataclass(frozen=True)
 class AppConfig:
     openai_api_key: str
@@ -55,7 +63,10 @@ class AppConfig:
     report_output_dir: Path
     tinyfish_default_browser_profile: str
     tinyfish_poll_interval_seconds: int
-    tinyfish_poll_timeout_seconds: int
+    tinyfish_poll_timeout_seconds: int | None
+    tinyfish_request_timeout_seconds: int | None
+    raw_source_timeout_seconds: int | None
+    openai_request_timeout_seconds: int | None
     tinyfish_batch_size: int
     tinyfish_max_total_jobs: int
     tinyfish_max_acquisition_waves: int
@@ -87,8 +98,17 @@ class AppConfig:
             tinyfish_poll_interval_seconds=int(
                 os.getenv("TINYFISH_POLL_INTERVAL_SECONDS", "5")
             ),
-            tinyfish_poll_timeout_seconds=int(
-                os.getenv("TINYFISH_POLL_TIMEOUT_SECONDS", "600")
+            tinyfish_poll_timeout_seconds=_env_optional_int(
+                "TINYFISH_POLL_TIMEOUT_SECONDS", "600"
+            ),
+            tinyfish_request_timeout_seconds=_env_optional_int(
+                "TINYFISH_REQUEST_TIMEOUT_SECONDS", "120"
+            ),
+            raw_source_timeout_seconds=_env_optional_int(
+                "RAW_SOURCE_TIMEOUT_SECONDS", "90"
+            ),
+            openai_request_timeout_seconds=_env_optional_int(
+                "OPENAI_REQUEST_TIMEOUT_SECONDS", "180"
             ),
             tinyfish_batch_size=int(os.getenv("TINYFISH_BATCH_SIZE", "50")),
             tinyfish_max_total_jobs=int(

@@ -1,0 +1,9 @@
+[project]
+name = "gus-reporter"
+version = "0.1.0"
+description = "Automated company intelligence report generator using Tinyfish and OpenAI gpt-5.4"
+requires-python = ">=3.11"
+readme = "README.md"
+
+[tool.unittest]
+start-directory = "tests"

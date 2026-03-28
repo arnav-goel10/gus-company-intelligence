@@ -727,3 +727,160 @@ button:disabled {
     padding: 16px;
   }
 }
+
+/* ── Structured data: tables, timelines, pills ── */
+
+.structured-block {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.structured-block h5 {
+  margin: 0 0 8px;
+  font-family: var(--font-heading, "Iowan Old Style", Palatino, Georgia, serif);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.matters-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.matters-table th {
+  text-align: left;
+  padding: 6px 8px;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  border-bottom: 2px solid var(--line-strong);
+}
+
+.matters-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.matters-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Event timeline */
+
+.event-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.event-item {
+  display: grid;
+  grid-template-columns: 90px 1fr auto;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 13px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.event-item:last-child {
+  border-bottom: none;
+}
+
+.event-date {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.event-headline {
+  color: var(--text);
+}
+
+.event-meta {
+  color: var(--muted);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Sentiment & severity pills */
+
+.pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pill-positive {
+  background: rgba(31, 92, 70, 0.12);
+  color: #1f5c46;
+}
+
+.pill-negative {
+  background: rgba(162, 67, 52, 0.12);
+  color: #a24334;
+}
+
+.pill-neutral {
+  background: rgba(150, 99, 36, 0.12);
+  color: #966324;
+}
+
+.pill-high {
+  background: rgba(162, 67, 52, 0.15);
+  color: #a24334;
+}
+
+.pill-medium {
+  background: rgba(150, 99, 36, 0.15);
+  color: #966324;
+}
+
+.pill-low {
+  background: rgba(31, 92, 70, 0.12);
+  color: #1f5c46;
+}
+
+/* Coverage density pills */
+
+.pill-density-heavy {
+  background: rgba(162, 67, 52, 0.12);
+  color: #a24334;
+}
+
+.pill-density-moderate {
+  background: rgba(150, 99, 36, 0.12);
+  color: #966324;
+}
+
+.pill-density-light {
+  background: rgba(31, 92, 70, 0.12);
+  color: #1f5c46;
+}
+
+.pill-density-dark {
+  background: rgba(21, 33, 25, 0.15);
+  color: var(--muted);
+}
+
+.coverage-pills {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}

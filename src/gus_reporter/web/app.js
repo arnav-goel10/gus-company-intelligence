@@ -367,6 +367,100 @@ function buildPreviewDeck(runId, sourceJobs) {
   `;
 }
 
+function buildLegalStructuredMarkup(data) {
+  if (!data) return "";
+  let markup = "";
+  const matters = data.active_matters || [];
+  if (matters.length) {
+    markup += `<div class="structured-block"><h5>Active matters</h5><table class="matters-table"><thead><tr><th>Type</th><th>Description</th><th>Jurisdiction</th><th>Status</th><th>Severity</th><th>Date</th></tr></thead><tbody>`;
+    for (const m of matters) {
+      markup += `<tr><td>${escapeHtml(m.matter_type)}</td><td>${escapeHtml(m.description)}</td><td>${escapeHtml(m.jurisdiction)}</td><td>${escapeHtml(m.status)}</td><td><span class="pill pill-${escapeHtml(m.severity)}">${escapeHtml(m.severity)}</span></td><td>${escapeHtml(m.date_filed_or_announced)}</td></tr>`;
+    }
+    markup += `</tbody></table></div>`;
+  }
+  const sanctions = data.sanctions_flags || [];
+  if (sanctions.length) {
+    markup += `<div class="structured-block"><h5>Sanctions flags</h5><ul>${sanctions.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}</ul></div>`;
+  }
+  const regulatory = data.regulatory_exposure || [];
+  if (regulatory.length) {
+    markup += `<div class="structured-block"><h5>Regulatory exposure</h5><ul>${regulatory.map((r) => `<li>${escapeHtml(r)}</li>`).join("")}</ul></div>`;
+  }
+  const redFlags = data.red_flags || [];
+  if (redFlags.length) {
+    markup += `<div class="structured-block"><h5>Red flags</h5><ul>${redFlags.map((f) => `<li>${escapeHtml(f)}</li>`).join("")}</ul></div>`;
+  }
+  const gaps = data.data_gaps || [];
+  if (gaps.length) {
+    markup += `<div class="structured-block"><h5>Data gaps</h5><ul>${gaps.map((g) => `<li>${escapeHtml(g)}</li>`).join("")}</ul></div>`;
+  }
+  return markup;
+}
+
+function buildNewsStructuredMarkup(data) {
+  if (!data) return "";
+  let markup = "";
+  const events = data.material_events || [];
+  if (events.length) {
+    markup += `<div class="structured-block"><h5>Material events</h5><div class="event-timeline">`;
+    for (const e of events) {
+      const sentimentClass = e.sentiment === "positive" ? "pill-positive" : e.sentiment === "negative" ? "pill-negative" : "pill-neutral";
+      markup += `<div class="event-item"><span class="event-date">${escapeHtml(e.date)}</span><span class="event-headline">${escapeHtml(e.headline)}</span><span class="event-meta">${escapeHtml(e.source_publisher)} <span class="pill ${sentimentClass}">${escapeHtml(e.sentiment)}</span></span></div>`;
+    }
+    markup += `</div></div>`;
+  }
+  const sentiment = data.coverage_sentiment || "";
+  const density = data.coverage_density || "";
+  if (sentiment || density) {
+    markup += `<div class="structured-block"><h5>Coverage overview</h5><div class="coverage-pills">`;
+    if (sentiment) {
+      const sClass = sentiment === "net_positive" ? "pill-positive" : sentiment === "net_negative" ? "pill-negative" : "pill-neutral";
+      markup += `<span>Sentiment: <span class="pill ${sClass}">${escapeHtml(sentiment.replace("_", " "))}</span></span>`;
+    }
+    if (density) {
+      markup += `<span>Density: <span class="pill pill-density-${escapeHtml(density)}">${escapeHtml(density)}</span></span>`;
+    }
+    markup += `</div></div>`;
+  }
+  const negative = data.negative_signals || [];
+  if (negative.length) {
+    markup += `<div class="structured-block"><h5>Negative signals</h5><ul>${negative.map((n) => `<li>${escapeHtml(n)}</li>`).join("")}</ul></div>`;
+  }
+  const gaps = data.data_gaps || [];
+  if (gaps.length) {
+    markup += `<div class="structured-block"><h5>Data gaps</h5><ul>${gaps.map((g) => `<li>${escapeHtml(g)}</li>`).join("")}</ul></div>`;
+  }
+  return markup;
+}
+
+function buildSectionStructuredMarkup(section) {
+  const sd = section.structured_data;
+  if (!sd) return "";
+  if (section.name === "legal") return buildLegalStructuredMarkup(sd);
+  if (section.name === "news") return buildNewsStructuredMarkup(sd);
+  if (section.name === "financials") {
+    let markup = "";
+    const metrics = sd.key_metrics || [];
+    if (metrics.length) {
+      markup += `<div class="structured-block"><h5>Key metrics</h5><table class="matters-table"><thead><tr><th>Metric</th><th>Value</th><th>Period</th></tr></thead><tbody>`;
+      for (const m of metrics) {
+        markup += `<tr><td>${escapeHtml(m.metric)}</td><td>${escapeHtml(m.value)}</td><td>${escapeHtml(m.period)}</td></tr>`;
+      }
+      markup += `</tbody></table></div>`;
+    }
+    const redFlags = sd.red_flags || [];
+    if (redFlags.length) {
+      markup += `<div class="structured-block"><h5>Red flags</h5><ul>${redFlags.map((f) => `<li>${escapeHtml(f)}</li>`).join("")}</ul></div>`;
+    }
+    const gaps = sd.data_gaps || [];
+    if (gaps.length) {
+      markup += `<div class="structured-block"><h5>Data gaps</h5><ul>${gaps.map((g) => `<li>${escapeHtml(g)}</li>`).join("")}</ul></div>`;
+    }
+    return markup;
+  }
+  return "";
+}
+
 function buildReportMarkup(report) {
   const findings = (report.key_findings || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
   const sections = (report.sections || []).map((section) => `
@@ -377,9 +471,10 @@ function buildReportMarkup(report) {
       </div>
       <p>${escapeHtml(section.summary)}</p>
       ${(section.highlights || []).length ? `<ul>${section.highlights.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : ""}
+      ${buildSectionStructuredMarkup(section)}
     </section>
   `).join("");
-  const risks = (report.risk_matrix || []).map((item) => `<li>${escapeHtml(item.section)}: ${escapeHtml(item.issue)}</li>`).join("");
+  const risks = (report.risk_matrix || []).map((item) => `<li><span class="pill pill-${escapeHtml(item.severity || "medium")}">${escapeHtml(item.severity || "medium")}</span> ${escapeHtml(item.section)}: ${escapeHtml(item.issue)}</li>`).join("");
 
   return `
     <div class="report-stack">

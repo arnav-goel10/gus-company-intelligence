@@ -210,6 +210,143 @@ FINANCIAL_EXTRACTION_AGENTS: tuple[ExtractionAgent, ...] = (
 )
 
 
+LEGAL_EXTRACTION_AGENTS: tuple[ExtractionAgent, ...] = (
+    ExtractionAgent(
+        name="legal_case_locator",
+        section="legal",
+        preferred_categories=("legal",),
+        preferred_source_types=(
+            "legal_court_records",
+            "legal_regulatory_filings",
+            "legal_search_discovery",
+        ),
+        extraction_instruction=(
+            "Focus on locating active and recent litigation, docket entries, case numbers, "
+            "named parties, courts, filing dates, and case status. Extract claims only about "
+            "what cases exist, their jurisdiction, and current procedural status."
+        ),
+    ),
+    ExtractionAgent(
+        name="legal_regulatory_agent",
+        section="legal",
+        preferred_categories=("legal",),
+        preferred_source_types=(
+            "legal_regulatory_filings",
+            "legal_enforcement",
+        ),
+        extraction_instruction=(
+            "Focus on enforcement actions, consent decrees, cease-and-desist orders, "
+            "regulatory settlements, compliance orders, and fines from named agencies "
+            "such as SEC, FTC, DOJ, EPA, CFPB, OSHA, or equivalent non-US regulators. "
+            "Prefer explicit agency names, action dates, and monetary amounts."
+        ),
+    ),
+    ExtractionAgent(
+        name="legal_sanctions_agent",
+        section="legal",
+        preferred_categories=("legal",),
+        preferred_source_types=(
+            "legal_sanctions",
+            "legal_regulatory_filings",
+        ),
+        extraction_instruction=(
+            "Focus on sanctions list appearances including OFAC SDN, EU consolidated "
+            "sanctions, UN sanctions, debarment lists, export control violations, and "
+            "AML enforcement actions. Extract the list name, date of designation, and "
+            "current status if available."
+        ),
+    ),
+    ExtractionAgent(
+        name="legal_corporate_filings_agent",
+        section="legal",
+        preferred_categories=("legal", "company_overview"),
+        preferred_source_types=(
+            "legal_corporate_registry",
+            "legal_regulatory_filings",
+        ),
+        extraction_instruction=(
+            "Focus on corporate registry facts: incorporation details, registered agents, "
+            "UCC filings, liens, judgments, mergers, dissolutions, name changes, and "
+            "beneficial ownership disclosures. Prefer official registry sources."
+        ),
+    ),
+    ExtractionAgent(
+        name="legal_risk_agent",
+        section="legal",
+        preferred_categories=("legal", "news", "risk_signals"),
+        use_all_evidence=True,
+        extraction_instruction=(
+            "Focus only on legal red flags: unresolved litigation exposure, repeated "
+            "regulatory action, undisclosed disputes, pattern of enforcement, whistleblower "
+            "signals, or material legal risks that are not yet captured by other legal "
+            "specialists. Do not duplicate claims already covered by case or regulatory agents."
+        ),
+    ),
+)
+
+
+NEWS_EXTRACTION_AGENTS: tuple[ExtractionAgent, ...] = (
+    ExtractionAgent(
+        name="news_event_locator",
+        section="news",
+        preferred_categories=("news",),
+        preferred_source_types=(
+            "news_aggregator",
+            "news_press_release",
+            "news_search_discovery",
+        ),
+        extraction_instruction=(
+            "Focus on date-stamped material events: funding rounds, acquisitions, "
+            "product launches, executive changes, restructurings, IPO signals, and "
+            "major partnerships. Each claim must include the approximate event date "
+            "and the publishing source."
+        ),
+    ),
+    ExtractionAgent(
+        name="news_negative_signal_agent",
+        section="news",
+        preferred_categories=("news", "risk_signals"),
+        preferred_source_types=(
+            "news_aggregator",
+            "news_industry_publication",
+            "news_search_discovery",
+        ),
+        extraction_instruction=(
+            "Focus on negative press coverage: lawsuits mentioned in the press, layoffs, "
+            "product recalls, data breaches, investigation reports, short-seller reports, "
+            "analyst downgrades, and controversy. Prefer claims with named sources and dates."
+        ),
+    ),
+    ExtractionAgent(
+        name="news_sentiment_agent",
+        section="news",
+        preferred_categories=("news", "industry"),
+        preferred_source_types=(
+            "news_aggregator",
+            "news_industry_publication",
+        ),
+        extraction_instruction=(
+            "Focus on the overall narrative trend: is press coverage net positive, negative, "
+            "or mixed? How frequent is coverage? What is the tone of analyst or industry "
+            "commentary? Extract claims about sentiment direction and coverage volume, not "
+            "individual events."
+        ),
+    ),
+    ExtractionAgent(
+        name="news_coverage_gap_agent",
+        section="news",
+        preferred_categories=("news",),
+        use_all_evidence=True,
+        extraction_instruction=(
+            "Focus on identifying what is NOT being covered: missing press around expected "
+            "events such as anticipated earnings with no coverage, a stale or abandoned "
+            "newsroom, dark period signals, or conspicuous absence of coverage for a company "
+            "of its scale. Extract claims about coverage gaps, not about events themselves."
+        ),
+    ),
+)
+
+
 def get_active_agents(focus_areas: list[str]) -> list[DomainAgent]:
     return [DOMAIN_AGENTS[area] for area in focus_areas if area in DOMAIN_AGENTS]
 
@@ -217,6 +354,10 @@ def get_active_agents(focus_areas: list[str]) -> list[DomainAgent]:
 def get_extraction_agents(agent: DomainAgent) -> list[ExtractionAgent]:
     if agent.section == "financials":
         return list(FINANCIAL_EXTRACTION_AGENTS)
+    if agent.section == "legal":
+        return list(LEGAL_EXTRACTION_AGENTS)
+    if agent.section == "news":
+        return list(NEWS_EXTRACTION_AGENTS)
     return [
         ExtractionAgent(
             name=agent.name,

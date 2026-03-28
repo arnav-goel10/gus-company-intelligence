@@ -1,0 +1,24 @@
+{
+  "company_name": "Example Corp",
+  "company_website": "https://example.com",
+  "primary_jurisdiction": "US",
+  "ticker": "EXMPL",
+  "investor_relations_url": "https://example.com/investors",
+  "financial_source_urls": [
+    "https://example.com/investors/annual-report-2025.pdf"
+  ],
+  "tinyfish_use_vault": false,
+  "tinyfish_credential_item_ids": [],
+  "tinyfish_enable_agent_memory": true,
+  "report_goal": "Generate a source-backed company intelligence report with no unsupported claims.",
+  "focus_areas": [
+    "company_overview",
+    "financials",
+    "legal",
+    "industry",
+    "leadership",
+    "employees",
+    "news",
+    "risk_signals"
+  ]
+}

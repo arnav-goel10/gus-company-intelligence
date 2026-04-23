@@ -612,6 +612,16 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
     return jobs
 
 
+def _extract_hostname(url: str) -> str:
+    stripped = url.strip()
+    candidate = stripped if "://" in stripped else f"https://{stripped.lstrip('/')}"
+    return (urllib.parse.urlparse(candidate).hostname or "").lower()
+
+
+def _domain_matches(hostname: str, domain: str) -> bool:
+    return hostname == domain or hostname.endswith(f".{domain}")
+
+
 def _guess_discovered_source_type(
     *,
     source_kind: str,
@@ -621,8 +631,7 @@ def _guess_discovered_source_type(
     source_kind = source_kind.lower()
     document_type = document_type.lower()
     url_lower = url.lower()
-    parsed_url = urllib.parse.urlparse(url_lower)
-    domain = parsed_url.netloc
+    hostname = _extract_hostname(url_lower)
 
     if any(marker in document_type for marker in {"annual", "quarter", "earnings", "presentation", "filing"}):
         return "financial_document"
@@ -634,7 +643,7 @@ def _guess_discovered_source_type(
         return "financial_sec_filings"
     if any(marker in url_lower for marker in {"investor", "investors"}):
         return "financial_investor_relations"
-    if "sec.gov" in domain or "edgar" in url_lower:
+    if _domain_matches(hostname, "sec.gov") or "edgar" in url_lower:
         return "financial_sec_filings"
 
     if "annual-report" in url_lower or "quarterly-report" in url_lower or "10-k" in url_lower or "10-q" in url_lower:
@@ -724,8 +733,7 @@ def _guess_discovered_legal_source_type(
     source_kind = source_kind.lower()
     document_type = document_type.lower()
     url_lower = url.lower()
-    parsed_url = urllib.parse.urlparse(url_lower)
-    domain = parsed_url.netloc
+    hostname = _extract_hostname(url_lower)
 
     if any(marker in source_kind for marker in {"court", "docket", "pacer", "case", "litigation"}):
         return "legal_court_records"
@@ -736,15 +744,20 @@ def _guess_discovered_legal_source_type(
     if any(marker in source_kind for marker in {"registry", "corporat", "secretary", "incorporation"}):
         return "legal_corporate_registry"
 
-    if any(marker in domain for marker in {"courtlistener.com", "pacer.gov", "uscourts.gov"}):
+    if any(
+        _domain_matches(hostname, marker)
+        for marker in {"courtlistener.com", "pacer.gov", "uscourts.gov"}
+    ):
         return "legal_court_records"
-    if "sec.gov" in domain and "litigation" in url_lower:
+    if _domain_matches(hostname, "sec.gov") and "litigation" in url_lower:
         return "legal_enforcement"
-    if any(marker in domain for marker in {"ftc.gov", "doj.gov"}) or "enforcement" in url_lower:
+    if any(_domain_matches(hostname, marker) for marker in {"ftc.gov", "doj.gov"}) or "enforcement" in url_lower:
         return "legal_enforcement"
-    if "treasury.gov" in domain and ("ofac" in url_lower or "sdn" in url_lower) or "sanctions" in url_lower:
+    if (
+        _domain_matches(hostname, "treasury.gov") and ("ofac" in url_lower or "sdn" in url_lower)
+    ) or "sanctions" in url_lower:
         return "legal_sanctions"
-    if "opencorporates.com" in domain or "sos." in domain or "secretary" in url_lower:
+    if _domain_matches(hostname, "opencorporates.com") or "sos." in hostname or "secretary" in url_lower:
         return "legal_corporate_registry"
 
     if any(marker in document_type for marker in {"complaint", "order", "judgment", "settlement", "filing"}):
@@ -759,10 +772,12 @@ def _guess_discovered_news_source_type(
 ) -> str:
     source_kind = source_kind.lower()
     url_lower = url.lower()
-    parsed_url = urllib.parse.urlparse(url_lower)
-    domain = parsed_url.netloc
+    hostname = _extract_hostname(url_lower)
 
-    if any(marker in domain for marker in {"prnewswire.com", "businesswire.com", "globenewswire.com"}):
+    if any(
+        _domain_matches(hostname, marker)
+        for marker in {"prnewswire.com", "businesswire.com", "globenewswire.com"}
+    ):
         return "news_press_release"
     if any(marker in source_kind for marker in {"press_release", "press release", "wire"}):
         return "news_press_release"
@@ -771,14 +786,14 @@ def _guess_discovered_news_source_type(
         "reuters.com", "bloomberg.com", "wsj.com", "nytimes.com", "ft.com",
         "cnbc.com", "bbc.com", "apnews.com", "news.yahoo.com", "news.google.com"
     }
-    if any(domain.endswith(d) or domain == d for d in aggregator_domains):
+    if any(_domain_matches(hostname, domain) for domain in aggregator_domains):
         return "news_aggregator"
 
     industry_domains = {
         "techcrunch.com", "theinformation.com", "semafor.com", "arstechnica.com",
         "theverge.com", "wired.com", "forbes.com", "fortune.com", "inc.com"
     }
-    if any(domain.endswith(d) or domain == d for d in industry_domains):
+    if any(_domain_matches(hostname, domain) for domain in industry_domains):
         return "news_industry_publication"
 
     if any(marker in source_kind for marker in {"news", "article", "report", "coverage"}):
@@ -1685,6 +1700,7 @@ class ReportPipeline:
     ) -> None:
         self.config = config
         self.progress_callback = progress_callback
+        self._event_lock = threading.Lock()
         self.storage = RunStorage(config.report_output_dir)
         self.tinyfish = TinyfishClient(
             api_key=config.tinyfish_api_key,
@@ -1706,12 +1722,15 @@ class ReportPipeline:
             base_url=config.openai_base_url,
             model=config.openai_model,
             request_timeout_seconds=config.openai_request_timeout_seconds,
+            request_max_retries=config.openai_request_max_retries,
+            request_retry_backoff_seconds=config.openai_request_retry_backoff_seconds,
         )
 
     def _emit_event(self, payload: dict[str, Any]) -> None:
         if self.progress_callback is None:
             return
-        self.progress_callback({"timestamp": utc_now_iso(), **payload})
+        with self._event_lock:
+            self.progress_callback({"timestamp": utc_now_iso(), **payload})
 
     def _emit_stage_event(
         self,
@@ -2006,6 +2025,8 @@ class ReportPipeline:
 
         def process_specialist(agent: DomainAgent, specialist: ExtractionAgent) -> list[ExtractedClaim]:
             nonlocal completed_specialists
+            with lock:
+                current = completed_specialists
             self._emit_event(
                 {
                     "event": "specialist_update",
@@ -2014,7 +2035,7 @@ class ReportPipeline:
                     "section": agent.section,
                     "specialist": specialist.name,
                     "message": f"Running {specialist.name}.",
-                    "current": completed_specialists,
+                    "current": current,
                     "total": total_specialists,
                 }
             )
@@ -2112,7 +2133,9 @@ class ReportPipeline:
                 )
             return extracted
 
-        with ThreadPoolExecutor(max_workers=min(10, total_specialists or 1)) as executor:
+        with ThreadPoolExecutor(
+            max_workers=min(self.config.openai_extraction_max_workers, total_specialists or 1)
+        ) as executor:
             futures = []
             for agent in get_active_agents(request.focus_areas):
                 for specialist in get_extraction_agents(agent):
@@ -2215,7 +2238,9 @@ class ReportPipeline:
                 )
             return verified_claim
 
-        with ThreadPoolExecutor(max_workers=min(20, total_claims or 1)) as executor:
+        with ThreadPoolExecutor(
+            max_workers=min(self.config.openai_verification_max_workers, total_claims or 1)
+        ) as executor:
             futures = [executor.submit(verify_single, claim) for claim in claims]
             for future in as_completed(futures):
                 future.result()

@@ -10,6 +10,20 @@
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
+    <div id="auth-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <h2>Authentication Required</h2>
+        <p>Please enter the access token to continue.</p>
+        <div class="form-group">
+          <input type="password" id="auth-token" placeholder="Enter token..." class="text-input" />
+        </div>
+        <div class="form-actions">
+          <button id="auth-submit" class="btn primary">Login</button>
+        </div>
+        <p id="auth-error" class="error-message" style="display: none;">Invalid token.</p>
+      </div>
+    </div>
+
     <div class="shell">
       <header class="topbar">
         <div class="brand-lockup">

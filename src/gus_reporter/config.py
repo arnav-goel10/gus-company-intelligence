@@ -72,10 +72,6 @@ class AppConfig:
     tinyfish_request_timeout_seconds: int | None
     raw_source_timeout_seconds: int | None
     openai_request_timeout_seconds: int | None
-    openai_request_max_retries: int
-    openai_request_retry_backoff_seconds: float
-    openai_extraction_max_workers: int
-    openai_verification_max_workers: int
     tinyfish_batch_size: int
     tinyfish_max_total_jobs: int
     tinyfish_max_acquisition_waves: int
@@ -116,22 +112,6 @@ class AppConfig:
             ),
             openai_request_timeout_seconds=_env_optional_int(
                 "OPENAI_REQUEST_TIMEOUT_SECONDS", "180"
-            ),
-            openai_request_max_retries=max(
-                0,
-                int(os.getenv("OPENAI_REQUEST_MAX_RETRIES", "3")),
-            ),
-            openai_request_retry_backoff_seconds=max(
-                0.1,
-                float(os.getenv("OPENAI_REQUEST_RETRY_BACKOFF_SECONDS", "2.0")),
-            ),
-            openai_extraction_max_workers=max(
-                1,
-                int(os.getenv("OPENAI_EXTRACTION_MAX_WORKERS", "10")),
-            ),
-            openai_verification_max_workers=max(
-                1,
-                int(os.getenv("OPENAI_VERIFICATION_MAX_WORKERS", "20")),
             ),
             tinyfish_batch_size=int(os.getenv("TINYFISH_BATCH_SIZE", "50")),
             tinyfish_max_total_jobs=int(

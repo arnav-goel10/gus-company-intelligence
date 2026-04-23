@@ -1,4 +1,68 @@
+
+async function apiFetch(url, options = {}) {
+  const headers = { ...options.headers };
+  if (state.authToken) {
+    headers['Authorization'] = `Bearer ${state.authToken}`;
+  }
+
+  const response = await fetch(url, { ...options, headers });
+
+  if (response.status === 401) {
+    showAuthModal();
+    throw new Error("Unauthorized");
+  }
+
+  return response;
+}
+
+function showAuthModal(error = false) {
+  document.getElementById('auth-modal').style.display = 'flex';
+  if (error) {
+    document.getElementById('auth-error').style.display = 'block';
+  }
+}
+
+function hideAuthModal() {
+  document.getElementById('auth-modal').style.display = 'none';
+  document.getElementById('auth-error').style.display = 'none';
+}
+
+async function checkAuthStatus() {
+  try {
+    const res = await fetch("/api/auth/status", {
+      headers: state.authToken ? { 'Authorization': `Bearer ${state.authToken}` } : {}
+    });
+    const data = await res.json();
+    state.authRequired = data.auth_required;
+
+    if (state.authRequired && !data.authenticated) {
+      showAuthModal();
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("Auth check failed:", err);
+    return false;
+  }
+}
+
+document.getElementById('auth-submit').addEventListener('click', async () => {
+  const token = document.getElementById('auth-token').value;
+  state.authToken = token;
+  localStorage.setItem('gus_ui_token', token);
+
+  const isAuthenticated = await checkAuthStatus();
+  if (isAuthenticated) {
+    hideAuthModal();
+    bootstrap(); // Re-initialize app
+  } else {
+    showAuthModal(true);
+  }
+});
+
 const state = {
+  authToken: localStorage.getItem('gus_ui_token'),
+  authRequired: false,
   runs: [],
   selectedRunId: null,
   selectedArtifactPath: null,
@@ -34,7 +98,7 @@ const domainLabels = {
 };
 
 async function api(path, options = {}) {
-  const response = await fetch(path, {
+  const response = await apiFetch(path, {
     headers: { "Content-Type": "application/json" },
     ...options,
   });
@@ -936,6 +1000,9 @@ async function submitRun(event) {
 }
 
 async function bootstrap() {
+  const authenticated = await checkAuthStatus();
+  if (!authenticated) return;
+
   const form = document.getElementById("run-form");
   const input = document.getElementById("company_name");
   form.addEventListener("submit", submitRun);

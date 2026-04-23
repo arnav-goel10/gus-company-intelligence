@@ -3,7 +3,9 @@ from __future__ import annotations
 import base64
 import json
 import urllib.parse
+import threading
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Callable
 
@@ -610,6 +612,16 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
     return jobs
 
 
+def _extract_hostname(url: str) -> str:
+    stripped = url.strip()
+    candidate = stripped if "://" in stripped else f"https://{stripped.lstrip('/')}"
+    return (urllib.parse.urlparse(candidate).hostname or "").lower()
+
+
+def _domain_matches(hostname: str, domain: str) -> bool:
+    return hostname == domain or hostname.endswith(f".{domain}")
+
+
 def _guess_discovered_source_type(
     *,
     source_kind: str,
@@ -619,6 +631,7 @@ def _guess_discovered_source_type(
     source_kind = source_kind.lower()
     document_type = document_type.lower()
     url_lower = url.lower()
+    hostname = _extract_hostname(url_lower)
 
     if any(marker in document_type for marker in {"annual", "quarter", "earnings", "presentation", "filing"}):
         return "financial_document"
@@ -630,8 +643,12 @@ def _guess_discovered_source_type(
         return "financial_sec_filings"
     if any(marker in url_lower for marker in {"investor", "investors"}):
         return "financial_investor_relations"
-    if "sec.gov" in url_lower or "edgar" in url_lower:
+    if _domain_matches(hostname, "sec.gov") or "edgar" in url_lower:
         return "financial_sec_filings"
+
+    if "annual-report" in url_lower or "quarterly-report" in url_lower or "10-k" in url_lower or "10-q" in url_lower:
+        return "financial_document"
+
     return "financial_document"
 
 
@@ -716,6 +733,7 @@ def _guess_discovered_legal_source_type(
     source_kind = source_kind.lower()
     document_type = document_type.lower()
     url_lower = url.lower()
+    hostname = _extract_hostname(url_lower)
 
     if any(marker in source_kind for marker in {"court", "docket", "pacer", "case", "litigation"}):
         return "legal_court_records"
@@ -725,14 +743,23 @@ def _guess_discovered_legal_source_type(
         return "legal_sanctions"
     if any(marker in source_kind for marker in {"registry", "corporat", "secretary", "incorporation"}):
         return "legal_corporate_registry"
-    if any(marker in url_lower for marker in {"courtlistener", "pacer", "uscourts.gov"}):
+
+    if any(
+        _domain_matches(hostname, marker)
+        for marker in {"courtlistener.com", "pacer.gov", "uscourts.gov"}
+    ):
         return "legal_court_records"
-    if any(marker in url_lower for marker in {"sec.gov/litigation", "ftc.gov", "doj.gov", "enforcement"}):
+    if _domain_matches(hostname, "sec.gov") and "litigation" in url_lower:
         return "legal_enforcement"
-    if any(marker in url_lower for marker in {"ofac", "sanctions", "treasury.gov/sdn"}):
+    if any(_domain_matches(hostname, marker) for marker in {"ftc.gov", "doj.gov"}) or "enforcement" in url_lower:
+        return "legal_enforcement"
+    if (
+        _domain_matches(hostname, "treasury.gov") and ("ofac" in url_lower or "sdn" in url_lower)
+    ) or "sanctions" in url_lower:
         return "legal_sanctions"
-    if any(marker in url_lower for marker in {"opencorporates", "secretary", "sos."}):
+    if _domain_matches(hostname, "opencorporates.com") or "sos." in hostname or "secretary" in url_lower:
         return "legal_corporate_registry"
+
     if any(marker in document_type for marker in {"complaint", "order", "judgment", "settlement", "filing"}):
         return "legal_document"
     return "legal_document"
@@ -745,23 +772,36 @@ def _guess_discovered_news_source_type(
 ) -> str:
     source_kind = source_kind.lower()
     url_lower = url.lower()
+    hostname = _extract_hostname(url_lower)
 
-    if any(marker in url_lower for marker in {"prnewswire", "businesswire", "globenewswire"}):
+    if any(
+        _domain_matches(hostname, marker)
+        for marker in {"prnewswire.com", "businesswire.com", "globenewswire.com"}
+    ):
         return "news_press_release"
     if any(marker in source_kind for marker in {"press_release", "press release", "wire"}):
         return "news_press_release"
-    if any(marker in url_lower for marker in {
+
+    aggregator_domains = {
         "reuters.com", "bloomberg.com", "wsj.com", "nytimes.com", "ft.com",
-        "cnbc.com", "bbc.com", "apnews.com",
-    }):
+        "cnbc.com", "bbc.com", "apnews.com", "news.yahoo.com", "news.google.com"
+    }
+    if any(_domain_matches(hostname, domain) for domain in aggregator_domains):
         return "news_aggregator"
-    if any(marker in url_lower for marker in {
+
+    industry_domains = {
         "techcrunch.com", "theinformation.com", "semafor.com", "arstechnica.com",
-        "theverge.com", "wired.com",
-    }):
+        "theverge.com", "wired.com", "forbes.com", "fortune.com", "inc.com"
+    }
+    if any(_domain_matches(hostname, domain) for domain in industry_domains):
         return "news_industry_publication"
+
     if any(marker in source_kind for marker in {"news", "article", "report", "coverage"}):
         return "news_aggregator"
+
+    if "news" in url_lower or "article" in url_lower or "blog" in url_lower:
+        return "news_article"
+
     return "news_article"
 
 
@@ -1660,6 +1700,7 @@ class ReportPipeline:
     ) -> None:
         self.config = config
         self.progress_callback = progress_callback
+        self._event_lock = threading.Lock()
         self.storage = RunStorage(config.report_output_dir)
         self.tinyfish = TinyfishClient(
             api_key=config.tinyfish_api_key,
@@ -1681,12 +1722,15 @@ class ReportPipeline:
             base_url=config.openai_base_url,
             model=config.openai_model,
             request_timeout_seconds=config.openai_request_timeout_seconds,
+            request_max_retries=config.openai_request_max_retries,
+            request_retry_backoff_seconds=config.openai_request_retry_backoff_seconds,
         )
 
     def _emit_event(self, payload: dict[str, Any]) -> None:
         if self.progress_callback is None:
             return
-        self.progress_callback({"timestamp": utc_now_iso(), **payload})
+        with self._event_lock:
+            self.progress_callback({"timestamp": utc_now_iso(), **payload})
 
     def _emit_stage_event(
         self,
@@ -1969,6 +2013,9 @@ class ReportPipeline:
         ]
         total_specialists = len(extraction_units)
         completed_specialists = 0
+        started_specialists = 0
+        lock = threading.Lock()
+
         self._emit_stage_event(
             stage="extraction",
             status="running",
@@ -1976,49 +2023,54 @@ class ReportPipeline:
             current=0,
             total=total_specialists,
         )
-        for agent in get_active_agents(request.focus_areas):
-            extraction_agents = get_extraction_agents(agent)
-            for specialist in extraction_agents:
-                self._emit_event(
-                    {
-                        "event": "specialist_update",
-                        "stage": "extraction",
-                        "status": "running",
-                        "section": agent.section,
-                        "specialist": specialist.name,
-                        "message": f"Running {specialist.name}.",
-                        "current": completed_specialists,
-                        "total": total_specialists,
-                    }
-                )
-                specialist_evidence = select_evidence_for_extraction_agent(
-                    specialist,
-                    select_evidence_for_agent(agent, evidence),
-                )
-                try:
-                    payload = self.openai.structured_response(
-                        schema_name=f"{agent.section}_{specialist.name}_claim_extraction",
-                        schema=extraction_schema([agent.section]),
-                        system_prompt=(
-                            f"{EXTRACTION_SYSTEM_PROMPT}\n\n"
-                            f"Coordinator section: {agent.section}\n"
-                            f"Coordinator: {agent.name}\n"
-                            f"Specialist: {specialist.name}\n"
-                            f"Specialist instruction: {specialist.extraction_instruction}"
+
+        def process_specialist(agent: DomainAgent, specialist: ExtractionAgent) -> list[ExtractedClaim]:
+            nonlocal completed_specialists
+            nonlocal started_specialists
+            with lock:
+                started_specialists += 1
+                current = started_specialists
+            self._emit_event(
+                {
+                    "event": "specialist_update",
+                    "stage": "extraction",
+                    "status": "running",
+                    "section": agent.section,
+                    "specialist": specialist.name,
+                    "message": f"Running {specialist.name}.",
+                    "current": current,
+                    "total": total_specialists,
+                }
+            )
+            specialist_evidence = select_evidence_for_extraction_agent(
+                specialist,
+                select_evidence_for_agent(agent, evidence),
+            )
+            try:
+                payload = self.openai.structured_response(
+                    schema_name=f"{agent.section}_{specialist.name}_claim_extraction",
+                    schema=extraction_schema([agent.section]),
+                    system_prompt=(
+                        f"{EXTRACTION_SYSTEM_PROMPT}\n\n"
+                        f"Coordinator section: {agent.section}\n"
+                        f"Coordinator: {agent.name}\n"
+                        f"Specialist: {specialist.name}\n"
+                        f"Specialist instruction: {specialist.extraction_instruction}"
+                    ),
+                    user_content=_build_openai_user_content(
+                        preamble=(
+                        f"Company: {request.company_name}\n"
+                        f"Jurisdiction: {request.primary_jurisdiction}\n"
+                        f"Target section: {agent.section}\n"
+                        f"Goal: {request.report_goal or 'Generate a source-backed diligence report.'}\n\n"
+                        "Use attached PDFs and raw source text to extract only directly supported claims."
                         ),
-                        user_content=_build_openai_user_content(
-                            preamble=(
-                            f"Company: {request.company_name}\n"
-                            f"Jurisdiction: {request.primary_jurisdiction}\n"
-                            f"Target section: {agent.section}\n"
-                            f"Goal: {request.report_goal or 'Generate a source-backed diligence report.'}\n\n"
-                            "Use attached PDFs and raw source text to extract only directly supported claims."
-                            ),
-                            evidence=specialist_evidence,
-                            run_dir=run_dir,
-                        ),
-                    )
-                except Exception as exc:
+                        evidence=specialist_evidence,
+                        run_dir=run_dir,
+                    ),
+                )
+            except Exception as exc:
+                with lock:
                     completed_specialists += 1
                     self._emit_event(
                         {
@@ -2040,23 +2092,27 @@ class ReportPipeline:
                         current=completed_specialists,
                         total=total_specialists,
                     )
-                    continue
-                for offset, claim in enumerate(payload.get("claims", []), start=1):
-                    claims.append(
-                        ExtractedClaim(
-                            claim_id=f"{agent.section}_{specialist.name}_{offset:03d}",
-                            section=str(claim["section"]),
-                            statement=str(claim["statement"]).strip(),
-                            importance=str(claim["importance"]),
-                            confidence=float(claim["confidence"]),
-                            as_of=str(claim["as_of"]).strip(),
-                            source_quote=str(claim["source_quote"]).strip(),
-                            evidence_ids=[
-                                item.evidence_id for item in specialist_evidence
-                            ],
-                            raw_source_label=specialist.name,
-                        )
+                return []
+
+            extracted = []
+            for offset, claim in enumerate(payload.get("claims", []), start=1):
+                extracted.append(
+                    ExtractedClaim(
+                        claim_id=f"{agent.section}_{specialist.name}_{offset:03d}",
+                        section=str(claim["section"]),
+                        statement=str(claim["statement"]).strip(),
+                        importance=str(claim["importance"]),
+                        confidence=float(claim["confidence"]),
+                        as_of=str(claim["as_of"]).strip(),
+                        source_quote=str(claim["source_quote"]).strip(),
+                        evidence_ids=[
+                            item.evidence_id for item in specialist_evidence
+                        ],
+                        raw_source_label=specialist.name,
                     )
+                )
+
+            with lock:
                 completed_specialists += 1
                 self._emit_event(
                     {
@@ -2078,6 +2134,19 @@ class ReportPipeline:
                     current=completed_specialists,
                     total=total_specialists,
                 )
+            return extracted
+
+        with ThreadPoolExecutor(
+            max_workers=min(self.config.openai_extraction_max_workers, total_specialists or 1)
+        ) as executor:
+            futures = []
+            for agent in get_active_agents(request.focus_areas):
+                for specialist in get_extraction_agents(agent):
+                    futures.append(executor.submit(process_specialist, agent, specialist))
+
+            for future in as_completed(futures):
+                claims.extend(future.result())
+
         self._emit_stage_event(
             stage="extraction",
             status="completed",
@@ -2093,6 +2162,8 @@ class ReportPipeline:
         evidence_map = {item.evidence_id: item for item in evidence}
         verified: list[VerifiedClaim] = []
         total_claims = len(claims)
+        lock = threading.Lock()
+
         self._emit_stage_event(
             stage="verification",
             status="running",
@@ -2100,7 +2171,8 @@ class ReportPipeline:
             current=0,
             total=total_claims,
         )
-        for claim in claims:
+
+        def verify_single(claim: ExtractedClaim) -> VerifiedClaim:
             referenced = [evidence_map[eid] for eid in claim.evidence_ids if eid in evidence_map]
             try:
                 payload = self.openai.structured_response(
@@ -2152,19 +2224,30 @@ class ReportPipeline:
                     importance=claim.importance,
                     as_of=claim.as_of,
                 )
-            verified.append(verified_claim)
-            self._emit_event(
-                {
-                    "event": "verification_update",
-                    "stage": "verification",
-                    "status": "running",
-                    "message": f"Verified {claim.claim_id}.",
-                    "current": len(verified),
-                    "total": total_claims,
-                    "claim_id": claim.claim_id,
-                    "claim_status": verified_claim.status,
-                }
-            )
+
+            with lock:
+                verified.append(verified_claim)
+                self._emit_event(
+                    {
+                        "event": "verification_update",
+                        "stage": "verification",
+                        "status": "running",
+                        "message": f"Verified {claim.claim_id}.",
+                        "current": len(verified),
+                        "total": total_claims,
+                        "claim_id": claim.claim_id,
+                        "claim_status": verified_claim.status,
+                    }
+                )
+            return verified_claim
+
+        with ThreadPoolExecutor(
+            max_workers=min(self.config.openai_verification_max_workers, total_claims or 1)
+        ) as executor:
+            futures = [executor.submit(verify_single, claim) for claim in claims]
+            for future in as_completed(futures):
+                future.result()
+
         self._emit_stage_event(
             stage="verification",
             status="completed",

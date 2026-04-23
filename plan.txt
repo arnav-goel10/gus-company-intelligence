@@ -1,0 +1,4 @@
+1. Implement Basic Authentication to `GusUIRequestHandler` using a hardcoded or configured token (e.g. `GUS_UI_TOKEN`) for deployment security.
+2. Update the UI to show a login prompt if not authenticated, and pass the auth token.
+3. Update tests
+4. Submit

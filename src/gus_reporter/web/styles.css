@@ -1242,3 +1242,38 @@ button:disabled {
     gap: 4px;
   }
 }
+
+/* Auth Modal */
+.modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: var(--bg-card);
+  padding: 32px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid var(--border-soft);
+  text-align: center;
+}
+.modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-family: "Instrument Serif", serif;
+  font-size: 28px;
+}
+.modal-content p {
+  color: var(--fg-muted);
+  margin-bottom: 24px;
+}
+.error-message {
+  color: var(--alert-error);
+  margin-top: 16px;
+  font-size: 14px;
+}

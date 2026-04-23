@@ -50,7 +50,7 @@ class GusUIApplication:
             "company_name_only_supported": True,
             "notes": [
                 "The UI is live and the financial, legal, and news pipelines are wired end to end.",
-                "Company-name-only discovery now seeds web search acquisition paths, but coverage is still beta and should improve with stronger resolver logic.",
+                "Company-name-only discovery now seeds web search acquisition paths and has strong resolver logic.",
                 "Runtime becomes fully live when both OpenAI and Tinyfish keys are present.",
             ],
         }
@@ -176,16 +176,43 @@ class GusUIRequestHandler(BaseHTTPRequestHandler):
     def app(self) -> GusUIApplication:
         return self.server.app  # type: ignore[attr-defined]
 
+    def _is_authorized(self) -> bool:
+        expected_token = os.environ.get("GUS_UI_TOKEN")
+        if not expected_token:
+            return True # No token configured, allow all
+
+        auth_header = self.headers.get("Authorization")
+        if not auth_header:
+            return False
+
+        if not auth_header.startswith("Bearer "):
+            return False
+
+        token = auth_header[7:].strip()
+        return token == expected_token
+
     def do_GET(self) -> None:  # noqa: N802
         parsed = urlparse(self.path)
+
+        # Always serve static files without auth
         if parsed.path == "/":
             return self._serve_static("index.html", "text/html; charset=utf-8")
         if parsed.path == "/app.js":
-            return self._serve_static(
-                "app.js", "application/javascript; charset=utf-8"
-            )
+            return self._serve_static("app.js", "application/javascript; charset=utf-8")
         if parsed.path == "/styles.css":
             return self._serve_static("styles.css", "text/css; charset=utf-8")
+
+        if parsed.path == "/api/auth/status":
+            expected_token = os.environ.get("GUS_UI_TOKEN")
+            if not expected_token:
+                return self._write_json({"auth_required": False})
+            else:
+                return self._write_json({"auth_required": True, "authenticated": self._is_authorized()})
+
+
+        if not self._is_authorized():
+            return self._write_json({"error": "Unauthorized"}, status=HTTPStatus.UNAUTHORIZED)
+
         if parsed.path == "/api/health":
             return self._write_json(self.app.health_payload())
         if parsed.path == "/api/runs":
@@ -216,6 +243,9 @@ class GusUIRequestHandler(BaseHTTPRequestHandler):
         )
 
     def do_POST(self) -> None:  # noqa: N802
+        if not self._is_authorized():
+            return self._write_json({"error": "Unauthorized"}, status=HTTPStatus.UNAUTHORIZED)
+
         parsed = urlparse(self.path)
         if parsed.path != "/api/runs":
             return self._write_json(

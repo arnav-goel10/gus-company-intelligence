@@ -65,6 +65,13 @@ Useful Tinyfish tuning variables:
 - `TINYFISH_REQUEST_MAX_RETRIES` and `TINYFISH_REQUEST_RETRY_BACKOFF_SECONDS`
   control transport-level retries for 429 and 5xx responses
 
+Useful OpenAI tuning variables:
+
+- `OPENAI_REQUEST_MAX_RETRIES` and `OPENAI_REQUEST_RETRY_BACKOFF_SECONDS`
+  control transport-level retries for 429 and 5xx responses
+- `OPENAI_EXTRACTION_MAX_WORKERS` and `OPENAI_VERIFICATION_MAX_WORKERS`
+  control parallel OpenAI fan-out during extraction and verification
+
 Model policy:
 
 - The default model is `gpt-5.4-mini`.

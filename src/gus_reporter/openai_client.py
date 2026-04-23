@@ -6,6 +6,8 @@ import urllib.error
 import urllib.request
 from typing import Any
 
+MAX_RETRY_BACKOFF_SECONDS = 60.0
+
 
 class OpenAIClient:
     def __init__(
@@ -14,6 +16,8 @@ class OpenAIClient:
         base_url: str,
         model: str,
         request_timeout_seconds: int | None = 180,
+        request_max_retries: int = 3,
+        request_retry_backoff_seconds: float = 2.0,
     ) -> None:
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
@@ -21,6 +25,8 @@ class OpenAIClient:
         self.request_timeout_seconds = (
             request_timeout_seconds if request_timeout_seconds and request_timeout_seconds > 0 else None
         )
+        self.request_max_retries = max(0, request_max_retries)
+        self.request_retry_backoff_seconds = max(0.1, request_retry_backoff_seconds)
 
     def structured_response(
         self,
@@ -114,27 +120,44 @@ class OpenAIClient:
     def _request(self, method: str, path: str, payload: dict[str, Any] | None = None) -> dict:
         url = f"{self.base_url}{path}"
         body = None if payload is None else json.dumps(payload).encode("utf-8")
-        request = urllib.request.Request(
-            url,
-            data=body,
-            method=method,
-            headers={
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-            },
-        )
-        try:
-            if self.request_timeout_seconds is None:
-                response_context = urllib.request.urlopen(request)
-            else:
-                response_context = urllib.request.urlopen(
-                    request,
-                    timeout=self.request_timeout_seconds,
-                )
-            with response_context as response:
-                return json.loads(response.read().decode("utf-8"))
-        except urllib.error.HTTPError as exc:
-            detail = exc.read().decode("utf-8", errors="replace")
-            raise RuntimeError(
-                f"OpenAI request failed: {method} {url} -> {exc.code} {detail}"
-            ) from exc
+        for attempt in range(self.request_max_retries + 1):
+            request = urllib.request.Request(
+                url,
+                data=body,
+                method=method,
+                headers={
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json",
+                },
+            )
+            try:
+                if self.request_timeout_seconds is None:
+                    response_context = urllib.request.urlopen(request)
+                else:
+                    response_context = urllib.request.urlopen(
+                        request,
+                        timeout=self.request_timeout_seconds,
+                    )
+                with response_context as response:
+                    return json.loads(response.read().decode("utf-8"))
+            except urllib.error.HTTPError as exc:
+                detail = exc.read().decode("utf-8", errors="replace")
+                if self._is_retryable_http_status(exc.code) and attempt < self.request_max_retries:
+                    time.sleep(self._backoff_seconds(attempt))
+                    continue
+                raise RuntimeError(
+                    f"OpenAI request failed: {method} {url} -> {exc.code} {detail}"
+                ) from exc
+            except urllib.error.URLError as exc:
+                if attempt < self.request_max_retries:
+                    time.sleep(self._backoff_seconds(attempt))
+                    continue
+                raise RuntimeError(
+                    f"OpenAI request failed: {method} {url} -> {str(exc.reason).strip()}"
+                ) from exc
+
+    def _backoff_seconds(self, attempt: int) -> float:
+        return min(self.request_retry_backoff_seconds * (2**attempt), MAX_RETRY_BACKOFF_SECONDS)
+
+    def _is_retryable_http_status(self, status_code: int) -> bool:
+        return status_code == 429 or status_code >= 500

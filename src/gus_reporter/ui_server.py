@@ -50,7 +50,7 @@ class GusUIApplication:
             "company_name_only_supported": True,
             "notes": [
                 "The UI is live and the financial, legal, and news pipelines are wired end to end.",
-                "Company-name-only discovery now seeds web search acquisition paths, but coverage is still beta and should improve with stronger resolver logic.",
+                "Company-name-only discovery now seeds web search acquisition paths and has strong resolver logic.",
                 "Runtime becomes fully live when both OpenAI and Tinyfish keys are present.",
             ],
         }

@@ -1994,6 +1994,7 @@ class ReportPipeline:
         ]
         total_specialists = len(extraction_units)
         completed_specialists = 0
+        started_specialists = 0
         lock = threading.Lock()
 
         self._emit_stage_event(
@@ -2006,6 +2007,10 @@ class ReportPipeline:
 
         def process_specialist(agent: DomainAgent, specialist: ExtractionAgent) -> list[ExtractedClaim]:
             nonlocal completed_specialists
+            nonlocal started_specialists
+            with lock:
+                started_specialists += 1
+                current = started_specialists
             self._emit_event(
                 {
                     "event": "specialist_update",
@@ -2014,7 +2019,7 @@ class ReportPipeline:
                     "section": agent.section,
                     "specialist": specialist.name,
                     "message": f"Running {specialist.name}.",
-                    "current": completed_specialists,
+                    "current": current,
                     "total": total_specialists,
                 }
             )

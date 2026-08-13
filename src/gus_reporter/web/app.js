@@ -333,8 +333,17 @@ function categoryBadge(category) {
   return `<span class="category-badge ${escapeHtml(cat)}">${escapeHtml(label)}</span>`;
 }
 
+function safeHttpUrl(value) {
+  /* escaping stops attribute breakout, but an href can still carry a
+     javascript: scheme; only ever link out to http(s) targets */
+  const raw = String(value || "").trim();
+  return /^https?:\/\//i.test(raw) ? raw : "";
+}
+
 function buildSourceCards(sourceJobs) {
-  return sourceJobs.map((job) => `
+  return sourceJobs.map((job) => {
+    const previewUrl = safeHttpUrl(job.streaming_url);
+    return `
     <div class="detail-card">
       <div class="detail-row">
         <strong>${escapeHtml(job.label)}</strong>
@@ -343,9 +352,10 @@ function buildSourceCards(sourceJobs) {
       <p class="quiet">${categoryBadge(job.category)} ${escapeHtml(job.source_type || "")}</p>
       ${job.message ? `<p class="quiet">${escapeHtml(job.message)}</p>` : ""}
       <p class="url-text">${escapeHtml(job.url)}</p>
-      ${job.streaming_url ? `<a class="source-link" href="${escapeHtml(job.streaming_url)}" target="_blank" rel="noreferrer">Open Tinyfish preview</a>` : ""}
+      ${previewUrl ? `<a class="source-link" href="${escapeHtml(previewUrl)}" target="_blank" rel="noreferrer">Open Tinyfish preview</a>` : ""}
     </div>
-  `).join("");
+  `;
+  }).join("");
 }
 
 function buildGroupedSourceCards(sourceJobs) {

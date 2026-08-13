@@ -1,9 +1,15 @@
 [project]
 name = "gus-reporter"
 version = "0.1.0"
-description = "Automated company intelligence report generator using Tinyfish and OpenAI gpt-5.4-mini"
+description = "GUS: autonomous company-intelligence pipeline with claim-level provenance and fail-closed verification"
 requires-python = ">=3.11"
 readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Arnav Goel" }]
+keywords = ["multi-agent", "llm", "due-diligence", "provenance", "verification"]
+
+[project.urls]
+Repository = "https://github.com/arnav-goel10/gus-company-intelligence"
 
 [tool.unittest]
 start-directory = "tests"

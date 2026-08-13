@@ -1,186 +1,112 @@
-# GUS Automated Company Report Generator
+# GUS · autonomous company-intelligence pipeline
 
-This repository is the first implementation slice of an automated multi-agent
-company intelligence pipeline using Tinyfish for acquisition and OpenAI
-`gpt-5.4-mini` by default for structured extraction and verification.
+[![CI](https://github.com/arnav-goel10/gus-company-intelligence/actions/workflows/ci.yml/badge.svg)](https://github.com/arnav-goel10/gus-company-intelligence/actions/workflows/ci.yml)
 
-The current scaffold is intentionally narrow:
+GUS turns a company name into a source-backed due-diligence report. A planner decomposes the question and dispatches financial, legal, and news agents in parallel; every extracted claim carries provenance back to a captured source, and a verification pass re-checks each claim against its own evidence before it can appear in the report.
 
-- Tinyfish executes discovery/navigation URL batches, captures source maps and
-  direct document links, and retries blocked financial pages with `stealth`
-  after a `lite` first pass.
-- Direct raw-source fetching downloads or references the actual HTML, text, and
-  PDF artifacts that OpenAI analyzes.
-- The financial coordinator now fans out into specialist sub-agents for document
-  discovery, statement metrics, capital structure, guidance/funding, and
-  finance-specific red flags.
-- Domain agents focus on individual sections such as financials, legal, news,
-  leadership, workforce, and risk.
-- OpenAI `gpt-5.4-mini` extracts typed claims for each domain agent by default.
-- OpenAI `gpt-5.4-mini` verifies each claim against its source evidence by default.
-- Section agents synthesize section summaries.
-- An executive aggregation pass compiles the overall report.
-- The report assembler publishes only verified claims and blocks output when
-  section coverage is too weak.
+The design premise: **a fabricated claim costs more than a missing one.** That inverts the usual generation objective, so the whole pipeline is fail-closed. Unverified claims are suppressed, visibly, and the assembler blocks the report entirely when section coverage is too weak to stand behind.
 
-There is no runtime human-in-the-loop path in this implementation.
+## How a run works
 
-## Project Layout
-
-- `src/gus_reporter/config.py`: environment loading
-- `src/gus_reporter/models.py`: request, evidence, claim, and report models
-- `src/gus_reporter/agents.py`: domain-agent definitions and routing
-- `src/gus_reporter/tinyfish_client.py`: Tinyfish batch/async client with
-  vault, agent-memory, and `lite -> stealth` retry support
-- `src/gus_reporter/raw_source_client.py`: direct raw HTML/text/PDF acquisition
-  layer used after Tinyfish discovery
-- `src/gus_reporter/openai_client.py`: Responses API client for the configured OpenAI model
-- `src/gus_reporter/pipeline.py`: end-to-end pipeline
-- `src/gus_reporter/ui_server.py`: zero-dependency local operator UI
-- `src/gus_reporter/ui_state.py`: UI run-state projection for live progress
-- `src/gus_reporter/storage.py`: run artifact persistence
-- `examples/company_request.json`: example input
-- `tests/`: stdlib unit tests for deterministic logic
-
-## Environment
-
-Copy `.env.example` values into your shell or a local `.env` loader of choice.
-This project does not depend on third-party Python packages.
-
-Required variables:
-
-- `OPENAI_API_KEY`
-- `TINYFISH_API_KEY`
-
-Useful Tinyfish tuning variables:
-
-- `TINYFISH_DEFAULT_BROWSER_PROFILE` defaults to `lite`
-- `TINYFISH_BATCH_SIZE` controls `run-batch` chunking
-- `TINYFISH_MAX_TOTAL_JOBS` caps the total Tinyfish jobs a single run may fan
-  out into
-- `TINYFISH_MAX_ACQUISITION_WAVES` caps how many discovery-expansion waves the
-  financial crawler may execute
-- `TINYFISH_RETRY_WITH_STEALTH` enables automatic anti-bot retry for blocked
-  financial jobs
-- `TINYFISH_REQUEST_MAX_RETRIES` and `TINYFISH_REQUEST_RETRY_BACKOFF_SECONDS`
-  control transport-level retries for 429 and 5xx responses
-
-Useful OpenAI tuning variables:
-
-- `OPENAI_REQUEST_MAX_RETRIES` and `OPENAI_REQUEST_RETRY_BACKOFF_SECONDS`
-  control transport-level retries for 429 and 5xx responses
-- `OPENAI_EXTRACTION_MAX_WORKERS` and `OPENAI_VERIFICATION_MAX_WORKERS`
-  control parallel OpenAI fan-out during extraction and verification
-
-Model policy:
-
-- The default model is `gpt-5.4-mini`.
-- You can override it with `OPENAI_MODEL` if you want to move to a different model later.
-
-## Usage
-
-Run deterministic tests first:
-
-```bash
-PYTHONPATH=src python3 -m unittest discover -s tests -v
+```
+request ──► planning ──► acquisition ──► extraction ──► verification ──► assembly
+              │              │               │               │              │
+              │              │               │               │              └─ verified claims only;
+              │              │               │               │                 blocks on weak coverage
+              │              │               │               └─ every claim re-checked against
+              │              │               │                  its own source evidence
+              │              │               └─ domain agents emit typed claims
+              │              │                  (financial fans out into specialists)
+              │              └─ Tinyfish browses sources (lite, retries blocked
+              │                 pages with stealth), then raw HTML/text/PDF capture
+              └─ deterministic source seeding: IR pages, SEC filing
+                 indexes, explicit URLs, web-search discovery
 ```
 
-Run a report:
+1. **Planning** seeds source jobs deterministically from the request: investor-relations pages, `/investors` candidates, SEC filing indexes when a ticker is supplied, explicit URLs, and web-search discovery when only a name is given.
+2. **Acquisition** runs Tinyfish browse jobs in bounded batches (`lite` first, automatic `stealth` retry for blocked financial pages), then downloads the actual HTML, text, and PDF artifacts the models will read.
+3. **Extraction** routes evidence to domain agents (financials, legal, news). The financial coordinator fans out into specialists for document discovery, statement metrics, capital structure, guidance and funding, and finance-specific red flags. Each agent emits typed, schema-validated claims.
+4. **Verification** re-reads every claim against the specific evidence it cites. A claim that does not survive is dropped, not softened.
+5. **Assembly** builds the report from verified claims only: executive summary, entity profile, key findings, risk matrix, domain sections, recommendations, and a full source log.
 
-```bash
-PYTHONPATH=src python3 -m gus_reporter.cli --request examples/company_request.json
-```
+Every stage writes JSON artifacts under `runs/<timestamp>-<company>/`, so a finished run is fully auditable: claim → source → verification status.
 
-Artifacts are written under `runs/<timestamp>-<company-slug>/`.
+## Operator UI
 
-Run the operator UI:
+A zero-dependency local web UI shows the run as a live intelligence thread: stage progress, per-source acquisition status with Tinyfish preview links, the risk matrix, section summaries, and an inspector for every artifact the run wrote.
 
 ```bash
 PYTHONPATH=src python3 -m gus_reporter.ui_server --host 127.0.0.1 --port 8787
 ```
 
-Then open [http://127.0.0.1:8787](http://127.0.0.1:8787).
+Open http://127.0.0.1:8787. Set `GUS_UI_TOKEN` to require a bearer token for every API route (the UI prompts for it); leave it unset for local use.
 
-The UI currently provides:
+## Quickstart
 
-- a financial-run launcher from a single company-name prompt
-- live stage progress across planning, acquisition, extraction, verification, and reporting
-- per-source Tinyfish status tracking and preview links when available
-- final report rendering with risk matrix and section summaries
-- artifact inspection for every JSON file written during the run
+No third-party Python packages are required, the entire pipeline is standard library.
 
-## Target Report Format
+```bash
+cp .env.example .env       # add OPENAI_API_KEY and TINYFISH_API_KEY
 
-The implementation is being shaped around the most common diligence-report
-pattern used by commercial, legal, compliance, and investment teams:
+# deterministic tests (also run in CI)
+PYTHONPATH=src python3 -m unittest discover -s tests -v
 
-1. Executive summary
-2. Scope and methodology
-3. Entity profile
-4. Key findings
-5. Risk matrix
-6. Domain sections such as financial, legal, news, leadership, and workforce
-7. Recommendations
-8. Source log / appendix
+# run a report from a request file
+PYTHONPATH=src python3 -m gus_reporter.cli --request examples/company_request.json
+```
 
-## Request Shape
+Required environment: `OPENAI_API_KEY`, `TINYFISH_API_KEY`. The default model is `gpt-5.4-mini`, overridable with `OPENAI_MODEL`. Concurrency, batching, timeouts, and retry backoff are all tunable through the variables documented in `.env.example`.
 
-The request file is JSON. Minimal example:
+## Request shape
 
 ```json
 {
   "company_name": "Example Corp",
   "company_website": "https://example.com",
   "primary_jurisdiction": "US",
-  "focus_areas": [
-    "company_overview",
-    "financials",
-    "legal",
-    "industry",
-    "leadership",
-    "employees",
-    "news",
-    "risk_signals"
-  ]
+  "ticker": "EXMP",
+  "investor_relations_url": "https://example.com/investors",
+  "focus_areas": ["financials", "legal", "news"]
 }
 ```
 
-You can also supply explicit `source_jobs` for better coverage. For authenticated
-workflows, request-level Tinyfish fields are supported:
+Only `company_name` is required; everything else improves coverage. Explicit `source_jobs` are supported, as are authenticated Tinyfish workflows (`tinyfish_use_vault`, `tinyfish_credential_item_ids`, `tinyfish_enable_agent_memory`, and per-job `source_type`, `preferred_run_mode`, `allow_stealth_fallback`).
 
-- `tinyfish_use_vault`
-- `tinyfish_credential_item_ids`
-- `tinyfish_enable_agent_memory`
-- per-job `source_type`, `preferred_run_mode`, and `allow_stealth_fallback`
+## Project layout
 
-The financial planner now seeds:
+| Path | Responsibility |
+|---|---|
+| `src/gus_reporter/pipeline.py` | end-to-end orchestration: planning, waves, extraction, verification, assembly |
+| `src/gus_reporter/agents.py` | domain-agent definitions and routing |
+| `src/gus_reporter/tinyfish_client.py` | Tinyfish batch client: vault, agent memory, lite to stealth retry |
+| `src/gus_reporter/raw_source_client.py` | direct raw HTML/text/PDF acquisition after discovery |
+| `src/gus_reporter/openai_client.py` | Responses API client with retries and timeouts |
+| `src/gus_reporter/models.py`, `schemas.py` | request, evidence, claim, and report types with strict schemas |
+| `src/gus_reporter/ui_server.py`, `ui_state.py`, `web/` | zero-dependency operator UI and live run-state projection |
+| `src/gus_reporter/storage.py` | run artifact persistence |
+| `tests/` | 45 stdlib unit tests over the deterministic logic |
 
-- official investor-relations pages when provided
-- `/investor-relations` and `/investors` candidates when no IR URL is given
-- explicit financial source URLs such as annual report PDFs
-- SEC filing index coverage when a ticker is supplied
+## Design decisions
 
-Financial jobs use tighter Tinyfish goals that ask for bounded, structured JSON
-including reporting periods, key metrics, document links, capital events, red
-flags, and data gaps.
+- **Fail-closed, everywhere.** Verification can only remove claims. The assembler refuses to publish sections whose coverage is too thin, and says so in the artifact trail.
+- **Provenance is structural, not decorative.** Claims reference the evidence they came from; the report renderer cannot cite what the pipeline did not capture.
+- **Zero runtime dependencies.** Standard library only: the pipeline, the HTTP clients, and the operator UI. Nothing to install, nothing to audit beyond this repo.
+- **Bounded fan-out.** Worker pools, batch sizes, job caps, and acquisition waves are all capped by configuration, because an autonomous crawler without limits is a liability.
 
-## Current Limits
+## Current limits
 
-- No external vector store or graph database is wired in yet.
-- Retrieval is source-bounded per claim in this slice.
-- Source planning is deterministic from the request plus explicit source jobs.
-- The local UI surfaces Tinyfish live preview URLs when a run exposes them, but
-  the UI is still operator-facing rather than end-user polished.
-- Company-name-only source discovery is not implemented yet; the current live
-  flow still works best when the request includes website, ticker, or known
-  source URLs.
-- There is not yet a source-specific parser for SEC HTML or XBRL responses; the
-  current financial slice still relies on Tinyfish page extraction plus OpenAI
-  verification.
+- Retrieval is source-bounded per claim; there is no external vector store or graph database yet.
+- Source planning is deterministic from the request plus discovery waves; no learned source ranking.
+- No source-specific parsers for SEC HTML or XBRL yet; financial pages go through Tinyfish extraction plus model verification.
+- The operator UI is built for the operator, not for end-user delivery.
 
-## Near-Term Next Steps
+## Roadmap
 
-1. Add evidence deduplication and temporal entity resolution.
-2. Add a graph-backed ownership and related-party layer.
-3. Add batch backfills and background OpenAI jobs for larger runs.
-4. Add source-specific adapters for SEC, registries, news, and court sources.
+1. Evidence deduplication and temporal entity resolution.
+2. A graph-backed ownership and related-party layer.
+3. Published benchmark runs with full artifact traces.
+4. Source-specific adapters for SEC, registries, news, and court sources.
+
+## License
+
+Code is MIT licensed (see [LICENSE](LICENSE)).

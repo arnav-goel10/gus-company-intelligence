@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hmac
 import json
 import os
 import threading
@@ -189,7 +190,7 @@ class GusUIRequestHandler(BaseHTTPRequestHandler):
             return False
 
         token = auth_header[7:].strip()
-        return token == expected_token
+        return hmac.compare_digest(token.encode("utf-8"), expected_token.encode("utf-8"))
 
     def do_GET(self) -> None:  # noqa: N802
         parsed = urlparse(self.path)

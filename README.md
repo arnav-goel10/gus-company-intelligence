@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/arnav-goel10/gus-company-intelligence/actions/workflows/ci.yml/badge.svg)](https://github.com/arnav-goel10/gus-company-intelligence/actions/workflows/ci.yml)
 
-GUS turns a company name into a source-backed due-diligence report. A planner decomposes the question and dispatches financial, legal, and news agents in parallel; every extracted claim carries provenance back to a captured source, and a verification pass re-checks each claim against its own evidence before it can appear in the report.
+GUS turns a company name into a source-backed due-diligence report. A planner decomposes the question and dispatches eight domain agents in parallel, from company overview and financials to leadership, news and risk signals; every extracted claim carries provenance back to a captured source, and a verification pass re-checks each claim against its own evidence before it can appear in the report.
 
 The design premise: **a fabricated claim costs more than a missing one.** That inverts the usual generation objective, so the whole pipeline is fail-closed. Unverified claims are suppressed, visibly, and the assembler blocks the report entirely when section coverage is too weak to stand behind.
 
@@ -25,7 +25,7 @@ request ──► planning ──► acquisition ──► extraction ──► 
 
 1. **Planning** seeds source jobs deterministically from the request: investor-relations pages, `/investors` candidates, SEC filing indexes when a ticker is supplied, explicit URLs, and web-search discovery when only a name is given.
 2. **Acquisition** runs Tinyfish browse jobs in bounded batches (`lite` first, automatic `stealth` retry for blocked financial pages), then downloads the actual HTML, text, and PDF artifacts the models will read.
-3. **Extraction** routes evidence to domain agents (financials, legal, news). The financial coordinator fans out into specialists for document discovery, statement metrics, capital structure, guidance and funding, and finance-specific red flags. Each agent emits typed, schema-validated claims.
+3. **Extraction** routes evidence to the eight domain agents (company overview, financials, legal, industry, leadership, employees, news, risk signals). The financial coordinator fans out into specialists for document discovery, statement metrics, capital structure, guidance and funding, and finance-specific red flags. Each agent emits typed, schema-validated claims.
 4. **Verification** re-reads every claim against the specific evidence it cites. A claim that does not survive is dropped, not softened.
 5. **Assembly** builds the report from verified claims only: executive summary, entity profile, key findings, risk matrix, domain sections, recommendations, and a full source log.
 

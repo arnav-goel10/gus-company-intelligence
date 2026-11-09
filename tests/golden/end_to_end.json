@@ -731,18 +731,14 @@
         "Appendix / Source Log"
       ],
       "publish_decision": "blocked",
-      "publish_reason": "Only 3 focus areas have supported evidence; minimum required is 4.",
+      "publish_reason": "Only 1 focus areas have supported evidence; minimum required is 4.",
       "recommendations": [
         "rec"
       ],
       "risk_matrix": [
         {
           "evidence_ids": [
-            "direct_financials_001",
-            "direct_financials_002",
-            "direct_financials_003",
-            "tinyfish_financials_005",
-            "tinyfish_financials_016"
+            "direct_financials_001"
           ],
           "issue": "financials_financial_document_locator_claim_extraction claim 0",
           "recommendation": "Request primary financial statements and reconcile any quantitative exposure before relying on the claim.",
@@ -751,65 +747,30 @@
         },
         {
           "evidence_ids": [
-            "direct_financials_001",
-            "direct_financials_002",
-            "direct_financials_003",
-            "tinyfish_financials_005",
-            "tinyfish_financials_016"
+            "direct_financials_001"
           ],
           "issue": "financials_financial_statement_agent_claim_extraction claim 1",
           "recommendation": "Request primary financial statements and reconcile any quantitative exposure before relying on the claim.",
           "section": "financials",
           "severity": "medium"
-        },
-        {
-          "evidence_ids": [
-            "direct_financials_001"
-          ],
-          "issue": "news_news_negative_signal_agent_claim_extraction claim 0",
-          "recommendation": "Verify whether the event remains current, assess reputational impact, and determine whether it materially changes the investment thesis or company narrative.",
-          "section": "news",
-          "severity": "high"
-        },
-        {
-          "evidence_ids": [
-            "tinyfish_news_004",
-            "tinyfish_news_012",
-            "tinyfish_news_013",
-            "tinyfish_news_014",
-            "tinyfish_news_015"
-          ],
-          "issue": "news_news_sentiment_agent_claim_extraction claim 0",
-          "recommendation": "Verify whether the event remains current, assess reputational impact, and determine whether it materially changes the investment thesis or company narrative.",
-          "section": "news",
-          "severity": "high"
         }
       ],
       "scope_and_limitations": "Scope",
       "sections": [
         {
-          "evidence_ids": [
-            "tinyfish_company_overview_001"
-          ],
-          "highlights": [
-            "h1",
-            "h2"
-          ],
+          "evidence_ids": [],
+          "highlights": [],
           "name": "company_overview",
           "recommendations": [
-            "r1"
+            "Add stronger primary sources for this section before relying on it in a decision."
           ],
-          "status": "supported",
+          "status": "insufficient_evidence",
           "structured_data": {},
-          "summary": "Summary for company_overview_section_summary"
+          "summary": "Insufficient verified evidence for this section."
         },
         {
           "evidence_ids": [
-            "direct_financials_001",
-            "direct_financials_002",
-            "direct_financials_003",
-            "tinyfish_financials_005",
-            "tinyfish_financials_016"
+            "direct_financials_001"
           ],
           "highlights": [
             "h1",
@@ -845,31 +806,21 @@
           "summary": "Insufficient verified evidence for this section."
         },
         {
-          "evidence_ids": [
-            "direct_financials_001",
-            "tinyfish_news_004",
-            "tinyfish_news_012",
-            "tinyfish_news_013",
-            "tinyfish_news_014",
-            "tinyfish_news_015"
-          ],
-          "highlights": [
-            "h1",
-            "h2"
-          ],
+          "evidence_ids": [],
+          "highlights": [],
           "name": "news",
           "recommendations": [
-            "r1"
+            "Add stronger primary sources for this section before relying on it in a decision."
           ],
-          "status": "supported",
+          "status": "insufficient_evidence",
           "structured_data": {
-            "coverage_density": "mixed",
-            "coverage_sentiment": "mixed",
+            "coverage_density": "",
+            "coverage_sentiment": "",
             "data_gaps": [],
             "material_events": [],
             "negative_signals": []
           },
-          "summary": "Summary for news_section_summary"
+          "summary": "Insufficient verified evidence for this section."
         },
         {
           "evidence_ids": [],
@@ -1171,7 +1122,7 @@
         }
       ],
       "total_claims": 20,
-      "unsupported_claims": 15
+      "unsupported_claims": 18
     },
     "raw_source_manifest.json": [
       {
@@ -1969,18 +1920,20 @@
     "verified_claims.json": [
       {
         "as_of": "2025",
-        "blocking_issues": [],
+        "blocking_issues": [
+          "Grounding check: the extraction quote does not appear in any source the claim was extracted from."
+        ],
         "claim_id": "company_overview_overview_agent_001",
         "confidence": 0.9,
         "evidence_ids": [
           "tinyfish_company_overview_001"
         ],
         "importance": "high",
-        "rationale": "bucket 0",
+        "rationale": "Grounding check: the extraction quote does not appear in any source the claim was extracted from. Model rationale: bucket 0",
         "section": "company_overview",
         "source_quote": "Revenue grew 12%",
         "statement": "company_overview_overview_agent_claim_extraction claim 0",
-        "status": "supported"
+        "status": "unsupported"
       },
       {
         "as_of": "2025",
@@ -1988,11 +1941,7 @@
         "claim_id": "financials_financial_document_locator_001",
         "confidence": 0.9,
         "evidence_ids": [
-          "direct_financials_001",
-          "direct_financials_002",
-          "direct_financials_003",
-          "tinyfish_financials_005",
-          "tinyfish_financials_016"
+          "direct_financials_001"
         ],
         "importance": "high",
         "rationale": "bucket 0",
@@ -2028,11 +1977,7 @@
         "claim_id": "financials_financial_statement_agent_002",
         "confidence": 0.9,
         "evidence_ids": [
-          "direct_financials_001",
-          "direct_financials_002",
-          "direct_financials_003",
-          "tinyfish_financials_005",
-          "tinyfish_financials_016"
+          "direct_financials_001"
         ],
         "importance": "medium",
         "rationale": "bucket 0",
@@ -2290,22 +2235,26 @@
       },
       {
         "as_of": "2025",
-        "blocking_issues": [],
+        "blocking_issues": [
+          "Grounding check: the extraction quote does not appear in any source the claim was extracted from."
+        ],
         "claim_id": "news_news_negative_signal_agent_001",
         "confidence": 0.9,
         "evidence_ids": [
           "direct_financials_001"
         ],
         "importance": "high",
-        "rationale": "bucket 1",
+        "rationale": "Grounding check: the extraction quote does not appear in any source the claim was extracted from. Model rationale: bucket 1",
         "section": "news",
         "source_quote": "Revenue grew 12%",
         "statement": "news_news_negative_signal_agent_claim_extraction claim 0",
-        "status": "supported"
+        "status": "unsupported"
       },
       {
         "as_of": "2025",
-        "blocking_issues": [],
+        "blocking_issues": [
+          "Grounding check: the extraction quote does not appear in any source the claim was extracted from."
+        ],
         "claim_id": "news_news_sentiment_agent_001",
         "confidence": 0.9,
         "evidence_ids": [
@@ -2316,11 +2265,11 @@
           "tinyfish_news_015"
         ],
         "importance": "high",
-        "rationale": "bucket 0",
+        "rationale": "Grounding check: the extraction quote does not appear in any source the claim was extracted from. Model rationale: bucket 0",
         "section": "news",
         "source_quote": "Revenue grew 12%",
         "statement": "news_news_sentiment_agent_claim_extraction claim 0",
-        "status": "supported"
+        "status": "unsupported"
       },
       {
         "as_of": "2025",
@@ -3213,7 +3162,7 @@
     },
     {
       "claim_id": "company_overview_overview_agent_001",
-      "claim_status": "supported",
+      "claim_status": "unsupported",
       "current": 1,
       "event": "verification_update",
       "message": "Verified company_overview_overview_agent_001.",
@@ -3363,7 +3312,7 @@
     },
     {
       "claim_id": "news_news_negative_signal_agent_001",
-      "claim_status": "supported",
+      "claim_status": "unsupported",
       "current": 16,
       "event": "verification_update",
       "message": "Verified news_news_negative_signal_agent_001.",
@@ -3373,7 +3322,7 @@
     },
     {
       "claim_id": "news_news_sentiment_agent_001",
-      "claim_status": "supported",
+      "claim_status": "unsupported",
       "current": 17,
       "event": "verification_update",
       "message": "Verified news_news_sentiment_agent_001.",
@@ -3569,18 +3518,14 @@
           "Appendix / Source Log"
         ],
         "publish_decision": "blocked",
-        "publish_reason": "Only 3 focus areas have supported evidence; minimum required is 4.",
+        "publish_reason": "Only 1 focus areas have supported evidence; minimum required is 4.",
         "recommendations": [
           "rec"
         ],
         "risk_matrix": [
           {
             "evidence_ids": [
-              "direct_financials_001",
-              "direct_financials_002",
-              "direct_financials_003",
-              "tinyfish_financials_005",
-              "tinyfish_financials_016"
+              "direct_financials_001"
             ],
             "issue": "financials_financial_document_locator_claim_extraction claim 0",
             "recommendation": "Request primary financial statements and reconcile any quantitative exposure before relying on the claim.",
@@ -3589,65 +3534,30 @@
           },
           {
             "evidence_ids": [
-              "direct_financials_001",
-              "direct_financials_002",
-              "direct_financials_003",
-              "tinyfish_financials_005",
-              "tinyfish_financials_016"
+              "direct_financials_001"
             ],
             "issue": "financials_financial_statement_agent_claim_extraction claim 1",
             "recommendation": "Request primary financial statements and reconcile any quantitative exposure before relying on the claim.",
             "section": "financials",
             "severity": "medium"
-          },
-          {
-            "evidence_ids": [
-              "direct_financials_001"
-            ],
-            "issue": "news_news_negative_signal_agent_claim_extraction claim 0",
-            "recommendation": "Verify whether the event remains current, assess reputational impact, and determine whether it materially changes the investment thesis or company narrative.",
-            "section": "news",
-            "severity": "high"
-          },
-          {
-            "evidence_ids": [
-              "tinyfish_news_004",
-              "tinyfish_news_012",
-              "tinyfish_news_013",
-              "tinyfish_news_014",
-              "tinyfish_news_015"
-            ],
-            "issue": "news_news_sentiment_agent_claim_extraction claim 0",
-            "recommendation": "Verify whether the event remains current, assess reputational impact, and determine whether it materially changes the investment thesis or company narrative.",
-            "section": "news",
-            "severity": "high"
           }
         ],
         "scope_and_limitations": "Scope",
         "sections": [
           {
-            "evidence_ids": [
-              "tinyfish_company_overview_001"
-            ],
-            "highlights": [
-              "h1",
-              "h2"
-            ],
+            "evidence_ids": [],
+            "highlights": [],
             "name": "company_overview",
             "recommendations": [
-              "r1"
+              "Add stronger primary sources for this section before relying on it in a decision."
             ],
-            "status": "supported",
+            "status": "insufficient_evidence",
             "structured_data": {},
-            "summary": "Summary for company_overview_section_summary"
+            "summary": "Insufficient verified evidence for this section."
           },
           {
             "evidence_ids": [
-              "direct_financials_001",
-              "direct_financials_002",
-              "direct_financials_003",
-              "tinyfish_financials_005",
-              "tinyfish_financials_016"
+              "direct_financials_001"
             ],
             "highlights": [
               "h1",
@@ -3683,31 +3593,21 @@
             "summary": "Insufficient verified evidence for this section."
           },
           {
-            "evidence_ids": [
-              "direct_financials_001",
-              "tinyfish_news_004",
-              "tinyfish_news_012",
-              "tinyfish_news_013",
-              "tinyfish_news_014",
-              "tinyfish_news_015"
-            ],
-            "highlights": [
-              "h1",
-              "h2"
-            ],
+            "evidence_ids": [],
+            "highlights": [],
             "name": "news",
             "recommendations": [
-              "r1"
+              "Add stronger primary sources for this section before relying on it in a decision."
             ],
-            "status": "supported",
+            "status": "insufficient_evidence",
             "structured_data": {
-              "coverage_density": "mixed",
-              "coverage_sentiment": "mixed",
+              "coverage_density": "",
+              "coverage_sentiment": "",
               "data_gaps": [],
               "material_events": [],
               "negative_signals": []
             },
-            "summary": "Summary for news_section_summary"
+            "summary": "Insufficient verified evidence for this section."
           },
           {
             "evidence_ids": [],
@@ -4009,7 +3909,7 @@
           }
         ],
         "total_claims": 20,
-        "unsupported_claims": 15
+        "unsupported_claims": 18
       },
       "run_dir": "<run_dir>"
     }
@@ -4414,29 +4314,11 @@
     {
       "files": [],
       "max_output_tokens": 1400,
-      "schema_name": "company_overview_section_summary",
-      "schema_sha": "e0f226b0c5903f93",
-      "system_prompt": "You are generating a no-hallucination company intelligence report.\n\nRules:\n- Use only verified claims provided in the prompt.\n- Do not add outside knowledge.\n- If coverage is weak, say so directly.\n- Keep summaries decision-useful and compact.\n- Preserve a neutral, analyst-grade tone.\n- Write section output so it can drop cleanly into a formal due diligence PDF.\n\n\nAgent: overview_agent\nSection: company_overview\nInstruction: Write a concise entity snapshot for decision-makers. Keep it factual and avoid marketing tone.",
-      "user_prompt_used": true,
-      "user_text": "Company: Golden Widgets\nSection: company_overview\nSection meaning: What the company is, what it sells, where it operates, and notable scale signals.\n\nVerified claims:\n- Statement: company_overview_overview_agent_claim_extraction claim 0 | Importance: high | Confidence: 0.90 | As of: 2025 | Evidence IDs: tinyfish_company_overview_001"
-    },
-    {
-      "files": [],
-      "max_output_tokens": 1400,
       "schema_name": "financials_section_summary",
       "schema_sha": "c3217f834e7b899c",
       "system_prompt": "You are generating a no-hallucination company intelligence report.\n\nRules:\n- Use only verified claims provided in the prompt.\n- Do not add outside knowledge.\n- If coverage is weak, say so directly.\n- Keep summaries decision-useful and compact.\n- Preserve a neutral, analyst-grade tone.\n- Write section output so it can drop cleanly into a formal due diligence PDF.\n\n\nAgent: financial_agent\nSection: financials\nInstruction: Write a finance-focused summary highlighting verified metrics, data quality, red flags, and any missing disclosure.",
       "user_prompt_used": true,
-      "user_text": "Company: Golden Widgets\nSection: financials\nSection meaning: Revenue, profitability, funding, balance sheet, market cap, or official financial metrics.\n\nVerified claims:\n- Statement: financials_financial_document_locator_claim_extraction claim 0 | Importance: high | Confidence: 0.90 | As of: 2025 | Evidence IDs: direct_financials_001, direct_financials_002, direct_financials_003, tinyfish_financials_005, tinyfish_financials_016\n- Statement: financials_financial_statement_agent_claim_extraction claim 1 | Importance: medium | Confidence: 0.90 | As of: 2025 | Evidence IDs: direct_financials_001, direct_financials_002, direct_financials_003, tinyfish_financials_005, tinyfish_financials_016"
-    },
-    {
-      "files": [],
-      "max_output_tokens": 1400,
-      "schema_name": "news_section_summary",
-      "schema_sha": "6042815197137849",
-      "system_prompt": "You are generating a no-hallucination company intelligence report.\n\nRules:\n- Use only verified claims provided in the prompt.\n- Do not add outside knowledge.\n- If coverage is weak, say so directly.\n- Keep summaries decision-useful and compact.\n- Preserve a neutral, analyst-grade tone.\n- Write section output so it can drop cleanly into a formal due diligence PDF.\n\n\nAgent: news_agent\nSection: news\nInstruction: Write a recent-events summary with emphasis on what changed and why it matters.",
-      "user_prompt_used": true,
-      "user_text": "Company: Golden Widgets\nSection: news\nSection meaning: Recent material events, positive or negative, that change the company narrative.\n\nVerified claims:\n- Statement: news_news_negative_signal_agent_claim_extraction claim 0 | Importance: high | Confidence: 0.90 | As of: 2025 | Evidence IDs: direct_financials_001\n- Statement: news_news_sentiment_agent_claim_extraction claim 0 | Importance: high | Confidence: 0.90 | As of: 2025 | Evidence IDs: tinyfish_news_004, tinyfish_news_012, tinyfish_news_013, tinyfish_news_014, tinyfish_news_015"
+      "user_text": "Company: Golden Widgets\nSection: financials\nSection meaning: Revenue, profitability, funding, balance sheet, market cap, or official financial metrics.\n\nVerified claims:\n- Statement: financials_financial_document_locator_claim_extraction claim 0 | Importance: high | Confidence: 0.90 | As of: 2025 | Evidence IDs: direct_financials_001\n- Statement: financials_financial_statement_agent_claim_extraction claim 1 | Importance: medium | Confidence: 0.90 | As of: 2025 | Evidence IDs: direct_financials_001"
     },
     {
       "files": [],
@@ -4445,7 +4327,7 @@
       "schema_sha": "1cb7e41dd5d256b8",
       "system_prompt": "You are the coordinating editor for a multi-agent due diligence report.\n\nRules:\n- Use only section summaries and verified findings supplied in the prompt.\n- Produce a concise executive summary for decision-makers.\n- Make the methodology explicit and defensible.\n- Keep key findings ranked by materiality.\n- Recommendations should be actionable and tied to evidence gaps or risks.\n- The final output will be rendered into a formal PDF, so follow this structure exactly:\nTarget PDF structure:\n1. Executive Summary\n   Include the headline decision, overall risk posture, major blockers, and highest-value takeaways.\n2. Scope and Methodology\n   State scope, focus areas covered, source classes used, evidence freshness, and material limitations.\n3. Entity Profile\n   Summarize company identity, jurisdiction, business model, and other core orientation facts.\n4. Domain Analysis\n   Present each diligence section as its own analysis chapter, led by financials in this slice.\n5. Key Findings\n   Rank findings by materiality and decision relevance.\n6. Risk Matrix\n   Show severity, issue, supporting evidence, and mitigation or next-step recommendation.\n7. Recommendations and Decision Path\n   State proceed / proceed with conditions / do not proceed logic and next actions.\n8. Appendix / Source Log\n   End with traceable evidence references, source timestamps, and retrieval metadata.\n\n- Keep the tone factual, audit-ready, and suitable for investors, counsel, risk teams, or compliance reviewers.\n",
       "user_prompt_used": true,
-      "user_text": "Company: Golden Widgets\nJurisdiction: US\nGoal: Generate an evidence-backed company report.\nPublish decision: blocked\nPublish reason: Only 3 focus areas have supported evidence; minimum required is 4.\nRequested PDF section order: Executive Summary, Scope and Methodology, Entity Profile, company_overview, financials, legal, news, risk_signals, Key Findings, Risk Matrix, Recommendations and Decision Path, Appendix / Source Log\n\nScope guidance:\n- The report should read like an in-depth diligence memo for investors, legal, compliance, or risk teams.\n- Keep section ordering consistent with the requested PDF structure.\n- State limitations clearly when evidence is weak or missing.\n- The appendix should be represented by the source log rather than narrative repetition.\n\nSection summaries:\nSection company_overview (supported): Summary for company_overview_section_summary\n- Highlight: h1\n- Highlight: h2\n- Recommendation: r1\nSection financials (supported): Summary for financials_section_summary\n- Highlight: h1\n- Highlight: h2\n- Recommendation: r1\nSection legal (insufficient_evidence): Insufficient verified evidence for this section.\n- Recommendation: Add stronger primary sources for this section before relying on it in a decision.\nSection news (supported): Summary for news_section_summary\n- Highlight: h1\n- Highlight: h2\n- Recommendation: r1\nSection risk_signals (insufficient_evidence): Insufficient verified evidence for this section.\n- Recommendation: Add stronger primary sources for this section before relying on it in a decision.\n\nRisk matrix:\n- Severity: high | Section: financials | Issue: financials_financial_document_locator_claim_extraction claim 0 | Evidence IDs: direct_financials_001, direct_financials_002, direct_financials_003, tinyfish_financials_005, tinyfish_financials_016 | Recommendation: Request primary financial statements and reconcile any quantitative exposure before relying on the claim.\n- Severity: medium | Section: financials | Issue: financials_financial_statement_agent_claim_extraction claim 1 | Evidence IDs: direct_financials_001, direct_financials_002, direct_financials_003, tinyfish_financials_005, tinyfish_financials_016 | Recommendation: Request primary financial statements and reconcile any quantitative exposure before relying on the claim.\n- Severity: high | Section: news | Issue: news_news_negative_signal_agent_claim_extraction claim 0 | Evidence IDs: direct_financials_001 | Recommendation: Verify whether the event remains current, assess reputational impact, and determine whether it materially changes the investment thesis or company narrative.\n- Severity: high | Section: news | Issue: news_news_sentiment_agent_claim_extraction claim 0 | Evidence IDs: tinyfish_news_004, tinyfish_news_012, tinyfish_news_013, tinyfish_news_014, tinyfish_news_015 | Recommendation: Verify whether the event remains current, assess reputational impact, and determine whether it materially changes the investment thesis or company narrative."
+      "user_text": "Company: Golden Widgets\nJurisdiction: US\nGoal: Generate an evidence-backed company report.\nPublish decision: blocked\nPublish reason: Only 1 focus areas have supported evidence; minimum required is 4.\nRequested PDF section order: Executive Summary, Scope and Methodology, Entity Profile, company_overview, financials, legal, news, risk_signals, Key Findings, Risk Matrix, Recommendations and Decision Path, Appendix / Source Log\n\nScope guidance:\n- The report should read like an in-depth diligence memo for investors, legal, compliance, or risk teams.\n- Keep section ordering consistent with the requested PDF structure.\n- State limitations clearly when evidence is weak or missing.\n- The appendix should be represented by the source log rather than narrative repetition.\n\nSection summaries:\nSection company_overview (insufficient_evidence): Insufficient verified evidence for this section.\n- Recommendation: Add stronger primary sources for this section before relying on it in a decision.\nSection financials (supported): Summary for financials_section_summary\n- Highlight: h1\n- Highlight: h2\n- Recommendation: r1\nSection legal (insufficient_evidence): Insufficient verified evidence for this section.\n- Recommendation: Add stronger primary sources for this section before relying on it in a decision.\nSection news (insufficient_evidence): Insufficient verified evidence for this section.\n- Recommendation: Add stronger primary sources for this section before relying on it in a decision.\nSection risk_signals (insufficient_evidence): Insufficient verified evidence for this section.\n- Recommendation: Add stronger primary sources for this section before relying on it in a decision.\n\nRisk matrix:\n- Severity: high | Section: financials | Issue: financials_financial_document_locator_claim_extraction claim 0 | Evidence IDs: direct_financials_001 | Recommendation: Request primary financial statements and reconcile any quantitative exposure before relying on the claim.\n- Severity: medium | Section: financials | Issue: financials_financial_statement_agent_claim_extraction claim 1 | Evidence IDs: direct_financials_001 | Recommendation: Request primary financial statements and reconcile any quantitative exposure before relying on the claim."
     }
   ],
   "report_matches_artifact": true

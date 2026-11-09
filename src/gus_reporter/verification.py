@@ -2,11 +2,14 @@
 
 The verifier can only keep or suppress. A claim whose verification call fails
 is recorded as insufficient_evidence, so an outage suppresses claims rather
-than letting them through unchecked.
+than letting them through unchecked. A claim the model calls supported must
+then pass ground_citation: its quote has to appear in a source it cites.
 """
 
 from __future__ import annotations
 
+import dataclasses
+import re
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -17,6 +20,56 @@ from gus_reporter.models import EvidenceItem, ExtractedClaim, VerifiedClaim
 from gus_reporter.prompts import VERIFICATION_SYSTEM_PROMPT
 from gus_reporter.providers import StructuredModel
 from gus_reporter.schemas import verification_schema
+
+
+def _fold(text: str) -> str:
+    return re.sub(r"\s+", " ", text or "").strip().lower()
+
+
+def _searchable_text(item: EvidenceItem) -> str:
+    return f"{item.metadata.get('openai_input_text', '')}\n{item.content}"
+
+
+def _is_unextracted_pdf(item: EvidenceItem) -> bool:
+    return bool(item.metadata.get("openai_input_file_path")) and not str(
+        item.metadata.get("openai_input_text", "")
+    ).strip()
+
+
+def ground_citation(
+    verified: VerifiedClaim, extracted: ExtractedClaim, evidence_map: dict[str, EvidenceItem]
+) -> VerifiedClaim:
+    """Deterministic check after the model says supported.
+
+    The cited sources become the items, among those the claim was extracted
+    from, that contain the extraction quote. A PDF whose text was never
+    extracted cannot be searched, so it stays cited when the model named it.
+    If no cited source contains the quote, the claim is suppressed.
+    """
+    allowed = [eid for eid in extracted.evidence_ids if eid in evidence_map]
+    named = [eid for eid in verified.evidence_ids if eid in allowed] or allowed
+    quote = _fold(extracted.source_quote)
+    containing = [
+        eid for eid in allowed if quote and quote in _fold(_searchable_text(evidence_map[eid]))
+    ]
+    if containing:
+        preferred = [eid for eid in named if eid in containing]
+        return dataclasses.replace(verified, evidence_ids=preferred or containing)
+    pdfs = [eid for eid in named if _is_unextracted_pdf(evidence_map[eid])]
+    if quote and pdfs:
+        return dataclasses.replace(verified, evidence_ids=pdfs)
+    reason = (
+        "Grounding check: the extraction quote does not appear in any source the claim was "
+        "extracted from."
+        if quote
+        else "Grounding check: the claim has no supporting quote."
+    )
+    return dataclasses.replace(
+        verified,
+        status="unsupported",
+        rationale=f"{reason} Model rationale: {verified.rationale}",
+        blocking_issues=[*verified.blocking_issues, reason],
+    )
 
 
 class ClaimVerifier:
@@ -77,6 +130,8 @@ class ClaimVerifier:
                     importance=claim.importance,
                     as_of=claim.as_of,
                 )
+                if verified_claim.status == "supported":
+                    verified_claim = ground_citation(verified_claim, claim, evidence_map)
             except Exception as exc:
                 verified_claim = VerifiedClaim(
                     claim_id=claim.claim_id,

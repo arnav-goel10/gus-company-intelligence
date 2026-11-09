@@ -220,10 +220,14 @@ def select_evidence_for_extraction_agent(
     filtered = [item for item in evidence if item.category in preferred_categories]
     if agent.preferred_source_types:
         preferred_source_types = set(agent.preferred_source_types)
+        # Browse evidence carries tinyfish_source_type, directly fetched
+        # documents carry source_type. Match either, or the specialist would
+        # lose the raw annual report whenever a browse run of the same type exists.
         filtered_by_source_type = [
             item
             for item in filtered
-            if item.metadata.get("tinyfish_source_type", "") in preferred_source_types
+            if (item.metadata.get("source_type") or item.metadata.get("tinyfish_source_type", ""))
+            in preferred_source_types
         ]
         if filtered_by_source_type:
             return filtered_by_source_type

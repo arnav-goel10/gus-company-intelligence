@@ -246,6 +246,34 @@ class FinancialSubAgentTests(unittest.TestCase):
         self.assertEqual(["e1"], [item.evidence_id for item in selected])
 
 
+class RawDocumentRoutingTests(unittest.TestCase):
+    def test_raw_documents_reach_specialists_alongside_browse_evidence(self) -> None:
+        specialist = get_extraction_agents(DOMAIN_AGENTS["financials"])[1]
+        browse = EvidenceItem(
+            evidence_id="tinyfish_financials_001",
+            label="IR page",
+            category="financials",
+            url="https://example.com/investors",
+            retrieved_at="2026-03-28T00:00:00Z",
+            content="{}",
+            metadata={"tinyfish_source_type": "financial_investor_relations"},
+        )
+        annual_report = EvidenceItem(
+            evidence_id="direct_financials_001",
+            label="Annual report",
+            category="financials",
+            url="https://example.com/ar.pdf",
+            retrieved_at="2026-03-28T00:00:00Z",
+            content="Revenue was $10.",
+            metadata={"source_type": "financial_document"},
+        )
+        selected = select_evidence_for_extraction_agent(specialist, [annual_report, browse])
+        self.assertEqual(
+            ["direct_financials_001", "tinyfish_financials_001"],
+            [item.evidence_id for item in selected],
+        )
+
+
 class PublishDecisionTests(unittest.TestCase):
     def test_publish_decision_blocks_weak_coverage(self) -> None:
         claims = [

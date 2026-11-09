@@ -356,6 +356,9 @@
         "claim_id": "financials_financial_document_locator_001",
         "confidence": 0.5,
         "evidence_ids": [
+          "direct_financials_001",
+          "direct_financials_002",
+          "direct_financials_003",
           "tinyfish_financials_005",
           "tinyfish_financials_016"
         ],
@@ -370,6 +373,9 @@
         "claim_id": "financials_financial_statement_agent_001",
         "confidence": 0.5,
         "evidence_ids": [
+          "direct_financials_001",
+          "direct_financials_002",
+          "direct_financials_003",
           "tinyfish_financials_005",
           "tinyfish_financials_016"
         ],
@@ -384,6 +390,9 @@
         "claim_id": "financials_financial_statement_agent_002",
         "confidence": 0.6,
         "evidence_ids": [
+          "direct_financials_001",
+          "direct_financials_002",
+          "direct_financials_003",
           "tinyfish_financials_005",
           "tinyfish_financials_016"
         ],
@@ -398,6 +407,9 @@
         "claim_id": "financials_funding_guidance_agent_001",
         "confidence": 0.5,
         "evidence_ids": [
+          "direct_financials_001",
+          "direct_financials_002",
+          "direct_financials_003",
           "tinyfish_financials_005",
           "tinyfish_financials_016"
         ],
@@ -726,6 +738,9 @@
       "risk_matrix": [
         {
           "evidence_ids": [
+            "direct_financials_001",
+            "direct_financials_002",
+            "direct_financials_003",
             "tinyfish_financials_005",
             "tinyfish_financials_016"
           ],
@@ -736,6 +751,9 @@
         },
         {
           "evidence_ids": [
+            "direct_financials_001",
+            "direct_financials_002",
+            "direct_financials_003",
             "tinyfish_financials_005",
             "tinyfish_financials_016"
           ],
@@ -787,6 +805,9 @@
         },
         {
           "evidence_ids": [
+            "direct_financials_001",
+            "direct_financials_002",
+            "direct_financials_003",
             "tinyfish_financials_005",
             "tinyfish_financials_016"
           ],
@@ -1967,6 +1988,9 @@
         "claim_id": "financials_financial_document_locator_001",
         "confidence": 0.9,
         "evidence_ids": [
+          "direct_financials_001",
+          "direct_financials_002",
+          "direct_financials_003",
           "tinyfish_financials_005",
           "tinyfish_financials_016"
         ],
@@ -1985,6 +2009,9 @@
         "claim_id": "financials_financial_statement_agent_001",
         "confidence": 0.0,
         "evidence_ids": [
+          "direct_financials_001",
+          "direct_financials_002",
+          "direct_financials_003",
           "tinyfish_financials_005",
           "tinyfish_financials_016"
         ],
@@ -2001,6 +2028,9 @@
         "claim_id": "financials_financial_statement_agent_002",
         "confidence": 0.9,
         "evidence_ids": [
+          "direct_financials_001",
+          "direct_financials_002",
+          "direct_financials_003",
           "tinyfish_financials_005",
           "tinyfish_financials_016"
         ],
@@ -2019,6 +2049,9 @@
         "claim_id": "financials_funding_guidance_agent_001",
         "confidence": 0.0,
         "evidence_ids": [
+          "direct_financials_001",
+          "direct_financials_002",
+          "direct_financials_003",
           "tinyfish_financials_005",
           "tinyfish_financials_016"
         ],
@@ -3543,6 +3576,9 @@
         "risk_matrix": [
           {
             "evidence_ids": [
+              "direct_financials_001",
+              "direct_financials_002",
+              "direct_financials_003",
               "tinyfish_financials_005",
               "tinyfish_financials_016"
             ],
@@ -3553,6 +3589,9 @@
           },
           {
             "evidence_ids": [
+              "direct_financials_001",
+              "direct_financials_002",
+              "direct_financials_003",
               "tinyfish_financials_005",
               "tinyfish_financials_016"
             ],
@@ -3604,6 +3643,9 @@
           },
           {
             "evidence_ids": [
+              "direct_financials_001",
+              "direct_financials_002",
+              "direct_financials_003",
               "tinyfish_financials_005",
               "tinyfish_financials_016"
             ],
@@ -3983,40 +4025,64 @@
       "user_text": "Company: Golden Widgets\nJurisdiction: US\nTarget section: company_overview\nGoal: Generate a source-backed diligence report.\n\nUse attached PDFs and raw source text to extract only directly supported claims.\n\n\n\nEvidence bundle:\n\nEvidence ID: tinyfish_company_overview_001\nLabel: Official website\nCategory: company_overview\nURL: https://golden.example.com\nSource type: company_homepage\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Official website\n\nSource type: company_homepage\n\nSource URL: https://golden.example.com\n\nCapture mode: page\n\nCaptured source 1\nPage title: Golden Widgets\nFinal URL: https://golden.example.com\nSource kind: homepage\nReporting period: \nCaptured text:\nGolden Widgets makes industrial widgets in Ohio.\nLinked documents:\n- None\nNotes:\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]"
     },
     {
-      "files": [],
+      "files": [
+        {
+          "file_data": "adc4610d28ac9d94",
+          "filename": "002-financial-source-1.pdf",
+          "type": "input_file"
+        }
+      ],
       "max_output_tokens": 4000,
       "schema_name": "financials_financial_document_locator_claim_extraction",
       "schema_sha": "b970ef57a98d04cc",
       "system_prompt": "You are an evidence extraction engine for automated company intelligence.\n\nRules:\n- Work only from the supplied source content.\n- Extract factual claims, not opinions.\n- Each claim must be directly grounded in the source.\n- If the source is weak, return fewer claims instead of guessing.\n- Prefer claims that are material for investors, operators, diligence teams, or compliance teams.\n- Map each claim into one of the allowed report sections.\n- Keep claim statements concise and standalone.\n\n\nCoordinator section: financials\nCoordinator: financial_agent\nSpecialist: financial_document_locator\nSpecialist instruction: Focus on locating the newest financially material primary sources, including annual reports, quarterly or interim results, filing indexes, investor presentations, and official guidance documents. Extract claims only about document recency, reporting periods, and what was formally disclosed.",
       "user_prompt_used": false,
-      "user_text": "Company: Golden Widgets\nJurisdiction: US\nTarget section: financials\nGoal: Generate a source-backed diligence report.\n\nUse attached PDFs and raw source text to extract only directly supported claims.\n\n\n\nEvidence bundle:\n\nEvidence ID: tinyfish_financials_005\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/ir\n\nCaptured source 1\nPage title: Investor relations\nFinal URL: https://golden.example.com/investors/filings\nSource kind: investor relations\nReporting period: FY2025\n\nLinked documents:\n- Q3 results | quarterly | https://golden.example.com/q3.html\nNotes:\n\nCoverage gaps:\n- No 10-K found\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]\n\nEvidence ID: tinyfish_financials_016\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/investors/filings\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]"
+      "user_text": "Company: Golden Widgets\nJurisdiction: US\nTarget section: financials\nGoal: Generate a source-backed diligence report.\n\nUse attached PDFs and raw source text to extract only directly supported claims.\n\n\n\nEvidence bundle:\n\nEvidence ID: direct_financials_001\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nIR Revenue grew 12% to $40.1 million in FY2025.\n\nEvidence ID: direct_financials_002\nLabel: Financial source 1\nCategory: financials\nURL: https://golden.example.com/ar-2025.pdf\nSource type: financial_document\nRetrieved at: <ts>\nContent:\nSource label: Financial source 1\nSource URL: https://golden.example.com/ar-2025.pdf\nSource type: financial_document\nSource kind: \nReporting period: \nFetch mode: pdf_file_url\n\nEvidence ID: direct_financials_003\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nNet loss was $2.3 million. Cash on hand $9.8 million.\n\nEvidence ID: tinyfish_financials_005\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/ir\n\nCaptured source 1\nPage title: Investor relations\nFinal URL: https://golden.example.com/investors/filings\nSource kind: investor relations\nReporting period: FY2025\n\nLinked documents:\n- Q3 results | quarterly | https://golden.example.com/q3.html\nNotes:\n\nCoverage gaps:\n- No 10-K found\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]\n\nEvidence ID: tinyfish_financials_016\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/investors/filings\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]"
     },
     {
-      "files": [],
+      "files": [
+        {
+          "file_data": "adc4610d28ac9d94",
+          "filename": "002-financial-source-1.pdf",
+          "type": "input_file"
+        }
+      ],
       "max_output_tokens": 4000,
       "schema_name": "financials_financial_statement_agent_claim_extraction",
       "schema_sha": "b970ef57a98d04cc",
       "system_prompt": "You are an evidence extraction engine for automated company intelligence.\n\nRules:\n- Work only from the supplied source content.\n- Extract factual claims, not opinions.\n- Each claim must be directly grounded in the source.\n- If the source is weak, return fewer claims instead of guessing.\n- Prefer claims that are material for investors, operators, diligence teams, or compliance teams.\n- Map each claim into one of the allowed report sections.\n- Keep claim statements concise and standalone.\n\n\nCoordinator section: financials\nCoordinator: financial_agent\nSpecialist: financial_statement_agent\nSpecialist instruction: Focus on income statement and cash flow facts: revenue, gross profit or gross margin, EBITDA or operating income, net income, free cash flow, and reported growth or decline across named periods. Prefer explicit numeric statements.",
       "user_prompt_used": false,
-      "user_text": "Company: Golden Widgets\nJurisdiction: US\nTarget section: financials\nGoal: Generate a source-backed diligence report.\n\nUse attached PDFs and raw source text to extract only directly supported claims.\n\n\n\nEvidence bundle:\n\nEvidence ID: tinyfish_financials_005\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/ir\n\nCaptured source 1\nPage title: Investor relations\nFinal URL: https://golden.example.com/investors/filings\nSource kind: investor relations\nReporting period: FY2025\n\nLinked documents:\n- Q3 results | quarterly | https://golden.example.com/q3.html\nNotes:\n\nCoverage gaps:\n- No 10-K found\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]\n\nEvidence ID: tinyfish_financials_016\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/investors/filings\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]"
+      "user_text": "Company: Golden Widgets\nJurisdiction: US\nTarget section: financials\nGoal: Generate a source-backed diligence report.\n\nUse attached PDFs and raw source text to extract only directly supported claims.\n\n\n\nEvidence bundle:\n\nEvidence ID: direct_financials_001\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nIR Revenue grew 12% to $40.1 million in FY2025.\n\nEvidence ID: direct_financials_002\nLabel: Financial source 1\nCategory: financials\nURL: https://golden.example.com/ar-2025.pdf\nSource type: financial_document\nRetrieved at: <ts>\nContent:\nSource label: Financial source 1\nSource URL: https://golden.example.com/ar-2025.pdf\nSource type: financial_document\nSource kind: \nReporting period: \nFetch mode: pdf_file_url\n\nEvidence ID: direct_financials_003\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nNet loss was $2.3 million. Cash on hand $9.8 million.\n\nEvidence ID: tinyfish_financials_005\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/ir\n\nCaptured source 1\nPage title: Investor relations\nFinal URL: https://golden.example.com/investors/filings\nSource kind: investor relations\nReporting period: FY2025\n\nLinked documents:\n- Q3 results | quarterly | https://golden.example.com/q3.html\nNotes:\n\nCoverage gaps:\n- No 10-K found\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]\n\nEvidence ID: tinyfish_financials_016\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/investors/filings\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]"
     },
     {
-      "files": [],
+      "files": [
+        {
+          "file_data": "adc4610d28ac9d94",
+          "filename": "002-financial-source-1.pdf",
+          "type": "input_file"
+        }
+      ],
       "max_output_tokens": 4000,
       "schema_name": "financials_capital_structure_agent_claim_extraction",
       "schema_sha": "b970ef57a98d04cc",
       "system_prompt": "You are an evidence extraction engine for automated company intelligence.\n\nRules:\n- Work only from the supplied source content.\n- Extract factual claims, not opinions.\n- Each claim must be directly grounded in the source.\n- If the source is weak, return fewer claims instead of guessing.\n- Prefer claims that are material for investors, operators, diligence teams, or compliance teams.\n- Map each claim into one of the allowed report sections.\n- Keep claim statements concise and standalone.\n\n\nCoordinator section: financials\nCoordinator: financial_agent\nSpecialist: capital_structure_agent\nSpecialist instruction: Focus on balance sheet and financing facts: cash, debt, liquidity, leverage, credit facilities, buybacks, dividends, dilution, and other capital structure signals stated in primary sources.",
       "user_prompt_used": false,
-      "user_text": "Company: Golden Widgets\nJurisdiction: US\nTarget section: financials\nGoal: Generate a source-backed diligence report.\n\nUse attached PDFs and raw source text to extract only directly supported claims.\n\n\n\nEvidence bundle:\n\nEvidence ID: tinyfish_financials_005\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/ir\n\nCaptured source 1\nPage title: Investor relations\nFinal URL: https://golden.example.com/investors/filings\nSource kind: investor relations\nReporting period: FY2025\n\nLinked documents:\n- Q3 results | quarterly | https://golden.example.com/q3.html\nNotes:\n\nCoverage gaps:\n- No 10-K found\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]\n\nEvidence ID: tinyfish_financials_016\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/investors/filings\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]"
+      "user_text": "Company: Golden Widgets\nJurisdiction: US\nTarget section: financials\nGoal: Generate a source-backed diligence report.\n\nUse attached PDFs and raw source text to extract only directly supported claims.\n\n\n\nEvidence bundle:\n\nEvidence ID: direct_financials_001\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nIR Revenue grew 12% to $40.1 million in FY2025.\n\nEvidence ID: direct_financials_002\nLabel: Financial source 1\nCategory: financials\nURL: https://golden.example.com/ar-2025.pdf\nSource type: financial_document\nRetrieved at: <ts>\nContent:\nSource label: Financial source 1\nSource URL: https://golden.example.com/ar-2025.pdf\nSource type: financial_document\nSource kind: \nReporting period: \nFetch mode: pdf_file_url\n\nEvidence ID: direct_financials_003\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nNet loss was $2.3 million. Cash on hand $9.8 million.\n\nEvidence ID: tinyfish_financials_005\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/ir\n\nCaptured source 1\nPage title: Investor relations\nFinal URL: https://golden.example.com/investors/filings\nSource kind: investor relations\nReporting period: FY2025\n\nLinked documents:\n- Q3 results | quarterly | https://golden.example.com/q3.html\nNotes:\n\nCoverage gaps:\n- No 10-K found\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]\n\nEvidence ID: tinyfish_financials_016\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/investors/filings\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]"
     },
     {
-      "files": [],
+      "files": [
+        {
+          "file_data": "adc4610d28ac9d94",
+          "filename": "002-financial-source-1.pdf",
+          "type": "input_file"
+        }
+      ],
       "max_output_tokens": 4000,
       "schema_name": "financials_funding_guidance_agent_claim_extraction",
       "schema_sha": "b970ef57a98d04cc",
       "system_prompt": "You are an evidence extraction engine for automated company intelligence.\n\nRules:\n- Work only from the supplied source content.\n- Extract factual claims, not opinions.\n- Each claim must be directly grounded in the source.\n- If the source is weak, return fewer claims instead of guessing.\n- Prefer claims that are material for investors, operators, diligence teams, or compliance teams.\n- Map each claim into one of the allowed report sections.\n- Keep claim statements concise and standalone.\n\n\nCoordinator section: financials\nCoordinator: financial_agent\nSpecialist: funding_guidance_agent\nSpecialist instruction: Focus on management guidance, fundraising, capital raises, debt issuance, refinancing, and officially announced financially material events. Use news only when it reflects an official company announcement.",
       "user_prompt_used": false,
-      "user_text": "Company: Golden Widgets\nJurisdiction: US\nTarget section: financials\nGoal: Generate a source-backed diligence report.\n\nUse attached PDFs and raw source text to extract only directly supported claims.\n\n\n\nEvidence bundle:\n\nEvidence ID: tinyfish_financials_005\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/ir\n\nCaptured source 1\nPage title: Investor relations\nFinal URL: https://golden.example.com/investors/filings\nSource kind: investor relations\nReporting period: FY2025\n\nLinked documents:\n- Q3 results | quarterly | https://golden.example.com/q3.html\nNotes:\n\nCoverage gaps:\n- No 10-K found\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]\n\nEvidence ID: tinyfish_financials_016\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/investors/filings\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]"
+      "user_text": "Company: Golden Widgets\nJurisdiction: US\nTarget section: financials\nGoal: Generate a source-backed diligence report.\n\nUse attached PDFs and raw source text to extract only directly supported claims.\n\n\n\nEvidence bundle:\n\nEvidence ID: direct_financials_001\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nIR Revenue grew 12% to $40.1 million in FY2025.\n\nEvidence ID: direct_financials_002\nLabel: Financial source 1\nCategory: financials\nURL: https://golden.example.com/ar-2025.pdf\nSource type: financial_document\nRetrieved at: <ts>\nContent:\nSource label: Financial source 1\nSource URL: https://golden.example.com/ar-2025.pdf\nSource type: financial_document\nSource kind: \nReporting period: \nFetch mode: pdf_file_url\n\nEvidence ID: direct_financials_003\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nNet loss was $2.3 million. Cash on hand $9.8 million.\n\nEvidence ID: tinyfish_financials_005\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/ir\n\nCaptured source 1\nPage title: Investor relations\nFinal URL: https://golden.example.com/investors/filings\nSource kind: investor relations\nReporting period: FY2025\n\nLinked documents:\n- Q3 results | quarterly | https://golden.example.com/q3.html\nNotes:\n\nCoverage gaps:\n- No 10-K found\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]\n\nEvidence ID: tinyfish_financials_016\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/investors/filings\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]"
     },
     {
       "files": [
@@ -4139,40 +4205,64 @@
       "user_text": "Claim ID: company_overview_overview_agent_001\nSection: company_overview\nClaim: company_overview_overview_agent_claim_extraction claim 0\nQuoted support from extraction: Revenue grew 12%\n\nVerify this claim only against the attached raw sources and text evidence.\n\n\n\nEvidence bundle:\n\nEvidence ID: tinyfish_company_overview_001\nLabel: Official website\nCategory: company_overview\nURL: https://golden.example.com\nSource type: company_homepage\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Official website\n\nSource type: company_homepage\n\nSource URL: https://golden.example.com\n\nCapture mode: page\n\nCaptured source 1\nPage title: Golden Widgets\nFinal URL: https://golden.example.com\nSource kind: homepage\nReporting period: \nCaptured text:\nGolden Widgets makes industrial widgets in Ohio.\nLinked documents:\n- None\nNotes:\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]"
     },
     {
-      "files": [],
+      "files": [
+        {
+          "file_data": "adc4610d28ac9d94",
+          "filename": "002-financial-source-1.pdf",
+          "type": "input_file"
+        }
+      ],
       "max_output_tokens": 1200,
       "schema_name": "claim_verification",
       "schema_sha": "e289f0e5d8d79ace",
       "system_prompt": "You are a strict claim verifier.\n\nRules:\n- Judge the claim only against the supplied evidence.\n- Mark unsupported or contradicted claims aggressively.\n- If the evidence is partial, return insufficient_evidence.\n- Never upgrade a weak claim into a supported claim.\n- Keep rationale short and operational.\n",
       "user_prompt_used": false,
-      "user_text": "Claim ID: financials_financial_document_locator_001\nSection: financials\nClaim: financials_financial_document_locator_claim_extraction claim 0\nQuoted support from extraction: Revenue grew 12%\n\nVerify this claim only against the attached raw sources and text evidence.\n\n\n\nEvidence bundle:\n\nEvidence ID: tinyfish_financials_005\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/ir\n\nCaptured source 1\nPage title: Investor relations\nFinal URL: https://golden.example.com/investors/filings\nSource kind: investor relations\nReporting period: FY2025\n\nLinked documents:\n- Q3 results | quarterly | https://golden.example.com/q3.html\nNotes:\n\nCoverage gaps:\n- No 10-K found\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]\n\nEvidence ID: tinyfish_financials_016\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/investors/filings\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]"
+      "user_text": "Claim ID: financials_financial_document_locator_001\nSection: financials\nClaim: financials_financial_document_locator_claim_extraction claim 0\nQuoted support from extraction: Revenue grew 12%\n\nVerify this claim only against the attached raw sources and text evidence.\n\n\n\nEvidence bundle:\n\nEvidence ID: direct_financials_001\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nIR Revenue grew 12% to $40.1 million in FY2025.\n\nEvidence ID: direct_financials_002\nLabel: Financial source 1\nCategory: financials\nURL: https://golden.example.com/ar-2025.pdf\nSource type: financial_document\nRetrieved at: <ts>\nContent:\nSource label: Financial source 1\nSource URL: https://golden.example.com/ar-2025.pdf\nSource type: financial_document\nSource kind: \nReporting period: \nFetch mode: pdf_file_url\n\nEvidence ID: direct_financials_003\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nNet loss was $2.3 million. Cash on hand $9.8 million.\n\nEvidence ID: tinyfish_financials_005\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/ir\n\nCaptured source 1\nPage title: Investor relations\nFinal URL: https://golden.example.com/investors/filings\nSource kind: investor relations\nReporting period: FY2025\n\nLinked documents:\n- Q3 results | quarterly | https://golden.example.com/q3.html\nNotes:\n\nCoverage gaps:\n- No 10-K found\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]\n\nEvidence ID: tinyfish_financials_016\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/investors/filings\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]"
     },
     {
-      "files": [],
+      "files": [
+        {
+          "file_data": "adc4610d28ac9d94",
+          "filename": "002-financial-source-1.pdf",
+          "type": "input_file"
+        }
+      ],
       "max_output_tokens": 1200,
       "schema_name": "claim_verification",
       "schema_sha": "e289f0e5d8d79ace",
       "system_prompt": "You are a strict claim verifier.\n\nRules:\n- Judge the claim only against the supplied evidence.\n- Mark unsupported or contradicted claims aggressively.\n- If the evidence is partial, return insufficient_evidence.\n- Never upgrade a weak claim into a supported claim.\n- Keep rationale short and operational.\n",
       "user_prompt_used": false,
-      "user_text": "Claim ID: financials_financial_statement_agent_001\nSection: financials\nClaim: financials_financial_statement_agent_claim_extraction claim 0\nQuoted support from extraction: Revenue grew 12%\n\nVerify this claim only against the attached raw sources and text evidence.\n\n\n\nEvidence bundle:\n\nEvidence ID: tinyfish_financials_005\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/ir\n\nCaptured source 1\nPage title: Investor relations\nFinal URL: https://golden.example.com/investors/filings\nSource kind: investor relations\nReporting period: FY2025\n\nLinked documents:\n- Q3 results | quarterly | https://golden.example.com/q3.html\nNotes:\n\nCoverage gaps:\n- No 10-K found\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]\n\nEvidence ID: tinyfish_financials_016\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/investors/filings\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]"
+      "user_text": "Claim ID: financials_financial_statement_agent_001\nSection: financials\nClaim: financials_financial_statement_agent_claim_extraction claim 0\nQuoted support from extraction: Revenue grew 12%\n\nVerify this claim only against the attached raw sources and text evidence.\n\n\n\nEvidence bundle:\n\nEvidence ID: direct_financials_001\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nIR Revenue grew 12% to $40.1 million in FY2025.\n\nEvidence ID: direct_financials_002\nLabel: Financial source 1\nCategory: financials\nURL: https://golden.example.com/ar-2025.pdf\nSource type: financial_document\nRetrieved at: <ts>\nContent:\nSource label: Financial source 1\nSource URL: https://golden.example.com/ar-2025.pdf\nSource type: financial_document\nSource kind: \nReporting period: \nFetch mode: pdf_file_url\n\nEvidence ID: direct_financials_003\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nNet loss was $2.3 million. Cash on hand $9.8 million.\n\nEvidence ID: tinyfish_financials_005\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/ir\n\nCaptured source 1\nPage title: Investor relations\nFinal URL: https://golden.example.com/investors/filings\nSource kind: investor relations\nReporting period: FY2025\n\nLinked documents:\n- Q3 results | quarterly | https://golden.example.com/q3.html\nNotes:\n\nCoverage gaps:\n- No 10-K found\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]\n\nEvidence ID: tinyfish_financials_016\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/investors/filings\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]"
     },
     {
-      "files": [],
+      "files": [
+        {
+          "file_data": "adc4610d28ac9d94",
+          "filename": "002-financial-source-1.pdf",
+          "type": "input_file"
+        }
+      ],
       "max_output_tokens": 1200,
       "schema_name": "claim_verification",
       "schema_sha": "e289f0e5d8d79ace",
       "system_prompt": "You are a strict claim verifier.\n\nRules:\n- Judge the claim only against the supplied evidence.\n- Mark unsupported or contradicted claims aggressively.\n- If the evidence is partial, return insufficient_evidence.\n- Never upgrade a weak claim into a supported claim.\n- Keep rationale short and operational.\n",
       "user_prompt_used": false,
-      "user_text": "Claim ID: financials_financial_statement_agent_002\nSection: financials\nClaim: financials_financial_statement_agent_claim_extraction claim 1\nQuoted support from extraction: Revenue grew 12%\n\nVerify this claim only against the attached raw sources and text evidence.\n\n\n\nEvidence bundle:\n\nEvidence ID: tinyfish_financials_005\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/ir\n\nCaptured source 1\nPage title: Investor relations\nFinal URL: https://golden.example.com/investors/filings\nSource kind: investor relations\nReporting period: FY2025\n\nLinked documents:\n- Q3 results | quarterly | https://golden.example.com/q3.html\nNotes:\n\nCoverage gaps:\n- No 10-K found\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]\n\nEvidence ID: tinyfish_financials_016\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/investors/filings\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]"
+      "user_text": "Claim ID: financials_financial_statement_agent_002\nSection: financials\nClaim: financials_financial_statement_agent_claim_extraction claim 1\nQuoted support from extraction: Revenue grew 12%\n\nVerify this claim only against the attached raw sources and text evidence.\n\n\n\nEvidence bundle:\n\nEvidence ID: direct_financials_001\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nIR Revenue grew 12% to $40.1 million in FY2025.\n\nEvidence ID: direct_financials_002\nLabel: Financial source 1\nCategory: financials\nURL: https://golden.example.com/ar-2025.pdf\nSource type: financial_document\nRetrieved at: <ts>\nContent:\nSource label: Financial source 1\nSource URL: https://golden.example.com/ar-2025.pdf\nSource type: financial_document\nSource kind: \nReporting period: \nFetch mode: pdf_file_url\n\nEvidence ID: direct_financials_003\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nNet loss was $2.3 million. Cash on hand $9.8 million.\n\nEvidence ID: tinyfish_financials_005\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/ir\n\nCaptured source 1\nPage title: Investor relations\nFinal URL: https://golden.example.com/investors/filings\nSource kind: investor relations\nReporting period: FY2025\n\nLinked documents:\n- Q3 results | quarterly | https://golden.example.com/q3.html\nNotes:\n\nCoverage gaps:\n- No 10-K found\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]\n\nEvidence ID: tinyfish_financials_016\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/investors/filings\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]"
     },
     {
-      "files": [],
+      "files": [
+        {
+          "file_data": "adc4610d28ac9d94",
+          "filename": "002-financial-source-1.pdf",
+          "type": "input_file"
+        }
+      ],
       "max_output_tokens": 1200,
       "schema_name": "claim_verification",
       "schema_sha": "e289f0e5d8d79ace",
       "system_prompt": "You are a strict claim verifier.\n\nRules:\n- Judge the claim only against the supplied evidence.\n- Mark unsupported or contradicted claims aggressively.\n- If the evidence is partial, return insufficient_evidence.\n- Never upgrade a weak claim into a supported claim.\n- Keep rationale short and operational.\n",
       "user_prompt_used": false,
-      "user_text": "Claim ID: financials_funding_guidance_agent_001\nSection: financials\nClaim: financials_funding_guidance_agent_claim_extraction claim 0\nQuoted support from extraction: Revenue grew 12%\n\nVerify this claim only against the attached raw sources and text evidence.\n\n\n\nEvidence bundle:\n\nEvidence ID: tinyfish_financials_005\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/ir\n\nCaptured source 1\nPage title: Investor relations\nFinal URL: https://golden.example.com/investors/filings\nSource kind: investor relations\nReporting period: FY2025\n\nLinked documents:\n- Q3 results | quarterly | https://golden.example.com/q3.html\nNotes:\n\nCoverage gaps:\n- No 10-K found\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]\n\nEvidence ID: tinyfish_financials_016\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/investors/filings\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]"
+      "user_text": "Claim ID: financials_funding_guidance_agent_001\nSection: financials\nClaim: financials_funding_guidance_agent_claim_extraction claim 0\nQuoted support from extraction: Revenue grew 12%\n\nVerify this claim only against the attached raw sources and text evidence.\n\n\n\nEvidence bundle:\n\nEvidence ID: direct_financials_001\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nIR Revenue grew 12% to $40.1 million in FY2025.\n\nEvidence ID: direct_financials_002\nLabel: Financial source 1\nCategory: financials\nURL: https://golden.example.com/ar-2025.pdf\nSource type: financial_document\nRetrieved at: <ts>\nContent:\nSource label: Financial source 1\nSource URL: https://golden.example.com/ar-2025.pdf\nSource type: financial_document\nSource kind: \nReporting period: \nFetch mode: pdf_file_url\n\nEvidence ID: direct_financials_003\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nNet loss was $2.3 million. Cash on hand $9.8 million.\n\nEvidence ID: tinyfish_financials_005\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/ir\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/ir\n\nCaptured source 1\nPage title: Investor relations\nFinal URL: https://golden.example.com/investors/filings\nSource kind: investor relations\nReporting period: FY2025\n\nLinked documents:\n- Q3 results | quarterly | https://golden.example.com/q3.html\nNotes:\n\nCoverage gaps:\n- No 10-K found\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]\n\nEvidence ID: tinyfish_financials_016\nLabel: Investor relations\nCategory: financials\nURL: https://golden.example.com/investors/filings\nSource type: financial_investor_relations\nRetrieved at: <ts>\nContent:\nRun status: COMPLETED\n\nSource label: Investor relations\n\nSource type: financial_investor_relations\n\nSource URL: https://golden.example.com/investors/filings\n\nTinyfish attempts:\n[\n  {\n    \"attempt_number\": 1,\n    \"browser_profile\": \"lite\"\n  }\n]"
     },
     {
       "files": [
@@ -4337,7 +4427,7 @@
       "schema_sha": "c3217f834e7b899c",
       "system_prompt": "You are generating a no-hallucination company intelligence report.\n\nRules:\n- Use only verified claims provided in the prompt.\n- Do not add outside knowledge.\n- If coverage is weak, say so directly.\n- Keep summaries decision-useful and compact.\n- Preserve a neutral, analyst-grade tone.\n- Write section output so it can drop cleanly into a formal due diligence PDF.\n\n\nAgent: financial_agent\nSection: financials\nInstruction: Write a finance-focused summary highlighting verified metrics, data quality, red flags, and any missing disclosure.",
       "user_prompt_used": true,
-      "user_text": "Company: Golden Widgets\nSection: financials\nSection meaning: Revenue, profitability, funding, balance sheet, market cap, or official financial metrics.\n\nVerified claims:\n- Statement: financials_financial_document_locator_claim_extraction claim 0 | Importance: high | Confidence: 0.90 | As of: 2025 | Evidence IDs: tinyfish_financials_005, tinyfish_financials_016\n- Statement: financials_financial_statement_agent_claim_extraction claim 1 | Importance: medium | Confidence: 0.90 | As of: 2025 | Evidence IDs: tinyfish_financials_005, tinyfish_financials_016"
+      "user_text": "Company: Golden Widgets\nSection: financials\nSection meaning: Revenue, profitability, funding, balance sheet, market cap, or official financial metrics.\n\nVerified claims:\n- Statement: financials_financial_document_locator_claim_extraction claim 0 | Importance: high | Confidence: 0.90 | As of: 2025 | Evidence IDs: direct_financials_001, direct_financials_002, direct_financials_003, tinyfish_financials_005, tinyfish_financials_016\n- Statement: financials_financial_statement_agent_claim_extraction claim 1 | Importance: medium | Confidence: 0.90 | As of: 2025 | Evidence IDs: direct_financials_001, direct_financials_002, direct_financials_003, tinyfish_financials_005, tinyfish_financials_016"
     },
     {
       "files": [],
@@ -4355,7 +4445,7 @@
       "schema_sha": "1cb7e41dd5d256b8",
       "system_prompt": "You are the coordinating editor for a multi-agent due diligence report.\n\nRules:\n- Use only section summaries and verified findings supplied in the prompt.\n- Produce a concise executive summary for decision-makers.\n- Make the methodology explicit and defensible.\n- Keep key findings ranked by materiality.\n- Recommendations should be actionable and tied to evidence gaps or risks.\n- The final output will be rendered into a formal PDF, so follow this structure exactly:\nTarget PDF structure:\n1. Executive Summary\n   Include the headline decision, overall risk posture, major blockers, and highest-value takeaways.\n2. Scope and Methodology\n   State scope, focus areas covered, source classes used, evidence freshness, and material limitations.\n3. Entity Profile\n   Summarize company identity, jurisdiction, business model, and other core orientation facts.\n4. Domain Analysis\n   Present each diligence section as its own analysis chapter, led by financials in this slice.\n5. Key Findings\n   Rank findings by materiality and decision relevance.\n6. Risk Matrix\n   Show severity, issue, supporting evidence, and mitigation or next-step recommendation.\n7. Recommendations and Decision Path\n   State proceed / proceed with conditions / do not proceed logic and next actions.\n8. Appendix / Source Log\n   End with traceable evidence references, source timestamps, and retrieval metadata.\n\n- Keep the tone factual, audit-ready, and suitable for investors, counsel, risk teams, or compliance reviewers.\n",
       "user_prompt_used": true,
-      "user_text": "Company: Golden Widgets\nJurisdiction: US\nGoal: Generate an evidence-backed company report.\nPublish decision: blocked\nPublish reason: Only 3 focus areas have supported evidence; minimum required is 4.\nRequested PDF section order: Executive Summary, Scope and Methodology, Entity Profile, company_overview, financials, legal, news, risk_signals, Key Findings, Risk Matrix, Recommendations and Decision Path, Appendix / Source Log\n\nScope guidance:\n- The report should read like an in-depth diligence memo for investors, legal, compliance, or risk teams.\n- Keep section ordering consistent with the requested PDF structure.\n- State limitations clearly when evidence is weak or missing.\n- The appendix should be represented by the source log rather than narrative repetition.\n\nSection summaries:\nSection company_overview (supported): Summary for company_overview_section_summary\n- Highlight: h1\n- Highlight: h2\n- Recommendation: r1\nSection financials (supported): Summary for financials_section_summary\n- Highlight: h1\n- Highlight: h2\n- Recommendation: r1\nSection legal (insufficient_evidence): Insufficient verified evidence for this section.\n- Recommendation: Add stronger primary sources for this section before relying on it in a decision.\nSection news (supported): Summary for news_section_summary\n- Highlight: h1\n- Highlight: h2\n- Recommendation: r1\nSection risk_signals (insufficient_evidence): Insufficient verified evidence for this section.\n- Recommendation: Add stronger primary sources for this section before relying on it in a decision.\n\nRisk matrix:\n- Severity: high | Section: financials | Issue: financials_financial_document_locator_claim_extraction claim 0 | Evidence IDs: tinyfish_financials_005, tinyfish_financials_016 | Recommendation: Request primary financial statements and reconcile any quantitative exposure before relying on the claim.\n- Severity: medium | Section: financials | Issue: financials_financial_statement_agent_claim_extraction claim 1 | Evidence IDs: tinyfish_financials_005, tinyfish_financials_016 | Recommendation: Request primary financial statements and reconcile any quantitative exposure before relying on the claim.\n- Severity: high | Section: news | Issue: news_news_negative_signal_agent_claim_extraction claim 0 | Evidence IDs: direct_financials_001 | Recommendation: Verify whether the event remains current, assess reputational impact, and determine whether it materially changes the investment thesis or company narrative.\n- Severity: high | Section: news | Issue: news_news_sentiment_agent_claim_extraction claim 0 | Evidence IDs: tinyfish_news_004, tinyfish_news_012, tinyfish_news_013, tinyfish_news_014, tinyfish_news_015 | Recommendation: Verify whether the event remains current, assess reputational impact, and determine whether it materially changes the investment thesis or company narrative."
+      "user_text": "Company: Golden Widgets\nJurisdiction: US\nGoal: Generate an evidence-backed company report.\nPublish decision: blocked\nPublish reason: Only 3 focus areas have supported evidence; minimum required is 4.\nRequested PDF section order: Executive Summary, Scope and Methodology, Entity Profile, company_overview, financials, legal, news, risk_signals, Key Findings, Risk Matrix, Recommendations and Decision Path, Appendix / Source Log\n\nScope guidance:\n- The report should read like an in-depth diligence memo for investors, legal, compliance, or risk teams.\n- Keep section ordering consistent with the requested PDF structure.\n- State limitations clearly when evidence is weak or missing.\n- The appendix should be represented by the source log rather than narrative repetition.\n\nSection summaries:\nSection company_overview (supported): Summary for company_overview_section_summary\n- Highlight: h1\n- Highlight: h2\n- Recommendation: r1\nSection financials (supported): Summary for financials_section_summary\n- Highlight: h1\n- Highlight: h2\n- Recommendation: r1\nSection legal (insufficient_evidence): Insufficient verified evidence for this section.\n- Recommendation: Add stronger primary sources for this section before relying on it in a decision.\nSection news (supported): Summary for news_section_summary\n- Highlight: h1\n- Highlight: h2\n- Recommendation: r1\nSection risk_signals (insufficient_evidence): Insufficient verified evidence for this section.\n- Recommendation: Add stronger primary sources for this section before relying on it in a decision.\n\nRisk matrix:\n- Severity: high | Section: financials | Issue: financials_financial_document_locator_claim_extraction claim 0 | Evidence IDs: direct_financials_001, direct_financials_002, direct_financials_003, tinyfish_financials_005, tinyfish_financials_016 | Recommendation: Request primary financial statements and reconcile any quantitative exposure before relying on the claim.\n- Severity: medium | Section: financials | Issue: financials_financial_statement_agent_claim_extraction claim 1 | Evidence IDs: direct_financials_001, direct_financials_002, direct_financials_003, tinyfish_financials_005, tinyfish_financials_016 | Recommendation: Request primary financial statements and reconcile any quantitative exposure before relying on the claim.\n- Severity: high | Section: news | Issue: news_news_negative_signal_agent_claim_extraction claim 0 | Evidence IDs: direct_financials_001 | Recommendation: Verify whether the event remains current, assess reputational impact, and determine whether it materially changes the investment thesis or company narrative.\n- Severity: high | Section: news | Issue: news_news_sentiment_agent_claim_extraction claim 0 | Evidence IDs: tinyfish_news_004, tinyfish_news_012, tinyfish_news_013, tinyfish_news_014, tinyfish_news_015 | Recommendation: Verify whether the event remains current, assess reputational impact, and determine whether it materially changes the investment thesis or company narrative."
     }
   ],
   "report_matches_artifact": true

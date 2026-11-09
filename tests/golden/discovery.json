@@ -1,0 +1,392 @@
+{
+  "existing_urls_after": [
+    "https://blog.example.net/post",
+    "https://example.com/investors/overview",
+    "https://home.treasury.gov/ofac/sdn",
+    "https://news.example.org/a",
+    "https://opencorporates.com/filings/2",
+    "https://storage.courtlistener.com/complaint.pdf",
+    "https://techcrunch.com:443/2026/01/01/example",
+    "https://unknown.example.io/x",
+    "https://www.courtlistener.com/docket/1/",
+    "https://www.ftc.gov/news/press-releases/x",
+    "https://www.prnewswire.com/news/x",
+    "https://www.reuters.com/markets/example",
+    "https://www.sec.gov/cgi-bin/browse-edgar?CIK=EXMP"
+  ],
+  "raw_financial": [
+    {
+      "discovery_origin": "request_hint",
+      "discovery_run_id": "",
+      "label": "Investor relations",
+      "notes": "",
+      "reporting_period": "",
+      "source_kind": "",
+      "source_type": "financial_investor_relations",
+      "url": "https://ir.example.com"
+    },
+    {
+      "discovery_origin": "request_hint",
+      "discovery_run_id": "",
+      "label": "Financial source 1",
+      "notes": "",
+      "reporting_period": "",
+      "source_kind": "",
+      "source_type": "financial_document",
+      "url": " https://example.com/AR.pdf "
+    },
+    {
+      "discovery_origin": "request_hint",
+      "discovery_run_id": "",
+      "label": "Financial source 2",
+      "notes": "",
+      "reporting_period": "",
+      "source_kind": "",
+      "source_type": "financial_document",
+      "url": "https://example.com/q1.pdf"
+    },
+    {
+      "discovery_origin": "tinyfish_discovery",
+      "discovery_run_id": "fin_1",
+      "label": "Investors hub",
+      "notes": "hub page",
+      "reporting_period": "FY2025",
+      "source_kind": "",
+      "source_type": "financial_investor_relations",
+      "url": "https://example.com/investors/overview"
+    },
+    {
+      "discovery_origin": "tinyfish_linked_document",
+      "discovery_run_id": "fin_1",
+      "label": "Annual Report 2025",
+      "notes": "hub page",
+      "reporting_period": "FY2025",
+      "source_kind": "Annual report",
+      "source_type": "financial_document",
+      "url": "https://example.com/files/annual-2025.pdf"
+    },
+    {
+      "discovery_origin": "tinyfish_linked_document",
+      "discovery_run_id": "fin_1",
+      "label": "Investors hub",
+      "notes": "hub page",
+      "reporting_period": "FY2025",
+      "source_kind": "",
+      "source_type": "financial_document",
+      "url": "https://example.com/files/deck"
+    },
+    {
+      "discovery_origin": "tinyfish_discovery",
+      "discovery_run_id": "fin_1",
+      "label": "Seed fin_1",
+      "notes": "",
+      "reporting_period": "",
+      "source_kind": "Regulator filing index",
+      "source_type": "financial_sec_filings",
+      "url": "https://WWW.SEC.GOV/cgi-bin/browse-edgar?CIK=EXMP#frag"
+    },
+    {
+      "discovery_origin": "tinyfish_seeded_url",
+      "discovery_run_id": "fin_2",
+      "label": "Seed fin_2",
+      "notes": "",
+      "reporting_period": "",
+      "source_kind": "",
+      "source_type": "financial_document",
+      "url": "https://example.com/ar-direct.pdf"
+    }
+  ],
+  "raw_legal": [
+    {
+      "discovery_origin": "request_hint",
+      "discovery_run_id": "",
+      "label": "Legal source 2",
+      "notes": "",
+      "reporting_period": "",
+      "source_kind": "",
+      "source_type": "legal_document",
+      "url": "https://court.example.org/case/9"
+    },
+    {
+      "discovery_origin": "tinyfish_discovery",
+      "discovery_run_id": "leg_1",
+      "label": "Docket 22-cv-1",
+      "notes": "civil",
+      "reporting_period": "",
+      "source_kind": "",
+      "source_type": "legal_court_records",
+      "url": "https://www.courtlistener.com/docket/1/"
+    },
+    {
+      "discovery_origin": "tinyfish_linked_document",
+      "discovery_run_id": "leg_1",
+      "label": "Complaint",
+      "notes": "civil",
+      "reporting_period": "",
+      "source_kind": "complaint",
+      "source_type": "legal_court_records",
+      "url": "https://storage.courtlistener.com/complaint.pdf"
+    },
+    {
+      "discovery_origin": "tinyfish_discovery",
+      "discovery_run_id": "leg_1",
+      "label": "FTC press",
+      "notes": "",
+      "reporting_period": "",
+      "source_kind": "press",
+      "source_type": "legal_enforcement",
+      "url": "https://www.ftc.gov/news/press-releases/x"
+    },
+    {
+      "discovery_origin": "tinyfish_discovery",
+      "discovery_run_id": "leg_1",
+      "label": "Registry",
+      "notes": "",
+      "reporting_period": "",
+      "source_kind": "",
+      "source_type": "legal_corporate_registry",
+      "url": "https://opencorporates.com/companies/gb/1"
+    },
+    {
+      "discovery_origin": "tinyfish_linked_document",
+      "discovery_run_id": "leg_1",
+      "label": "Registry",
+      "notes": "",
+      "reporting_period": "",
+      "source_kind": "",
+      "source_type": "legal_corporate_registry",
+      "url": "https://opencorporates.com/filings/2"
+    },
+    {
+      "discovery_origin": "tinyfish_discovery",
+      "discovery_run_id": "leg_1",
+      "label": "OFAC",
+      "notes": "",
+      "reporting_period": "",
+      "source_kind": "",
+      "source_type": "legal_sanctions",
+      "url": "https://home.treasury.gov/ofac/sdn"
+    },
+    {
+      "discovery_origin": "tinyfish_seeded_url",
+      "discovery_run_id": "leg_2",
+      "label": "Seed leg_2",
+      "notes": "",
+      "reporting_period": "",
+      "source_kind": "",
+      "source_type": "legal_court_records",
+      "url": "https://court.example.org/seeded"
+    }
+  ],
+  "raw_news": [
+    {
+      "discovery_origin": "request_hint",
+      "discovery_run_id": "",
+      "label": "News source 1",
+      "notes": "",
+      "reporting_period": "",
+      "source_kind": "",
+      "source_type": "news_article",
+      "url": "https://news.example.org/a"
+    },
+    {
+      "discovery_origin": "tinyfish_discovery",
+      "discovery_run_id": "news_1",
+      "label": "Reuters story",
+      "notes": "markets",
+      "reporting_period": "",
+      "source_kind": "",
+      "source_type": "news_aggregator",
+      "url": "https://www.reuters.com/markets/example"
+    },
+    {
+      "discovery_origin": "tinyfish_linked_document",
+      "discovery_run_id": "news_1",
+      "label": "Wire copy",
+      "notes": "markets",
+      "reporting_period": "",
+      "source_kind": "",
+      "source_type": "news_press_release",
+      "url": "https://www.prnewswire.com/news/x"
+    },
+    {
+      "discovery_origin": "tinyfish_linked_document",
+      "discovery_run_id": "news_1",
+      "label": "Reuters story",
+      "notes": "markets",
+      "reporting_period": "",
+      "source_kind": "",
+      "source_type": "news_article",
+      "url": "https://blog.example.net/post"
+    },
+    {
+      "discovery_origin": "tinyfish_discovery",
+      "discovery_run_id": "news_1",
+      "label": "Seed news_1",
+      "notes": "",
+      "reporting_period": "",
+      "source_kind": "",
+      "source_type": "news_industry_publication",
+      "url": "https://techcrunch.com:443/2026/01/01/example"
+    },
+    {
+      "discovery_origin": "tinyfish_discovery",
+      "discovery_run_id": "news_1",
+      "label": "Coverage",
+      "notes": "",
+      "reporting_period": "",
+      "source_kind": "coverage",
+      "source_type": "news_aggregator",
+      "url": "https://unknown.example.io/x"
+    }
+  ],
+  "spawned_financial": [
+    {
+      "browser_profile": "lite",
+      "category": "financials",
+      "credential_item_ids": [],
+      "enable_agent_memory": true,
+      "goal": "You are collecting raw financial source material for Example Corp from the source labeled 'Discovered Regulator filing index'. The public ticker or filing identifier is EXMP.\n\nInstructions:\n1. Capture the filing index page and the newest clearly relevant annual and quarterly or interim filing materials you can reach from it.\n2. Prefer official company or regulator sources over third-party summaries.\n3. Your job is source discovery and direct-link collection, not financial analysis.\n4. For each relevant page or document you open, return the page title, final URL, source kind, reporting period if explicitly stated, and any linked financial documents.\n5. Do not calculate ratios, infer missing numbers, or extract large blocks of financial text. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to five clearly relevant financial sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"search_discovery\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple Investor Relations\",\n      \"final_url\": \"https://investor.apple.com/\",\n      \"source_kind\": \"investor_relations_hub\",\n      \"reporting_period\": \"\",\n      \"linked_documents\": [\n        {\n          \"title\": \"Annual Report 2025\",\n          \"url\": \"https://investor.apple.com/annual-report-2025.pdf\",\n          \"document_type\": \"annual_report\"\n        }\n      ],\n      \"notes\": \"Official investor relations hub with links to results, SEC filings, and annual reports. Keep notes short and source-oriented.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"Latest quarterly document was not reachable from this path\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"search_discovery\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"Search results were blocked by CAPTCHA\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+      "label": "Discovered Regulator filing index",
+      "preferred_run_mode": "async",
+      "proxy_country_code": "",
+      "source_type": "financial_sec_filings",
+      "url": "https://WWW.SEC.GOV/cgi-bin/browse-edgar?CIK=EXMP#frag",
+      "use_vault": false
+    }
+  ],
+  "spawned_legal": [
+    {
+      "browser_profile": "lite",
+      "category": "legal",
+      "credential_item_ids": [],
+      "enable_agent_memory": true,
+      "goal": "You are collecting raw legal source material for Example Corp from the source labeled 'Docket 22-cv-1'. The public ticker or filing identifier is EXMP. The primary jurisdiction is GB.\n\nInstructions:\n1. Search for active and recent litigation involving the company. Collect case numbers, court names, filing dates, named parties, and links to docket entries or case documents.\n2. Prefer official court, regulatory, and government sources over news summaries.\n3. Your job is source discovery and direct-link collection, not legal analysis.\n4. For each relevant page or document you find, return the page title, final URL, source kind, case identifier or action reference if stated, jurisdiction, and any linked legal documents.\n5. Do not interpret legal outcomes, assess liability, or summarize legal arguments. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to eight clearly relevant legal sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple Inc. v. Samsung Electronics - Docket\",\n      \"final_url\": \"https://www.courtlistener.com/docket/123456/apple-inc-v-samsung/\",\n      \"source_kind\": \"court_docket\",\n      \"case_identifier\": \"5:11-cv-01846\",\n      \"jurisdiction\": \"N.D. Cal.\",\n      \"linked_documents\": [\n        {\n          \"title\": \"Complaint\",\n          \"url\": \"https://storage.courtlistener.com/recap/...\",\n          \"document_type\": \"complaint\"\n        }\n      ],\n      \"notes\": \"Patent infringement case. Last activity 2025-09-15.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"State court records were not accessible from this path\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"Court records database required login or subscription\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+      "label": "Docket 22-cv-1",
+      "preferred_run_mode": "async",
+      "proxy_country_code": "",
+      "source_type": "legal_court_records",
+      "url": "https://www.courtlistener.com/docket/1/",
+      "use_vault": false
+    },
+    {
+      "browser_profile": "lite",
+      "category": "legal",
+      "credential_item_ids": [],
+      "enable_agent_memory": true,
+      "goal": "You are collecting raw legal source material for Example Corp from the source labeled 'Complaint'. The public ticker or filing identifier is EXMP. The primary jurisdiction is GB.\n\nInstructions:\n1. Search for active and recent litigation involving the company. Collect case numbers, court names, filing dates, named parties, and links to docket entries or case documents.\n2. Prefer official court, regulatory, and government sources over news summaries.\n3. Your job is source discovery and direct-link collection, not legal analysis.\n4. For each relevant page or document you find, return the page title, final URL, source kind, case identifier or action reference if stated, jurisdiction, and any linked legal documents.\n5. Do not interpret legal outcomes, assess liability, or summarize legal arguments. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to eight clearly relevant legal sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple Inc. v. Samsung Electronics - Docket\",\n      \"final_url\": \"https://www.courtlistener.com/docket/123456/apple-inc-v-samsung/\",\n      \"source_kind\": \"court_docket\",\n      \"case_identifier\": \"5:11-cv-01846\",\n      \"jurisdiction\": \"N.D. Cal.\",\n      \"linked_documents\": [\n        {\n          \"title\": \"Complaint\",\n          \"url\": \"https://storage.courtlistener.com/recap/...\",\n          \"document_type\": \"complaint\"\n        }\n      ],\n      \"notes\": \"Patent infringement case. Last activity 2025-09-15.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"State court records were not accessible from this path\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"Court records database required login or subscription\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+      "label": "Complaint",
+      "preferred_run_mode": "async",
+      "proxy_country_code": "",
+      "source_type": "legal_court_records",
+      "url": "https://storage.courtlistener.com/complaint.pdf",
+      "use_vault": false
+    },
+    {
+      "browser_profile": "lite",
+      "category": "legal",
+      "credential_item_ids": [],
+      "enable_agent_memory": true,
+      "goal": "You are collecting raw legal source material for Example Corp from the source labeled 'FTC press'. The public ticker or filing identifier is EXMP. The primary jurisdiction is GB.\n\nInstructions:\n1. Search for regulatory enforcement actions, consent decrees, fines, penalties, and settlements involving the company from agencies such as SEC, FTC, DOJ, EPA, CFPB, or equivalent regulators. Collect action dates, agency names, and amounts.\n2. Prefer official court, regulatory, and government sources over news summaries.\n3. Your job is source discovery and direct-link collection, not legal analysis.\n4. For each relevant page or document you find, return the page title, final URL, source kind, case identifier or action reference if stated, jurisdiction, and any linked legal documents.\n5. Do not interpret legal outcomes, assess liability, or summarize legal arguments. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to eight clearly relevant legal sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple Inc. v. Samsung Electronics - Docket\",\n      \"final_url\": \"https://www.courtlistener.com/docket/123456/apple-inc-v-samsung/\",\n      \"source_kind\": \"court_docket\",\n      \"case_identifier\": \"5:11-cv-01846\",\n      \"jurisdiction\": \"N.D. Cal.\",\n      \"linked_documents\": [\n        {\n          \"title\": \"Complaint\",\n          \"url\": \"https://storage.courtlistener.com/recap/...\",\n          \"document_type\": \"complaint\"\n        }\n      ],\n      \"notes\": \"Patent infringement case. Last activity 2025-09-15.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"State court records were not accessible from this path\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"Court records database required login or subscription\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+      "label": "FTC press",
+      "preferred_run_mode": "async",
+      "proxy_country_code": "",
+      "source_type": "legal_enforcement",
+      "url": "https://www.ftc.gov/news/press-releases/x",
+      "use_vault": false
+    },
+    {
+      "browser_profile": "lite",
+      "category": "legal",
+      "credential_item_ids": [],
+      "enable_agent_memory": true,
+      "goal": "You are collecting raw legal source material for Example Corp from the source labeled 'Registry'. The public ticker or filing identifier is EXMP. The primary jurisdiction is GB.\n\nInstructions:\n1. Search corporate registry records for incorporation details, registered agents, UCC filings, liens, judgments, and beneficial ownership disclosures. Collect registry names, filing dates, and document links.\n2. Prefer official court, regulatory, and government sources over news summaries.\n3. Your job is source discovery and direct-link collection, not legal analysis.\n4. For each relevant page or document you find, return the page title, final URL, source kind, case identifier or action reference if stated, jurisdiction, and any linked legal documents.\n5. Do not interpret legal outcomes, assess liability, or summarize legal arguments. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to eight clearly relevant legal sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple Inc. v. Samsung Electronics - Docket\",\n      \"final_url\": \"https://www.courtlistener.com/docket/123456/apple-inc-v-samsung/\",\n      \"source_kind\": \"court_docket\",\n      \"case_identifier\": \"5:11-cv-01846\",\n      \"jurisdiction\": \"N.D. Cal.\",\n      \"linked_documents\": [\n        {\n          \"title\": \"Complaint\",\n          \"url\": \"https://storage.courtlistener.com/recap/...\",\n          \"document_type\": \"complaint\"\n        }\n      ],\n      \"notes\": \"Patent infringement case. Last activity 2025-09-15.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"State court records were not accessible from this path\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"Court records database required login or subscription\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+      "label": "Registry",
+      "preferred_run_mode": "async",
+      "proxy_country_code": "",
+      "source_type": "legal_corporate_registry",
+      "url": "https://opencorporates.com/filings/2",
+      "use_vault": false
+    },
+    {
+      "browser_profile": "lite",
+      "category": "legal",
+      "credential_item_ids": [],
+      "enable_agent_memory": true,
+      "goal": "You are collecting raw legal source material for Example Corp from the source labeled 'OFAC'. The public ticker or filing identifier is EXMP. The primary jurisdiction is GB.\n\nInstructions:\n1. Search for the company name on sanctions and debarment databases including OFAC SDN list, EU consolidated sanctions, and government debarment lists. Report any matches with designation dates and list names.\n2. Prefer official court, regulatory, and government sources over news summaries.\n3. Your job is source discovery and direct-link collection, not legal analysis.\n4. For each relevant page or document you find, return the page title, final URL, source kind, case identifier or action reference if stated, jurisdiction, and any linked legal documents.\n5. Do not interpret legal outcomes, assess liability, or summarize legal arguments. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to eight clearly relevant legal sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple Inc. v. Samsung Electronics - Docket\",\n      \"final_url\": \"https://www.courtlistener.com/docket/123456/apple-inc-v-samsung/\",\n      \"source_kind\": \"court_docket\",\n      \"case_identifier\": \"5:11-cv-01846\",\n      \"jurisdiction\": \"N.D. Cal.\",\n      \"linked_documents\": [\n        {\n          \"title\": \"Complaint\",\n          \"url\": \"https://storage.courtlistener.com/recap/...\",\n          \"document_type\": \"complaint\"\n        }\n      ],\n      \"notes\": \"Patent infringement case. Last activity 2025-09-15.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"State court records were not accessible from this path\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"Court records database required login or subscription\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+      "label": "OFAC",
+      "preferred_run_mode": "async",
+      "proxy_country_code": "",
+      "source_type": "legal_sanctions",
+      "url": "https://home.treasury.gov/ofac/sdn",
+      "use_vault": false
+    }
+  ],
+  "spawned_news": [
+    {
+      "browser_profile": "lite",
+      "category": "news",
+      "credential_item_ids": [],
+      "enable_agent_memory": true,
+      "goal": "You are collecting raw news source material for Example Corp from the source labeled 'Reuters story'.\n\nInstructions:\n1. Search for recent news articles about the company from major outlets. Collect article titles, publication dates, publisher names, and direct article URLs. Prioritize the most recent and most material coverage.\n2. Prefer named, reputable publishers over aggregator summaries or social media.\n3. Your job is source discovery and direct-link collection, not news analysis.\n4. For each relevant article or release you find, return the page title, final URL, source kind, publication date if stated, publisher name, and any linked documents.\n5. Do not summarize article content or assess sentiment. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to ten clearly relevant news sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple announces major restructuring of services division\",\n      \"final_url\": \"https://reuters.com/technology/apple-restructuring-2026-03/\",\n      \"source_kind\": \"news_article\",\n      \"publication_date\": \"2026-03-15\",\n      \"publisher\": \"Reuters\",\n      \"linked_documents\": [],\n      \"notes\": \"Reports 200 job cuts in services division effective Q2 2026.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"Industry trade press results were paywalled\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"News aggregator blocked automated access\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+      "label": "Reuters story",
+      "preferred_run_mode": "async",
+      "proxy_country_code": "",
+      "source_type": "news_aggregator",
+      "url": "https://www.reuters.com/markets/example",
+      "use_vault": false
+    },
+    {
+      "browser_profile": "lite",
+      "category": "news",
+      "credential_item_ids": [],
+      "enable_agent_memory": true,
+      "goal": "You are collecting raw news source material for Example Corp from the source labeled 'Wire copy'.\n\nInstructions:\n1. Search for official press releases from the company on wire services such as PR Newswire, Business Wire, or GlobeNewsWire. Collect release titles, dates, and direct URLs.\n2. Prefer named, reputable publishers over aggregator summaries or social media.\n3. Your job is source discovery and direct-link collection, not news analysis.\n4. For each relevant article or release you find, return the page title, final URL, source kind, publication date if stated, publisher name, and any linked documents.\n5. Do not summarize article content or assess sentiment. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to ten clearly relevant news sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple announces major restructuring of services division\",\n      \"final_url\": \"https://reuters.com/technology/apple-restructuring-2026-03/\",\n      \"source_kind\": \"news_article\",\n      \"publication_date\": \"2026-03-15\",\n      \"publisher\": \"Reuters\",\n      \"linked_documents\": [],\n      \"notes\": \"Reports 200 job cuts in services division effective Q2 2026.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"Industry trade press results were paywalled\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"News aggregator blocked automated access\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+      "label": "Wire copy",
+      "preferred_run_mode": "async",
+      "proxy_country_code": "",
+      "source_type": "news_press_release",
+      "url": "https://www.prnewswire.com/news/x",
+      "use_vault": false
+    },
+    {
+      "browser_profile": "lite",
+      "category": "news",
+      "credential_item_ids": [],
+      "enable_agent_memory": true,
+      "goal": "You are collecting raw news source material for Example Corp from the source labeled 'Reuters story'.\n\nInstructions:\n1. Starting from search results, locate recent news articles, press releases, and industry coverage about the company. Open the best paths and return the direct article URLs, publication dates, and publisher names.\n2. Prefer named, reputable publishers over aggregator summaries or social media.\n3. Your job is source discovery and direct-link collection, not news analysis.\n4. For each relevant article or release you find, return the page title, final URL, source kind, publication date if stated, publisher name, and any linked documents.\n5. Do not summarize article content or assess sentiment. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to ten clearly relevant news sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple announces major restructuring of services division\",\n      \"final_url\": \"https://reuters.com/technology/apple-restructuring-2026-03/\",\n      \"source_kind\": \"news_article\",\n      \"publication_date\": \"2026-03-15\",\n      \"publisher\": \"Reuters\",\n      \"linked_documents\": [],\n      \"notes\": \"Reports 200 job cuts in services division effective Q2 2026.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"Industry trade press results were paywalled\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"News aggregator blocked automated access\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+      "label": "Reuters story",
+      "preferred_run_mode": "async",
+      "proxy_country_code": "",
+      "source_type": "news_article",
+      "url": "https://blog.example.net/post",
+      "use_vault": false
+    },
+    {
+      "browser_profile": "lite",
+      "category": "news",
+      "credential_item_ids": [],
+      "enable_agent_memory": true,
+      "goal": "You are collecting raw news source material for Example Corp from the source labeled 'Discovered news source'.\n\nInstructions:\n1. Search for industry-specific coverage and analyst commentary about the company in trade publications and industry news sites. Collect article titles, publication dates, publisher names, and direct URLs.\n2. Prefer named, reputable publishers over aggregator summaries or social media.\n3. Your job is source discovery and direct-link collection, not news analysis.\n4. For each relevant article or release you find, return the page title, final URL, source kind, publication date if stated, publisher name, and any linked documents.\n5. Do not summarize article content or assess sentiment. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to ten clearly relevant news sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple announces major restructuring of services division\",\n      \"final_url\": \"https://reuters.com/technology/apple-restructuring-2026-03/\",\n      \"source_kind\": \"news_article\",\n      \"publication_date\": \"2026-03-15\",\n      \"publisher\": \"Reuters\",\n      \"linked_documents\": [],\n      \"notes\": \"Reports 200 job cuts in services division effective Q2 2026.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"Industry trade press results were paywalled\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"News aggregator blocked automated access\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+      "label": "Discovered news source",
+      "preferred_run_mode": "async",
+      "proxy_country_code": "",
+      "source_type": "news_industry_publication",
+      "url": "https://techcrunch.com:443/2026/01/01/example",
+      "use_vault": false
+    },
+    {
+      "browser_profile": "lite",
+      "category": "news",
+      "credential_item_ids": [],
+      "enable_agent_memory": true,
+      "goal": "You are collecting raw news source material for Example Corp from the source labeled 'Coverage'.\n\nInstructions:\n1. Search for recent news articles about the company from major outlets. Collect article titles, publication dates, publisher names, and direct article URLs. Prioritize the most recent and most material coverage.\n2. Prefer named, reputable publishers over aggregator summaries or social media.\n3. Your job is source discovery and direct-link collection, not news analysis.\n4. For each relevant article or release you find, return the page title, final URL, source kind, publication date if stated, publisher name, and any linked documents.\n5. Do not summarize article content or assess sentiment. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to ten clearly relevant news sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple announces major restructuring of services division\",\n      \"final_url\": \"https://reuters.com/technology/apple-restructuring-2026-03/\",\n      \"source_kind\": \"news_article\",\n      \"publication_date\": \"2026-03-15\",\n      \"publisher\": \"Reuters\",\n      \"linked_documents\": [],\n      \"notes\": \"Reports 200 job cuts in services division effective Q2 2026.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"Industry trade press results were paywalled\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"News aggregator blocked automated access\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+      "label": "Coverage",
+      "preferred_run_mode": "async",
+      "proxy_country_code": "",
+      "source_type": "news_aggregator",
+      "url": "https://unknown.example.io/x",
+      "use_vault": false
+    }
+  ]
+}

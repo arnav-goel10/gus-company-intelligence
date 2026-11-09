@@ -390,6 +390,8 @@ class ScriptedModel:
         background: bool = True,
     ) -> dict[str, Any]:
         content = user_content or [{"type": "input_text", "text": user_prompt}]
+        texts = [part.get("text", "") for part in content if part.get("type") == "input_text"]
+        attachments = [part for part in content if part.get("type") != "input_text"]
         self.calls.append(
             {
                 "schema_name": schema_name,
@@ -397,14 +399,15 @@ class ScriptedModel:
                     json.dumps(schema, sort_keys=True).encode()
                 ).hexdigest()[:16],
                 "system_prompt": system_prompt,
-                "user_text": content[0].get("text", ""),
+                "user_text": "\n\n".join(texts),
                 "files": [
                     {
                         k: (hashlib.sha256(v.encode()).hexdigest()[:16] if k == "file_data" else v)
                         for k, v in part.items()
                     }
-                    for part in content[1:]
+                    for part in attachments
                 ],
+                "content_order": [part.get("type") for part in content],
                 "max_output_tokens": max_output_tokens,
                 "user_prompt_used": user_content is None,
             }
@@ -427,20 +430,34 @@ class ScriptedModel:
                     for n in range(1 + len(schema_name) % 2)
                 ],
             }
-        if schema_name == "claim_verification":
-            text = content[0].get("text", "")
-            claim_id = text.split("Claim ID: ", 1)[1].split("\n", 1)[0]
-            bucket = sum(ord(ch) for ch in claim_id) % 5
-            if bucket == 4:
-                raise RuntimeError("simulated verifier timeout")
-            status = ["supported", "supported", "unsupported", "contradicted"][bucket]
-            return {
-                "status": status,
-                "confidence": 0.9,
-                "rationale": f"bucket {bucket}",
-                "supporting_evidence_ids": ["direct_financials_001"] if bucket == 1 else [],
-                "blocking_issues": [] if status == "supported" else ["not in source"],
-            }
+        if schema_name in ("claim_verification", "claim_verification_batch"):
+            # The verdict depends only on the claim id, so one call per claim
+            # and one call per batch must keep and suppress the same claims.
+            # Bucket 4 simulates a failure: the single-claim call raised; in a
+            # batch the claim is left out of the answer, which the pipeline
+            # must also treat as a failure.
+            text = "\n".join(texts)
+            claim_ids = [line.split("Claim ID: ", 1)[1].strip()
+                         for line in text.splitlines() if line.startswith("Claim ID: ")]
+            verdicts = []
+            for claim_id in claim_ids:
+                bucket = sum(ord(ch) for ch in claim_id) % 5
+                if bucket == 4:
+                    continue
+                status = ["supported", "supported", "unsupported", "contradicted"][bucket]
+                verdicts.append({
+                    "claim_id": claim_id,
+                    "status": status,
+                    "confidence": 0.9,
+                    "rationale": f"bucket {bucket}",
+                    "supporting_evidence_ids": ["direct_financials_001"] if bucket == 1 else [],
+                    "blocking_issues": [] if status == "supported" else ["not in source"],
+                })
+            if schema_name == "claim_verification":
+                if not verdicts:
+                    raise RuntimeError("simulated verifier timeout")
+                return {k: v for k, v in verdicts[0].items() if k != "claim_id"}
+            return {"verdicts": verdicts}
         if schema_name == "legal_section_summary":
             raise RuntimeError("simulated synthesis failure")
         if schema_name.endswith("_section_summary"):

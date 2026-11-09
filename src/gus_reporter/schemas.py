@@ -73,6 +73,22 @@ def verification_schema() -> dict:
     }
 
 
+def verification_batch_schema(claim_ids: list[str]) -> dict:
+    single = verification_schema()
+    verdict = {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {"claim_id": {"type": "string", "enum": list(claim_ids)}, **single["properties"]},
+        "required": ["claim_id", *single["required"]],
+    }
+    return {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {"verdicts": {"type": "array", "items": verdict}},
+        "required": ["verdicts"],
+    }
+
+
 def report_schema(focus_areas: list[str]) -> dict:
     return {
         "type": "object",

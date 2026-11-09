@@ -14,7 +14,7 @@ from gus_reporter.agents import (
 )
 from gus_reporter.events import RunEvents
 from gus_reporter.evidence import (
-    _build_openai_user_content,
+    build_model_input,
     select_evidence_for_agent,
     select_evidence_for_extraction_agent,
 )
@@ -107,26 +107,27 @@ class ClaimExtractor:
                 select_evidence_for_agent(agent, evidence),
             )
             try:
+                # The system prompt is the same for every specialist and the
+                # evidence comes before the specialist's task, so specialists
+                # that share a bundle share a cacheable prompt prefix.
                 payload = self.llm.structured_response(
                     schema_name=f"{agent.section}_{specialist.name}_claim_extraction",
                     schema=extraction_schema([agent.section]),
-                    system_prompt=(
-                        f"{EXTRACTION_SYSTEM_PROMPT}\n\n"
-                        f"Coordinator section: {agent.section}\n"
-                        f"Coordinator: {agent.name}\n"
-                        f"Specialist: {specialist.name}\n"
-                        f"Specialist instruction: {specialist.extraction_instruction}"
-                    ),
-                    user_content=_build_openai_user_content(
-                        preamble=(
+                    system_prompt=EXTRACTION_SYSTEM_PROMPT,
+                    user_content=build_model_input(
+                        evidence=specialist_evidence,
+                        run_dir=run_dir,
+                        task=(
                             f"Company: {request.company_name}\n"
                             f"Jurisdiction: {request.primary_jurisdiction}\n"
                             f"Target section: {agent.section}\n"
-                            f"Goal: {request.report_goal or 'Generate a source-backed diligence report.'}\n\n"
+                            f"Goal: {request.report_goal or 'Generate a source-backed diligence report.'}\n"
+                            f"Coordinator section: {agent.section}\n"
+                            f"Coordinator: {agent.name}\n"
+                            f"Specialist: {specialist.name}\n"
+                            f"Specialist instruction: {specialist.extraction_instruction}\n\n"
                             "Use attached PDFs and raw source text to extract only directly supported claims."
                         ),
-                        evidence=specialist_evidence,
-                        run_dir=run_dir,
                     ),
                 )
             except Exception as exc:

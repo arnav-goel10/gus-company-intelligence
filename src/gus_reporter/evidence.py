@@ -178,6 +178,38 @@ def _build_openai_user_content(
     return content
 
 
+def file_inputs(evidence: list[EvidenceItem], run_dir: Path | None) -> list[dict[str, Any]]:
+    """The PDF attachments for these items, same rules and cap as a full bundle."""
+    inputs: list[dict[str, Any]] = []
+    for item in evidence:
+        if len(inputs) >= MAX_FILE_INPUTS_PER_REQUEST:
+            break
+        file_input = _build_local_file_input(item, run_dir)
+        if file_input:
+            inputs.append(file_input)
+            continue
+        file_url = str(item.metadata.get("openai_input_file_url", "")).strip()
+        if file_url:
+            inputs.append({"type": "input_file", "file_url": file_url})
+    return inputs
+
+
+def build_model_input(
+    *,
+    task: str,
+    evidence: list[EvidenceItem],
+    run_dir: Path | None = None,
+) -> list[dict[str, Any]]:
+    """Same bundle as _build_openai_user_content, ordered for prompt caching.
+
+    Attached files and the evidence text come first and the call-specific task
+    comes last, so calls over the same evidence share a cacheable prefix.
+    """
+    bundle = _build_openai_user_content(preamble="", evidence=evidence, run_dir=run_dir)
+    text, files = bundle[0], bundle[1:]
+    return [*files, text, {"type": "input_text", "text": task}]
+
+
 def _build_local_file_input(
     item: EvidenceItem, run_dir: Path | None
 ) -> dict[str, Any] | None:

@@ -330,12 +330,28 @@ def _evidence_blocks(text: str) -> dict[str, str]:
 
 
 class AuthoredModel:
+    @staticmethod
+    def _verdict(claim: str, quote: str, passages: str) -> dict:
+        for marker, (status, rationale) in REJECTIONS.items():
+            if marker in claim:
+                return {"status": status, "confidence": 0.9, "rationale": rationale,
+                        "supporting_evidence_ids": [], "blocking_issues": [rationale]}
+        # Otherwise the authored verifier accepts the claim, the way a model can
+        # be talked into it. The pipeline's grounding check gets the last word.
+        hits = [eid for eid, body in _evidence_blocks(passages).items()
+                if quote and _squash(quote) in _squash(body)]
+        return {"status": "supported", "confidence": 0.9,
+                "rationale": "The cited source states this.",
+                "supporting_evidence_ids": hits[:1], "blocking_issues": []}
+
     def structured_response(self, *, schema_name: str, schema: dict, system_prompt: str,
                             user_prompt: str = "", user_content: list | None = None,
                             max_output_tokens: int = 4000, background: bool = True) -> dict:
-        text = (user_content or [{"text": user_prompt}])[0]["text"]
+        parts = [part["text"] for part in (user_content or [{"type": "input_text", "text": user_prompt}])
+                 if part.get("type") == "input_text"]
+        text = "\n\n".join(parts)
         if schema_name.endswith("_claim_extraction"):
-            specialist = system_prompt.split("Specialist: ", 1)[1].split("\n", 1)[0]
+            specialist = text.split("Specialist: ", 1)[1].split("\n", 1)[0]
             section = schema["properties"]["claims"]["items"]["properties"]["section"]["enum"][0]
             return {
                 "document_summary": "",
@@ -345,20 +361,16 @@ class AuthoredModel:
                     for statement, quote, importance in EXTRACTIONS.get(specialist, [])
                 ],
             }
-        if schema_name == "claim_verification":
-            claim = text.split("Claim: ", 1)[1].split("\n", 1)[0]
-            quote = text.split("Quoted support from extraction: ", 1)[1].split("\n", 1)[0]
-            for marker, (status, rationale) in REJECTIONS.items():
-                if marker in claim:
-                    return {"status": status, "confidence": 0.9, "rationale": rationale,
-                            "supporting_evidence_ids": [], "blocking_issues": [rationale]}
-            # Otherwise the authored verifier accepts the claim, the way a model can
-            # be talked into it. The pipeline's grounding check gets the last word.
-            hits = [eid for eid, body in _evidence_blocks(text).items()
-                    if quote and _squash(quote) in _squash(body)]
-            return {"status": "supported", "confidence": 0.9,
-                    "rationale": "The cited source states this.",
-                    "supporting_evidence_ids": hits[:1], "blocking_issues": []}
+        if schema_name == "claim_verification_batch":
+            passages = next(part for part in parts if part.startswith("Evidence passages:"))
+            claims_part = parts[-1].split("Claims to verify:", 1)[1]
+            verdicts = []
+            for block in claims_part.split("Claim ID: ")[1:]:
+                claim_id = block.split("\n", 1)[0].strip()
+                claim = block.split("Claim: ", 1)[1].split("\n", 1)[0]
+                quote = block.split("Quoted support from extraction: ", 1)[1].split("\n", 1)[0].strip()
+                verdicts.append({"claim_id": claim_id, **self._verdict(claim, quote, passages)})
+            return {"verdicts": verdicts}
         if schema_name.endswith("_section_summary"):
             statements = [line.split("- Statement: ", 1)[1].split(" | ", 1)[0]
                           for line in text.splitlines() if line.startswith("- Statement: ")]

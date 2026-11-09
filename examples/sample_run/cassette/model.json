@@ -1,195 +1,233 @@
 {
-  "claim_verification:04efef3108ffa85b56731ba6": {
+  "claim_verification_batch:011f7277e7edf636fd74d798": {
     "response": {
-      "blocking_issues": [
-        "No captured source states where the company is incorporated."
-      ],
-      "confidence": 0.9,
-      "rationale": "No captured source states where the company is incorporated.",
-      "status": "unsupported",
-      "supporting_evidence_ids": []
-    },
-    "usage": {}
-  },
-  "claim_verification:05ae8cdc356e55ef93156a1c": {
-    "response": {
-      "blocking_issues": [],
-      "confidence": 0.9,
-      "rationale": "The cited source states this.",
-      "status": "supported",
-      "supporting_evidence_ids": []
-    },
-    "usage": {}
-  },
-  "claim_verification:071c47809bed1c652dab2a0a": {
-    "response": {
-      "blocking_issues": [
-        "Two articles, one negative, cannot support a claim about overall coverage."
-      ],
-      "confidence": 0.9,
-      "rationale": "Two articles, one negative, cannot support a claim about overall coverage.",
-      "status": "insufficient_evidence",
-      "supporting_evidence_ids": []
-    },
-    "usage": {}
-  },
-  "claim_verification:3222d7dc88686e98579aaf7e": {
-    "response": {
-      "blocking_issues": [],
-      "confidence": 0.9,
-      "rationale": "The cited source states this.",
-      "status": "supported",
-      "supporting_evidence_ids": [
-        "direct_news_003"
+      "verdicts": [
+        {
+          "blocking_issues": [
+            "No sanctions screening source was captured, so absence from a list was never checked."
+          ],
+          "claim_id": "legal_legal_sanctions_agent_001",
+          "confidence": 0.9,
+          "rationale": "No sanctions screening source was captured, so absence from a list was never checked.",
+          "status": "insufficient_evidence",
+          "supporting_evidence_ids": []
+        }
       ]
     },
     "usage": {}
   },
-  "claim_verification:524c94efb25609dd83c147e6": {
+  "claim_verification_batch:2cbf2fe3c79bf749c94f6e76": {
     "response": {
-      "blocking_issues": [],
-      "confidence": 0.9,
-      "rationale": "The cited source states this.",
-      "status": "supported",
-      "supporting_evidence_ids": [
-        "direct_financials_002"
+      "verdicts": [
+        {
+          "blocking_issues": [],
+          "claim_id": "company_overview_overview_agent_001",
+          "confidence": 0.9,
+          "rationale": "The cited source states this.",
+          "status": "supported",
+          "supporting_evidence_ids": [
+            "tinyfish_company_overview_001"
+          ]
+        },
+        {
+          "blocking_issues": [],
+          "claim_id": "company_overview_overview_agent_002",
+          "confidence": 0.9,
+          "rationale": "The cited source states this.",
+          "status": "supported",
+          "supporting_evidence_ids": [
+            "tinyfish_company_overview_001"
+          ]
+        }
       ]
     },
     "usage": {}
   },
-  "claim_verification:5983f57f3492074e924113ba": {
+  "claim_verification_batch:47550437c70d1f840e009728": {
     "response": {
-      "blocking_issues": [],
-      "confidence": 0.9,
-      "rationale": "The cited source states this.",
-      "status": "supported",
-      "supporting_evidence_ids": [
-        "direct_legal_001"
+      "verdicts": [
+        {
+          "blocking_issues": [],
+          "claim_id": "news_news_negative_signal_agent_001",
+          "confidence": 0.9,
+          "rationale": "The cited source states this.",
+          "status": "supported",
+          "supporting_evidence_ids": [
+            "direct_news_003"
+          ]
+        }
       ]
     },
     "usage": {}
   },
-  "claim_verification:63c6eb93d1c3c7063f12e26a": {
+  "claim_verification_batch:550040bac8da4dfb9469bf02": {
     "response": {
-      "blocking_issues": [],
-      "confidence": 0.9,
-      "rationale": "The cited source states this.",
-      "status": "supported",
-      "supporting_evidence_ids": [
-        "direct_financials_001"
+      "verdicts": [
+        {
+          "blocking_issues": [
+            "No captured source states where the company is incorporated."
+          ],
+          "claim_id": "legal_legal_corporate_filings_agent_001",
+          "confidence": 0.9,
+          "rationale": "No captured source states where the company is incorporated.",
+          "status": "unsupported",
+          "supporting_evidence_ids": []
+        }
       ]
     },
     "usage": {}
   },
-  "claim_verification:7a5f74d89ac22a584e582517": {
+  "claim_verification_batch:7edb2c70f152e6b1cebdcc24": {
     "response": {
-      "blocking_issues": [],
-      "confidence": 0.9,
-      "rationale": "The cited source states this.",
-      "status": "supported",
-      "supporting_evidence_ids": [
-        "tinyfish_company_overview_001"
+      "verdicts": [
+        {
+          "blocking_issues": [],
+          "claim_id": "leadership_leadership_agent_001",
+          "confidence": 0.9,
+          "rationale": "The cited source states this.",
+          "status": "supported",
+          "supporting_evidence_ids": [
+            "tinyfish_leadership_002"
+          ]
+        },
+        {
+          "blocking_issues": [],
+          "claim_id": "leadership_leadership_agent_002",
+          "confidence": 0.9,
+          "rationale": "The cited source states this.",
+          "status": "supported",
+          "supporting_evidence_ids": [
+            "tinyfish_leadership_002"
+          ]
+        }
       ]
     },
     "usage": {}
   },
-  "claim_verification:808a87897cb2d48302c84ada": {
+  "claim_verification_batch:86c9b9a34d9c8706ac40e6ea": {
     "response": {
-      "blocking_issues": [],
-      "confidence": 0.9,
-      "rationale": "The cited source states this.",
-      "status": "supported",
-      "supporting_evidence_ids": [
-        "tinyfish_leadership_002"
+      "verdicts": [
+        {
+          "blocking_issues": [],
+          "claim_id": "financials_financial_risk_agent_001",
+          "confidence": 0.9,
+          "rationale": "The cited source states this.",
+          "status": "supported",
+          "supporting_evidence_ids": [
+            "direct_financials_002"
+          ]
+        }
       ]
     },
     "usage": {}
   },
-  "claim_verification:8b6a546ab30bcbebfb763d7e": {
+  "claim_verification_batch:908e955800c2831b12da2dba": {
     "response": {
-      "blocking_issues": [],
-      "confidence": 0.9,
-      "rationale": "The cited source states this.",
-      "status": "supported",
-      "supporting_evidence_ids": [
-        "direct_news_002"
+      "verdicts": [
+        {
+          "blocking_issues": [],
+          "claim_id": "legal_legal_case_locator_001",
+          "confidence": 0.9,
+          "rationale": "The cited source states this.",
+          "status": "supported",
+          "supporting_evidence_ids": [
+            "direct_legal_001"
+          ]
+        }
       ]
     },
     "usage": {}
   },
-  "claim_verification:9712bf5a0bd3dfcbe8d8eec1": {
+  "claim_verification_batch:acfb9aacdbc48ac9548a3e17": {
     "response": {
-      "blocking_issues": [
-        "The investor page reports a net loss of $6.4 million for FY2025."
-      ],
-      "confidence": 0.9,
-      "rationale": "The investor page reports a net loss of $6.4 million for FY2025.",
-      "status": "contradicted",
-      "supporting_evidence_ids": []
-    },
-    "usage": {}
-  },
-  "claim_verification:aecb9d46e2218118133384a5": {
-    "response": {
-      "blocking_issues": [],
-      "confidence": 0.9,
-      "rationale": "The cited source states this.",
-      "status": "supported",
-      "supporting_evidence_ids": [
-        "direct_financials_001"
+      "verdicts": [
+        {
+          "blocking_issues": [
+            "Two articles, one negative, cannot support a claim about overall coverage."
+          ],
+          "claim_id": "news_news_sentiment_agent_001",
+          "confidence": 0.9,
+          "rationale": "Two articles, one negative, cannot support a claim about overall coverage.",
+          "status": "insufficient_evidence",
+          "supporting_evidence_ids": []
+        }
       ]
     },
     "usage": {}
   },
-  "claim_verification:b057bcc9c815e84dd74af5be": {
+  "claim_verification_batch:c2e07eab2224cfa8058bb311": {
     "response": {
-      "blocking_issues": [],
-      "confidence": 0.9,
-      "rationale": "The cited source states this.",
-      "status": "supported",
-      "supporting_evidence_ids": [
-        "direct_financials_002"
+      "verdicts": [
+        {
+          "blocking_issues": [],
+          "claim_id": "news_news_event_locator_001",
+          "confidence": 0.9,
+          "rationale": "The cited source states this.",
+          "status": "supported",
+          "supporting_evidence_ids": [
+            "direct_news_002"
+          ]
+        }
       ]
     },
     "usage": {}
   },
-  "claim_verification:c9fd814c92ec36b9914b5cd0": {
+  "claim_verification_batch:d1b0868ad16f185db487b722": {
     "response": {
-      "blocking_issues": [],
-      "confidence": 0.9,
-      "rationale": "The cited source states this.",
-      "status": "supported",
-      "supporting_evidence_ids": [
-        "tinyfish_company_overview_001"
+      "verdicts": [
+        {
+          "blocking_issues": [],
+          "claim_id": "financials_financial_statement_agent_001",
+          "confidence": 0.9,
+          "rationale": "The cited source states this.",
+          "status": "supported",
+          "supporting_evidence_ids": [
+            "direct_financials_001"
+          ]
+        },
+        {
+          "blocking_issues": [],
+          "claim_id": "financials_financial_statement_agent_002",
+          "confidence": 0.9,
+          "rationale": "The cited source states this.",
+          "status": "supported",
+          "supporting_evidence_ids": [
+            "direct_financials_001"
+          ]
+        },
+        {
+          "blocking_issues": [
+            "The investor page reports a net loss of $6.4 million for FY2025."
+          ],
+          "claim_id": "financials_financial_statement_agent_003",
+          "confidence": 0.9,
+          "rationale": "The investor page reports a net loss of $6.4 million for FY2025.",
+          "status": "contradicted",
+          "supporting_evidence_ids": []
+        },
+        {
+          "blocking_issues": [],
+          "claim_id": "financials_capital_structure_agent_001",
+          "confidence": 0.9,
+          "rationale": "The cited source states this.",
+          "status": "supported",
+          "supporting_evidence_ids": [
+            "direct_financials_002"
+          ]
+        },
+        {
+          "blocking_issues": [],
+          "claim_id": "financials_funding_guidance_agent_001",
+          "confidence": 0.9,
+          "rationale": "The cited source states this.",
+          "status": "supported",
+          "supporting_evidence_ids": []
+        }
       ]
     },
     "usage": {}
   },
-  "claim_verification:e49b60ac6d0e19e7607ed219": {
-    "response": {
-      "blocking_issues": [],
-      "confidence": 0.9,
-      "rationale": "The cited source states this.",
-      "status": "supported",
-      "supporting_evidence_ids": [
-        "tinyfish_leadership_002"
-      ]
-    },
-    "usage": {}
-  },
-  "claim_verification:f1f2075673a05302356d2db6": {
-    "response": {
-      "blocking_issues": [
-        "No sanctions screening source was captured, so absence from a list was never checked."
-      ],
-      "confidence": 0.9,
-      "rationale": "No sanctions screening source was captured, so absence from a list was never checked.",
-      "status": "insufficient_evidence",
-      "supporting_evidence_ids": []
-    },
-    "usage": {}
-  },
-  "company_overview_overview_agent_claim_extraction:89b233ebd3eac875aa50e28f": {
+  "company_overview_overview_agent_claim_extraction:5ea017f074ca28b116b53cee": {
     "response": {
       "claims": [
         {
@@ -245,7 +283,7 @@
     },
     "usage": {}
   },
-  "financials_capital_structure_agent_claim_extraction:0bcae78c3f114a91b9f447aa": {
+  "financials_capital_structure_agent_claim_extraction:c2cafe787ba2fb04de1769f0": {
     "response": {
       "claims": [
         {
@@ -261,14 +299,14 @@
     },
     "usage": {}
   },
-  "financials_financial_document_locator_claim_extraction:0c116e88ddf7d68ba974f199": {
+  "financials_financial_document_locator_claim_extraction:57f47717ee3b70674a2a45b8": {
     "response": {
       "claims": [],
       "document_summary": ""
     },
     "usage": {}
   },
-  "financials_financial_risk_agent_claim_extraction:078c9611fbd5ef4f29bf5266": {
+  "financials_financial_risk_agent_claim_extraction:504cbecb587c07c3782c5059": {
     "response": {
       "claims": [
         {
@@ -284,7 +322,7 @@
     },
     "usage": {}
   },
-  "financials_financial_statement_agent_claim_extraction:19cddb1a6c0a2213a2f03b6c": {
+  "financials_financial_statement_agent_claim_extraction:115dee089a3532b4b3885edf": {
     "response": {
       "claims": [
         {
@@ -316,7 +354,7 @@
     },
     "usage": {}
   },
-  "financials_funding_guidance_agent_claim_extraction:a41baf9997bb437fa79c9e4d": {
+  "financials_funding_guidance_agent_claim_extraction:14375637c2502e5477e71b34": {
     "response": {
       "claims": [
         {
@@ -349,7 +387,7 @@
     },
     "usage": {}
   },
-  "leadership_leadership_agent_claim_extraction:f9500a3c5e4165bc894611e7": {
+  "leadership_leadership_agent_claim_extraction:b155a7dbc612f69cfeff894b": {
     "response": {
       "claims": [
         {
@@ -386,7 +424,7 @@
     },
     "usage": {}
   },
-  "legal_legal_case_locator_claim_extraction:793ee847c4b36f7568bcad28": {
+  "legal_legal_case_locator_claim_extraction:a3b9c15a23629f2109370d9a": {
     "response": {
       "claims": [
         {
@@ -402,7 +440,7 @@
     },
     "usage": {}
   },
-  "legal_legal_corporate_filings_agent_claim_extraction:2194275ef80cc35d836dcd4d": {
+  "legal_legal_corporate_filings_agent_claim_extraction:a69a74a5f1eb441a3f99c976": {
     "response": {
       "claims": [
         {
@@ -418,21 +456,21 @@
     },
     "usage": {}
   },
-  "legal_legal_regulatory_agent_claim_extraction:be66e9bd164748fe4c6e1a7b": {
+  "legal_legal_regulatory_agent_claim_extraction:83df05478a07623747f68e0a": {
     "response": {
       "claims": [],
       "document_summary": ""
     },
     "usage": {}
   },
-  "legal_legal_risk_agent_claim_extraction:75932b070b5d6f6e7e3c6bc3": {
+  "legal_legal_risk_agent_claim_extraction:598b993942e08da4497b7717": {
     "response": {
       "claims": [],
       "document_summary": ""
     },
     "usage": {}
   },
-  "legal_legal_sanctions_agent_claim_extraction:f23c171ec6761c121a9fdf6d": {
+  "legal_legal_sanctions_agent_claim_extraction:6995e6907334e8d945e45349": {
     "response": {
       "claims": [
         {
@@ -465,14 +503,14 @@
     },
     "usage": {}
   },
-  "news_news_coverage_gap_agent_claim_extraction:6fc6f189ec34b521b0ca378a": {
+  "news_news_coverage_gap_agent_claim_extraction:e4f9433096c6dbb617966f6f": {
     "response": {
       "claims": [],
       "document_summary": ""
     },
     "usage": {}
   },
-  "news_news_event_locator_claim_extraction:6140f3898ad084e59ecc5fa1": {
+  "news_news_event_locator_claim_extraction:7227b97429135999b8332d6c": {
     "response": {
       "claims": [
         {
@@ -488,7 +526,7 @@
     },
     "usage": {}
   },
-  "news_news_negative_signal_agent_claim_extraction:6898a2127e997390a291e90e": {
+  "news_news_negative_signal_agent_claim_extraction:8e20717c4fed9b4f6f6b2bd1": {
     "response": {
       "claims": [
         {
@@ -504,7 +542,7 @@
     },
     "usage": {}
   },
-  "news_news_sentiment_agent_claim_extraction:e0219ccd6eff69e74ac04f71": {
+  "news_news_sentiment_agent_claim_extraction:c7a26f116852451b091692d7": {
     "response": {
       "claims": [
         {

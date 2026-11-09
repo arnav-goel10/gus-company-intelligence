@@ -867,15 +867,21 @@ class PipelineParallelizationTests(unittest.TestCase):
         ]
 
         def fake_verification_response(*, user_content: list[dict[str, object]], **_: object) -> dict[str, object]:
-            text = str(user_content[0].get("text", ""))
-            if "Claim ID: c2" in text:
-                raise RuntimeError("429")
+            text = str(user_content[-1].get("text", ""))
+            # The model answers c1 and c3 and leaves c2 out of the batch.
             return {
-                "status": "supported",
-                "confidence": 0.92,
-                "rationale": "Matches source.",
-                "supporting_evidence_ids": ["e1"],
-                "blocking_issues": [],
+                "verdicts": [
+                    {
+                        "claim_id": claim_id,
+                        "status": "supported",
+                        "confidence": 0.92,
+                        "rationale": "Matches source.",
+                        "supporting_evidence_ids": ["e1"],
+                        "blocking_issues": [],
+                    }
+                    for claim_id in ("c1", "c3")
+                    if f"Claim ID: {claim_id}" in text
+                ]
             }
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -908,22 +914,27 @@ class PipelineParallelizationTests(unittest.TestCase):
                 confidence=0.5,
                 as_of="",
                 source_quote="",
-                evidence_ids=[],
+                evidence_ids=[f"e{index}"],  # one bundle each, so batches run in parallel
                 raw_source_label="specialist",
             )
             for index in range(8)
         ]
 
         def slow_first(*, user_content: list[dict[str, object]], **_: object) -> dict[str, object]:
-            text = str(user_content[0].get("text", ""))
-            index = int(text.split("Claim ID: c", 1)[1].split("\n", 1)[0])
-            time.sleep(0.002 * (8 - index))
+            text = str(user_content[-1].get("text", ""))
+            claim_id = text.split("Claim ID: ", 1)[1].split("\n", 1)[0]
+            time.sleep(0.002 * (8 - int(claim_id[1:])))
             return {
-                "status": "supported",
-                "confidence": 1.0,
-                "rationale": "",
-                "supporting_evidence_ids": [],
-                "blocking_issues": [],
+                "verdicts": [
+                    {
+                        "claim_id": claim_id,
+                        "status": "insufficient_evidence",
+                        "confidence": 1.0,
+                        "rationale": "",
+                        "supporting_evidence_ids": [],
+                        "blocking_issues": [],
+                    }
+                ]
             }
 
         with tempfile.TemporaryDirectory() as temp_dir:

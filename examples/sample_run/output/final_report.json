@@ -1,0 +1,538 @@
+{
+  "company_name": "Quillfeather Robotics",
+  "diligence_conclusion": "Publishable with the listed risks flagged for follow-up.",
+  "entity_profile": "Inspection drones for offshore wind, Portland, Oregon, about 240 staff.",
+  "executive_summary": "Quillfeather Robotics is a venture-backed maker of offshore wind inspection drones growing revenue 31% to $48.2 million while still loss-making. A pending patent suit, a January 2026 drone recall and 28% revenue concentration in one customer are the main risks.",
+  "generated_at": "2026-11-09T14:51:50+00:00",
+  "key_findings": [
+    "Revenue grew 31% to $48.2 million in FY2025; the company is not profitable.",
+    "A patent infringement case filed by Aerodyne Systems is pending.",
+    "One customer accounts for 28% of revenue."
+  ],
+  "methodology": "Browse discovery, direct raw-source capture, per-claim verification.",
+  "pdf_section_order": [
+    "Executive Summary",
+    "Scope and Methodology",
+    "Entity Profile",
+    "company_overview",
+    "financials",
+    "legal",
+    "news",
+    "leadership",
+    "Key Findings",
+    "Risk Matrix",
+    "Recommendations and Decision Path",
+    "Appendix / Source Log"
+  ],
+  "publish_decision": "publish",
+  "publish_reason": "Coverage and verification thresholds were met.",
+  "recommendations": [
+    "Obtain the convertible note terms and the recall root-cause report."
+  ],
+  "risk_matrix": [
+    {
+      "evidence_ids": [
+        "direct_financials_001"
+      ],
+      "issue": "FY2025 revenue was $48.2 million, up 31% from $36.8 million.",
+      "recommendation": "Request primary financial statements and reconcile any quantitative exposure before relying on the claim.",
+      "section": "financials",
+      "severity": "high"
+    },
+    {
+      "evidence_ids": [
+        "direct_financials_002"
+      ],
+      "issue": "Quillfeather issued a $15 million convertible note due 2027.",
+      "recommendation": "Request primary financial statements and reconcile any quantitative exposure before relying on the claim.",
+      "section": "financials",
+      "severity": "high"
+    },
+    {
+      "evidence_ids": [
+        "direct_financials_002"
+      ],
+      "issue": "One customer, Brightwater Energy, accounted for 28% of FY2025 revenue.",
+      "recommendation": "Request primary financial statements and reconcile any quantitative exposure before relying on the claim.",
+      "section": "financials",
+      "severity": "high"
+    },
+    {
+      "evidence_ids": [
+        "direct_legal_001"
+      ],
+      "issue": "Aerodyne Systems sued Quillfeather for patent infringement in September 2025; the case is pending.",
+      "recommendation": "Escalate to counsel for independent verification. Confirm case status, jurisdiction exposure, and potential liability before proceeding with any transaction.",
+      "section": "legal",
+      "severity": "high"
+    },
+    {
+      "evidence_ids": [
+        "direct_news_002"
+      ],
+      "issue": "Quillfeather raised a $60 million Series C led by Harbor Point Ventures on 12 February 2026.",
+      "recommendation": "Verify whether the event remains current, assess reputational impact, and determine whether it materially changes the investment thesis or company narrative.",
+      "section": "news",
+      "severity": "high"
+    },
+    {
+      "evidence_ids": [
+        "direct_news_003"
+      ],
+      "issue": "Quillfeather recalled 120 drones in January 2026 after battery fault reports.",
+      "recommendation": "Verify whether the event remains current, assess reputational impact, and determine whether it materially changes the investment thesis or company narrative.",
+      "section": "news",
+      "severity": "high"
+    }
+  ],
+  "scope_and_limitations": "Fictional sample company; see examples/sample_run/README.md.",
+  "sections": [
+    {
+      "evidence_ids": [
+        "tinyfish_company_overview_001"
+      ],
+      "highlights": [
+        "Quillfeather designs autonomous inspection drones for offshore wind farms.",
+        "Quillfeather is headquartered in Portland, Oregon, and has about 240 employees."
+      ],
+      "name": "company_overview",
+      "recommendations": [
+        "Confirm the cited figures against primary filings."
+      ],
+      "status": "supported",
+      "structured_data": {},
+      "summary": "Quillfeather designs autonomous inspection drones for offshore wind farms. Quillfeather is headquartered in Portland, Oregon, and has about 240 employees."
+    },
+    {
+      "evidence_ids": [
+        "direct_financials_001",
+        "direct_financials_002"
+      ],
+      "highlights": [
+        "FY2025 revenue was $48.2 million, up 31% from $36.8 million.",
+        "Quillfeather issued a $15 million convertible note due 2027.",
+        "One customer, Brightwater Energy, accounted for 28% of FY2025 revenue."
+      ],
+      "name": "financials",
+      "recommendations": [
+        "Confirm the cited figures against primary filings."
+      ],
+      "status": "supported",
+      "structured_data": {
+        "data_gaps": [],
+        "key_metrics": [],
+        "red_flags": []
+      },
+      "summary": "FY2025 revenue was $48.2 million, up 31% from $36.8 million. Quillfeather issued a $15 million convertible note due 2027. One customer, Brightwater Energy, accounted for 28% of FY2025 revenue."
+    },
+    {
+      "evidence_ids": [
+        "direct_legal_001"
+      ],
+      "highlights": [
+        "Aerodyne Systems sued Quillfeather for patent infringement in September 2025; the case is pending."
+      ],
+      "name": "legal",
+      "recommendations": [
+        "Confirm the cited figures against primary filings."
+      ],
+      "status": "supported",
+      "structured_data": {
+        "active_matters": [],
+        "data_gaps": [],
+        "red_flags": [],
+        "regulatory_exposure": [],
+        "sanctions_flags": []
+      },
+      "summary": "Aerodyne Systems sued Quillfeather for patent infringement in September 2025; the case is pending."
+    },
+    {
+      "evidence_ids": [
+        "direct_news_002",
+        "direct_news_003"
+      ],
+      "highlights": [
+        "Quillfeather raised a $60 million Series C led by Harbor Point Ventures on 12 February 2026.",
+        "Quillfeather recalled 120 drones in January 2026 after battery fault reports."
+      ],
+      "name": "news",
+      "recommendations": [
+        "Confirm the cited figures against primary filings."
+      ],
+      "status": "supported",
+      "structured_data": {
+        "coverage_density": "heavy",
+        "coverage_sentiment": "net_positive",
+        "data_gaps": [],
+        "material_events": [],
+        "negative_signals": []
+      },
+      "summary": "Quillfeather raised a $60 million Series C led by Harbor Point Ventures on 12 February 2026. Quillfeather recalled 120 drones in January 2026 after battery fault reports."
+    },
+    {
+      "evidence_ids": [
+        "tinyfish_leadership_002"
+      ],
+      "highlights": [
+        "Mara Lindqvist is chief executive and a co-founder.",
+        "Daniel Osei has been chief financial officer since March 2025."
+      ],
+      "name": "leadership",
+      "recommendations": [
+        "Confirm the cited figures against primary filings."
+      ],
+      "status": "supported",
+      "structured_data": {},
+      "summary": "Mara Lindqvist is chief executive and a co-founder. Daniel Osei has been chief financial officer since March 2025."
+    }
+  ],
+  "source_log": [
+    {
+      "category": "financials",
+      "direct_fetch_artifact_path": "raw_sources/001-investor-relations.txt",
+      "direct_fetch_mode": "html_text",
+      "evidence_id": "direct_financials_001",
+      "label": "Investor relations",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "financial_investor_relations",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "",
+      "tinyfish_streaming_url": "",
+      "url": "https://quillfeather.example/investors"
+    },
+    {
+      "category": "financials",
+      "direct_fetch_artifact_path": "raw_sources/002-annual-report-2025.txt",
+      "direct_fetch_mode": "html_text",
+      "evidence_id": "direct_financials_002",
+      "label": "Annual Report 2025",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "financial_document",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "",
+      "tinyfish_streaming_url": "",
+      "url": "https://quillfeather.example/investors/annual-report-2025.html"
+    },
+    {
+      "category": "legal",
+      "direct_fetch_artifact_path": "raw_sources/001-aerodyne-systems-v-quillfeather-robotics.txt",
+      "direct_fetch_mode": "text_fetch",
+      "evidence_id": "direct_legal_001",
+      "label": "Aerodyne Systems v. Quillfeather Robotics",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "legal_court_records",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "",
+      "tinyfish_streaming_url": "",
+      "url": "https://dockets.example/case/3-25-cv-01931"
+    },
+    {
+      "category": "news",
+      "direct_fetch_artifact_path": "raw_sources/002-quillfeather-closes-series-c.txt",
+      "direct_fetch_mode": "html_text",
+      "evidence_id": "direct_news_002",
+      "label": "Quillfeather closes Series C",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "news_press_release",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "",
+      "tinyfish_streaming_url": "",
+      "url": "https://quillfeather.example/news/series-c"
+    },
+    {
+      "category": "news",
+      "direct_fetch_artifact_path": "raw_sources/003-quillfeather-recalls-120-inspection-drones.txt",
+      "direct_fetch_mode": "html_text",
+      "evidence_id": "direct_news_003",
+      "label": "Quillfeather recalls 120 inspection drones",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "news_aggregator",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "",
+      "tinyfish_streaming_url": "",
+      "url": "https://windpower-news.example/2026/01/quillfeather-recall"
+    },
+    {
+      "category": "company_overview",
+      "direct_fetch_artifact_path": "",
+      "direct_fetch_mode": "",
+      "evidence_id": "tinyfish_company_overview_001",
+      "label": "Official website",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "company_homepage",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "COMPLETED",
+      "tinyfish_streaming_url": "",
+      "url": "https://quillfeather.example"
+    },
+    {
+      "category": "leadership",
+      "direct_fetch_artifact_path": "",
+      "direct_fetch_mode": "",
+      "evidence_id": "tinyfish_leadership_002",
+      "label": "Leadership page",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "leadership_page",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "COMPLETED",
+      "tinyfish_streaming_url": "",
+      "url": "https://quillfeather.example/leadership"
+    },
+    {
+      "category": "employees",
+      "direct_fetch_artifact_path": "",
+      "direct_fetch_mode": "",
+      "evidence_id": "tinyfish_employees_003",
+      "label": "Careers page",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "careers_page",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "FAILED",
+      "tinyfish_streaming_url": "",
+      "url": "https://quillfeather.example/careers"
+    },
+    {
+      "category": "news",
+      "direct_fetch_artifact_path": "",
+      "direct_fetch_mode": "",
+      "evidence_id": "tinyfish_news_004",
+      "label": "Newsroom",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "newsroom_page",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "COMPLETED",
+      "tinyfish_streaming_url": "",
+      "url": "https://quillfeather.example/news"
+    },
+    {
+      "category": "financials",
+      "direct_fetch_artifact_path": "",
+      "direct_fetch_mode": "",
+      "evidence_id": "tinyfish_financials_005",
+      "label": "Investor relations",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "financial_investor_relations",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "COMPLETED",
+      "tinyfish_streaming_url": "",
+      "url": "https://quillfeather.example/investors"
+    },
+    {
+      "category": "legal",
+      "direct_fetch_artifact_path": "",
+      "direct_fetch_mode": "",
+      "evidence_id": "tinyfish_legal_006",
+      "label": "Litigation search",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "legal_search_discovery",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "COMPLETED",
+      "tinyfish_streaming_url": "",
+      "url": "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+lawsuit+litigation+court+case+filed"
+    },
+    {
+      "category": "legal",
+      "direct_fetch_artifact_path": "",
+      "direct_fetch_mode": "",
+      "evidence_id": "tinyfish_legal_007",
+      "label": "SEC enforcement search",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "legal_search_discovery",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "COMPLETED",
+      "tinyfish_streaming_url": "",
+      "url": "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+SEC+enforcement+action+investigation+penalty"
+    },
+    {
+      "category": "legal",
+      "direct_fetch_artifact_path": "",
+      "direct_fetch_mode": "",
+      "evidence_id": "tinyfish_legal_008",
+      "label": "Regulatory action search",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "legal_search_discovery",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "COMPLETED",
+      "tinyfish_streaming_url": "",
+      "url": "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+FTC+DOJ+EPA+regulatory+fine+penalty+settlement"
+    },
+    {
+      "category": "legal",
+      "direct_fetch_artifact_path": "",
+      "direct_fetch_mode": "",
+      "evidence_id": "tinyfish_legal_009",
+      "label": "Sanctions screening",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "legal_search_discovery",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "COMPLETED",
+      "tinyfish_streaming_url": "",
+      "url": "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+OFAC+sanctions+SDN+debarment"
+    },
+    {
+      "category": "legal",
+      "direct_fetch_artifact_path": "",
+      "direct_fetch_mode": "",
+      "evidence_id": "tinyfish_legal_010",
+      "label": "CourtListener search",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "legal_court_records",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "COMPLETED",
+      "tinyfish_streaming_url": "",
+      "url": "https://www.courtlistener.com/?q=%22Quillfeather%20Robotics%22&type=o"
+    },
+    {
+      "category": "legal",
+      "direct_fetch_artifact_path": "",
+      "direct_fetch_mode": "",
+      "evidence_id": "tinyfish_legal_011",
+      "label": "OpenCorporates lookup",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "legal_corporate_registry",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "COMPLETED",
+      "tinyfish_streaming_url": "",
+      "url": "https://opencorporates.com/companies?q=Quillfeather%20Robotics"
+    },
+    {
+      "category": "news",
+      "direct_fetch_artifact_path": "",
+      "direct_fetch_mode": "",
+      "evidence_id": "tinyfish_news_012",
+      "label": "Recent news search",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "news_search_discovery",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "COMPLETED",
+      "tinyfish_streaming_url": "",
+      "url": "https://www.bing.com/news/search?q=Quillfeather+Robotics"
+    },
+    {
+      "category": "news",
+      "direct_fetch_artifact_path": "",
+      "direct_fetch_mode": "",
+      "evidence_id": "tinyfish_news_013",
+      "label": "Negative news search",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "news_search_discovery",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "COMPLETED",
+      "tinyfish_streaming_url": "",
+      "url": "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+lawsuit+layoff+investigation+scandal+recall+controversy"
+    },
+    {
+      "category": "news",
+      "direct_fetch_artifact_path": "",
+      "direct_fetch_mode": "",
+      "evidence_id": "tinyfish_news_014",
+      "label": "Press release search",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "news_press_release",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "COMPLETED",
+      "tinyfish_streaming_url": "",
+      "url": "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+press+release+site%3Aprnewswire.com+OR+site%3Abusinesswire.com+OR+site%3Aglobenewswire.com"
+    },
+    {
+      "category": "news",
+      "direct_fetch_artifact_path": "",
+      "direct_fetch_mode": "",
+      "evidence_id": "tinyfish_news_015",
+      "label": "Industry coverage search",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "news_search_discovery",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "COMPLETED",
+      "tinyfish_streaming_url": "",
+      "url": "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+analysis+report+review+coverage"
+    },
+    {
+      "category": "legal",
+      "direct_fetch_artifact_path": "",
+      "direct_fetch_mode": "",
+      "evidence_id": "tinyfish_legal_016",
+      "label": "Aerodyne Systems v. Quillfeather Robotics",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "legal_court_records",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "COMPLETED",
+      "tinyfish_streaming_url": "",
+      "url": "https://dockets.example/case/3-25-cv-01931"
+    },
+    {
+      "category": "news",
+      "direct_fetch_artifact_path": "",
+      "direct_fetch_mode": "",
+      "evidence_id": "tinyfish_news_017",
+      "label": "Quillfeather closes Series C",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "news_press_release",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "COMPLETED",
+      "tinyfish_streaming_url": "",
+      "url": "https://quillfeather.example/news/series-c"
+    },
+    {
+      "category": "news",
+      "direct_fetch_artifact_path": "",
+      "direct_fetch_mode": "",
+      "evidence_id": "tinyfish_news_018",
+      "label": "Quillfeather recalls 120 inspection drones",
+      "openai_input_file_path": "",
+      "openai_input_file_url": "",
+      "retrieved_at": "2026-11-09T00:00:00+00:00",
+      "source_type": "news_aggregator",
+      "tinyfish_num_of_steps": null,
+      "tinyfish_status": "COMPLETED",
+      "tinyfish_streaming_url": "",
+      "url": "https://windpower-news.example/2026/01/quillfeather-recall"
+    }
+  ],
+  "total_claims": 15,
+  "unsupported_claims": 5
+}

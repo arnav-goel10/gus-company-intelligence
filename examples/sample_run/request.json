@@ -1,0 +1,8 @@
+{
+  "company_name": "Quillfeather Robotics",
+  "company_website": "https://quillfeather.example",
+  "primary_jurisdiction": "US",
+  "investor_relations_url": "https://quillfeather.example/investors",
+  "report_goal": "Source-backed diligence report on a fictional company, for the offline sample.",
+  "focus_areas": ["company_overview", "financials", "legal", "news", "leadership"]
+}

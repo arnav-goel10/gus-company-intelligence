@@ -1,0 +1,22 @@
+{
+  "company_name": "Quillfeather Robotics",
+  "company_website": "https://quillfeather.example",
+  "financial_source_urls": [],
+  "focus_areas": [
+    "company_overview",
+    "financials",
+    "legal",
+    "news",
+    "leadership"
+  ],
+  "investor_relations_url": "https://quillfeather.example/investors",
+  "legal_source_urls": [],
+  "news_source_urls": [],
+  "primary_jurisdiction": "US",
+  "report_goal": "Source-backed diligence report on a fictional company, for the offline sample.",
+  "source_jobs": [],
+  "ticker": "",
+  "tinyfish_credential_item_ids": [],
+  "tinyfish_enable_agent_memory": false,
+  "tinyfish_use_vault": false
+}

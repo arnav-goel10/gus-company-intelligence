@@ -1,0 +1,249 @@
+[
+  {
+    "as_of": "2026-02",
+    "blocking_issues": [],
+    "claim_id": "company_overview_overview_agent_001",
+    "confidence": 0.95,
+    "evidence_ids": [
+      "tinyfish_company_overview_001"
+    ],
+    "importance": "high",
+    "rationale": "The quoted text appears verbatim in the cited source.",
+    "section": "company_overview",
+    "source_quote": "designs autonomous inspection drones for offshore wind farms",
+    "statement": "Quillfeather designs autonomous inspection drones for offshore wind farms.",
+    "status": "supported"
+  },
+  {
+    "as_of": "2026-02",
+    "blocking_issues": [],
+    "claim_id": "company_overview_overview_agent_002",
+    "confidence": 0.95,
+    "evidence_ids": [
+      "tinyfish_company_overview_001"
+    ],
+    "importance": "medium",
+    "rationale": "The quoted text appears verbatim in the cited source.",
+    "section": "company_overview",
+    "source_quote": "headquartered in Portland, Oregon, with about 240 employees",
+    "statement": "Quillfeather is headquartered in Portland, Oregon, and has about 240 employees.",
+    "status": "supported"
+  },
+  {
+    "as_of": "2026-02",
+    "blocking_issues": [],
+    "claim_id": "financials_financial_statement_agent_001",
+    "confidence": 0.95,
+    "evidence_ids": [
+      "direct_financials_001"
+    ],
+    "importance": "high",
+    "rationale": "The quoted text appears verbatim in the cited source.",
+    "section": "financials",
+    "source_quote": "FY2025 revenue $48.2 million, up 31% from $36.8 million",
+    "statement": "FY2025 revenue was $48.2 million, up 31% from $36.8 million.",
+    "status": "supported"
+  },
+  {
+    "as_of": "2026-02",
+    "blocking_issues": [
+      "The investor page reports a net loss of $6.4 million for FY2025."
+    ],
+    "claim_id": "financials_financial_statement_agent_002",
+    "confidence": 0.9,
+    "evidence_ids": [
+      "direct_financials_001",
+      "direct_financials_002",
+      "tinyfish_financials_005"
+    ],
+    "importance": "high",
+    "rationale": "The investor page reports a net loss of $6.4 million for FY2025.",
+    "section": "financials",
+    "source_quote": "Net loss $6.4 million",
+    "statement": "Quillfeather reported a net profit in FY2025.",
+    "status": "contradicted"
+  },
+  {
+    "as_of": "2026-02",
+    "blocking_issues": [],
+    "claim_id": "financials_capital_structure_agent_001",
+    "confidence": 0.95,
+    "evidence_ids": [
+      "direct_financials_002"
+    ],
+    "importance": "high",
+    "rationale": "The quoted text appears verbatim in the cited source.",
+    "section": "financials",
+    "source_quote": "issued a $15 million convertible note due 2027",
+    "statement": "Quillfeather issued a $15 million convertible note due 2027.",
+    "status": "supported"
+  },
+  {
+    "as_of": "2026-02",
+    "blocking_issues": [
+      "quote not found"
+    ],
+    "claim_id": "financials_funding_guidance_agent_001",
+    "confidence": 0.9,
+    "evidence_ids": [
+      "direct_financials_001",
+      "direct_financials_002",
+      "tinyfish_financials_005"
+    ],
+    "importance": "high",
+    "rationale": "The quoted support does not appear in any source shown.",
+    "section": "financials",
+    "source_quote": "raised $60 million in a Series C round led by Harbor Point Ventures",
+    "statement": "Quillfeather raised a $60 million Series C led by Harbor Point Ventures in February 2026.",
+    "status": "unsupported"
+  },
+  {
+    "as_of": "2026-02",
+    "blocking_issues": [],
+    "claim_id": "financials_financial_risk_agent_001",
+    "confidence": 0.95,
+    "evidence_ids": [
+      "direct_financials_002"
+    ],
+    "importance": "high",
+    "rationale": "The quoted text appears verbatim in the cited source.",
+    "section": "financials",
+    "source_quote": "Brightwater Energy, accounted for 28% of revenue",
+    "statement": "One customer, Brightwater Energy, accounted for 28% of FY2025 revenue.",
+    "status": "supported"
+  },
+  {
+    "as_of": "2026-02",
+    "blocking_issues": [],
+    "claim_id": "legal_legal_case_locator_001",
+    "confidence": 0.95,
+    "evidence_ids": [
+      "direct_legal_001"
+    ],
+    "importance": "high",
+    "rationale": "The quoted text appears verbatim in the cited source.",
+    "section": "legal",
+    "source_quote": "Patent infringement complaint filed 3 September 2025 in the District of Oregon. Status: pending.",
+    "statement": "Aerodyne Systems sued Quillfeather for patent infringement in September 2025; the case is pending.",
+    "status": "supported"
+  },
+  {
+    "as_of": "2026-02",
+    "blocking_issues": [
+      "No sanctions screening source was captured, so absence from a list was never checked."
+    ],
+    "claim_id": "legal_legal_sanctions_agent_001",
+    "confidence": 0.9,
+    "evidence_ids": [
+      "direct_legal_001",
+      "tinyfish_legal_006",
+      "tinyfish_legal_007",
+      "tinyfish_legal_008",
+      "tinyfish_legal_009",
+      "tinyfish_legal_010",
+      "tinyfish_legal_011",
+      "tinyfish_legal_016"
+    ],
+    "importance": "medium",
+    "rationale": "No sanctions screening source was captured, so absence from a list was never checked.",
+    "section": "legal",
+    "source_quote": "",
+    "statement": "Quillfeather does not appear on any sanctions list.",
+    "status": "insufficient_evidence"
+  },
+  {
+    "as_of": "2026-02",
+    "blocking_issues": [
+      "No captured source states where the company is incorporated."
+    ],
+    "claim_id": "legal_legal_corporate_filings_agent_001",
+    "confidence": 0.9,
+    "evidence_ids": [
+      "tinyfish_legal_011"
+    ],
+    "importance": "low",
+    "rationale": "No captured source states where the company is incorporated.",
+    "section": "legal",
+    "source_quote": "Founded in 2017",
+    "statement": "Quillfeather was incorporated in Delaware in 2017.",
+    "status": "unsupported"
+  },
+  {
+    "as_of": "2026-02",
+    "blocking_issues": [],
+    "claim_id": "news_news_event_locator_001",
+    "confidence": 0.95,
+    "evidence_ids": [
+      "direct_news_002"
+    ],
+    "importance": "high",
+    "rationale": "The quoted text appears verbatim in the cited source.",
+    "section": "news",
+    "source_quote": "raised $60 million in a Series C round led by Harbor Point Ventures",
+    "statement": "Quillfeather raised a $60 million Series C led by Harbor Point Ventures on 12 February 2026.",
+    "status": "supported"
+  },
+  {
+    "as_of": "2026-02",
+    "blocking_issues": [],
+    "claim_id": "news_news_negative_signal_agent_001",
+    "confidence": 0.95,
+    "evidence_ids": [
+      "direct_news_003"
+    ],
+    "importance": "high",
+    "rationale": "The quoted text appears verbatim in the cited source.",
+    "section": "news",
+    "source_quote": "recalled 120 drones in January 2026 after reports of battery faults",
+    "statement": "Quillfeather recalled 120 drones in January 2026 after battery fault reports.",
+    "status": "supported"
+  },
+  {
+    "as_of": "2026-02",
+    "blocking_issues": [
+      "Two articles, one negative, cannot support a claim about overall coverage."
+    ],
+    "claim_id": "news_news_sentiment_agent_001",
+    "confidence": 0.9,
+    "evidence_ids": [
+      "direct_news_003",
+      "tinyfish_news_018"
+    ],
+    "importance": "low",
+    "rationale": "Two articles, one negative, cannot support a claim about overall coverage.",
+    "section": "news",
+    "source_quote": "",
+    "statement": "Press coverage of Quillfeather is overwhelmingly positive.",
+    "status": "insufficient_evidence"
+  },
+  {
+    "as_of": "2026-02",
+    "blocking_issues": [],
+    "claim_id": "leadership_leadership_agent_001",
+    "confidence": 0.95,
+    "evidence_ids": [
+      "tinyfish_leadership_002"
+    ],
+    "importance": "high",
+    "rationale": "The quoted text appears verbatim in the cited source.",
+    "section": "leadership",
+    "source_quote": "Mara Lindqvist, Chief Executive Officer and co-founder",
+    "statement": "Mara Lindqvist is chief executive and a co-founder.",
+    "status": "supported"
+  },
+  {
+    "as_of": "2026-02",
+    "blocking_issues": [],
+    "claim_id": "leadership_leadership_agent_002",
+    "confidence": 0.95,
+    "evidence_ids": [
+      "tinyfish_leadership_002"
+    ],
+    "importance": "medium",
+    "rationale": "The quoted text appears verbatim in the cited source.",
+    "section": "leadership",
+    "source_quote": "Daniel Osei, Chief Financial Officer since March 2025",
+    "statement": "Daniel Osei has been chief financial officer since March 2025.",
+    "status": "supported"
+  }
+]

@@ -1,0 +1,44 @@
+{
+  "https://dockets.example/case/3-25-cv-01931": {
+    "body": "sources/60f52f79e441d5ab6d1160d5.bin",
+    "content_type": "text/plain; charset=utf-8",
+    "error": null,
+    "final_url": "https://dockets.example/case/3-25-cv-01931",
+    "retrieved_at": "2026-11-09T00:00:00+00:00"
+  },
+  "https://quillfeather.example/investors": {
+    "body": "sources/c032310b3bbf8c38a2e4b448.bin",
+    "content_type": "text/html; charset=utf-8",
+    "error": null,
+    "final_url": "https://quillfeather.example/investors",
+    "retrieved_at": "2026-11-09T00:00:00+00:00"
+  },
+  "https://quillfeather.example/investors/annual-report-2025.html": {
+    "body": "sources/08dc0b5e70740ce6655d4d8c.bin",
+    "content_type": "text/html; charset=utf-8",
+    "error": null,
+    "final_url": "https://quillfeather.example/investors/annual-report-2025.html",
+    "retrieved_at": "2026-11-09T00:00:00+00:00"
+  },
+  "https://quillfeather.example/news": {
+    "body": "",
+    "content_type": "",
+    "error": "HTTP 404: not found",
+    "final_url": "",
+    "retrieved_at": ""
+  },
+  "https://quillfeather.example/news/series-c": {
+    "body": "sources/29434eb786d666e1a52b7335.bin",
+    "content_type": "text/html; charset=utf-8",
+    "error": null,
+    "final_url": "https://quillfeather.example/news/series-c",
+    "retrieved_at": "2026-11-09T00:00:00+00:00"
+  },
+  "https://windpower-news.example/2026/01/quillfeather-recall": {
+    "body": "sources/9e1bb774bf29464340a4ac07.bin",
+    "content_type": "text/html; charset=utf-8",
+    "error": null,
+    "final_url": "https://windpower-news.example/2026/01/quillfeather-recall",
+    "retrieved_at": "2026-11-09T00:00:00+00:00"
+  }
+}

@@ -1,0 +1,113 @@
+[
+  {
+    "schema_name": "claim_verification"
+  },
+  {
+    "schema_name": "claim_verification"
+  },
+  {
+    "schema_name": "claim_verification"
+  },
+  {
+    "schema_name": "claim_verification"
+  },
+  {
+    "schema_name": "claim_verification"
+  },
+  {
+    "schema_name": "claim_verification"
+  },
+  {
+    "schema_name": "claim_verification"
+  },
+  {
+    "schema_name": "claim_verification"
+  },
+  {
+    "schema_name": "claim_verification"
+  },
+  {
+    "schema_name": "claim_verification"
+  },
+  {
+    "schema_name": "claim_verification"
+  },
+  {
+    "schema_name": "claim_verification"
+  },
+  {
+    "schema_name": "claim_verification"
+  },
+  {
+    "schema_name": "claim_verification"
+  },
+  {
+    "schema_name": "claim_verification"
+  },
+  {
+    "schema_name": "company_overview_overview_agent_claim_extraction"
+  },
+  {
+    "schema_name": "company_overview_section_summary"
+  },
+  {
+    "schema_name": "executive_company_report"
+  },
+  {
+    "schema_name": "financials_capital_structure_agent_claim_extraction"
+  },
+  {
+    "schema_name": "financials_financial_document_locator_claim_extraction"
+  },
+  {
+    "schema_name": "financials_financial_risk_agent_claim_extraction"
+  },
+  {
+    "schema_name": "financials_financial_statement_agent_claim_extraction"
+  },
+  {
+    "schema_name": "financials_funding_guidance_agent_claim_extraction"
+  },
+  {
+    "schema_name": "financials_section_summary"
+  },
+  {
+    "schema_name": "leadership_leadership_agent_claim_extraction"
+  },
+  {
+    "schema_name": "leadership_section_summary"
+  },
+  {
+    "schema_name": "legal_legal_case_locator_claim_extraction"
+  },
+  {
+    "schema_name": "legal_legal_corporate_filings_agent_claim_extraction"
+  },
+  {
+    "schema_name": "legal_legal_regulatory_agent_claim_extraction"
+  },
+  {
+    "schema_name": "legal_legal_risk_agent_claim_extraction"
+  },
+  {
+    "schema_name": "legal_legal_sanctions_agent_claim_extraction"
+  },
+  {
+    "schema_name": "legal_section_summary"
+  },
+  {
+    "schema_name": "news_news_coverage_gap_agent_claim_extraction"
+  },
+  {
+    "schema_name": "news_news_event_locator_claim_extraction"
+  },
+  {
+    "schema_name": "news_news_negative_signal_agent_claim_extraction"
+  },
+  {
+    "schema_name": "news_news_sentiment_agent_claim_extraction"
+  },
+  {
+    "schema_name": "news_section_summary"
+  }
+]

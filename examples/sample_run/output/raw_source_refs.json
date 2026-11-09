@@ -1,0 +1,62 @@
+[
+  {
+    "discovery_origin": "request_hint",
+    "discovery_run_id": "",
+    "label": "Investor relations",
+    "notes": "",
+    "reporting_period": "",
+    "source_kind": "",
+    "source_type": "financial_investor_relations",
+    "url": "https://quillfeather.example/investors"
+  },
+  {
+    "discovery_origin": "tinyfish_linked_document",
+    "discovery_run_id": "sample_73746f7273",
+    "label": "Annual Report 2025",
+    "notes": "",
+    "reporting_period": "FY2025",
+    "source_kind": "annual report",
+    "source_type": "financial_document",
+    "url": "https://quillfeather.example/investors/annual-report-2025.html"
+  },
+  {
+    "discovery_origin": "tinyfish_discovery",
+    "discovery_run_id": "sample_66696c6564",
+    "label": "Aerodyne Systems v. Quillfeather Robotics",
+    "notes": "",
+    "reporting_period": "",
+    "source_kind": "court docket",
+    "source_type": "legal_court_records",
+    "url": "https://dockets.example/case/3-25-cv-01931"
+  },
+  {
+    "discovery_origin": "tinyfish_discovery",
+    "discovery_run_id": "sample_2f6e657773",
+    "label": "Newsroom",
+    "notes": "",
+    "reporting_period": "",
+    "source_kind": "press release index",
+    "source_type": "news_press_release",
+    "url": "https://quillfeather.example/news"
+  },
+  {
+    "discovery_origin": "tinyfish_linked_document",
+    "discovery_run_id": "sample_2f6e657773",
+    "label": "Quillfeather closes Series C",
+    "notes": "",
+    "reporting_period": "",
+    "source_kind": "press release index",
+    "source_type": "news_press_release",
+    "url": "https://quillfeather.example/news/series-c"
+  },
+  {
+    "discovery_origin": "tinyfish_discovery",
+    "discovery_run_id": "sample_6f74696373",
+    "label": "Quillfeather recalls 120 inspection drones",
+    "notes": "",
+    "reporting_period": "",
+    "source_kind": "news article",
+    "source_type": "news_aggregator",
+    "url": "https://windpower-news.example/2026/01/quillfeather-recall"
+  }
+]

@@ -98,11 +98,14 @@ def main(argv: list[str] | None = None) -> None:
     kept = report.total_claims - report.unsupported_claims
     print(f"{report.company_name}: {report.publish_decision} ({report.publish_reason})")
     print(f"claims kept {kept}, suppressed {report.unsupported_claims}, total {report.total_claims}")
-    label = "recorded cost" if args.replay else "cost"
-    print(
-        f"{label}: ${cost['total_usd']:.4f} "
-        f"(model ${cost['model_usd']:.4f}, browse ${cost['browse_usd']:.4f})"
-    )
+    if cost["total_usd"] == 0 and args.replay:
+        print("cost: none (the cassette carries no billed usage)")
+    else:
+        label = "recorded cost" if args.replay else "cost"
+        print(
+            f"{label}: ${cost['total_usd']:.4f} "
+            f"(model ${cost['model_usd']:.4f}, browse ${cost['browse_usd']:.4f})"
+        )
     print(f"report: {markdown}")
     print(f"artifacts: {run_dir}")
 

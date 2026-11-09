@@ -1,0 +1,594 @@
+{
+  "https://dockets.example/case/3-25-cv-01931": {
+    "access_blocked": false,
+    "attempts": [
+      {
+        "attempt_number": 1,
+        "browser_profile": "lite"
+      }
+    ],
+    "browser_config": {},
+    "category": "legal",
+    "created_at": "2026-11-09T00:00:00+00:00",
+    "error": null,
+    "finished_at": "2026-11-09T00:00:00+00:00",
+    "goal": "You are collecting raw legal source material for Quillfeather Robotics from the source labeled 'Aerodyne Systems v. Quillfeather Robotics'. The primary jurisdiction is US.\n\nInstructions:\n1. Search for active and recent litigation involving the company. Collect case numbers, court names, filing dates, named parties, and links to docket entries or case documents.\n2. Prefer official court, regulatory, and government sources over news summaries.\n3. Your job is source discovery and direct-link collection, not legal analysis.\n4. For each relevant page or document you find, return the page title, final URL, source kind, case identifier or action reference if stated, jurisdiction, and any linked legal documents.\n5. Do not interpret legal outcomes, assess liability, or summarize legal arguments. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to eight clearly relevant legal sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple Inc. v. Samsung Electronics - Docket\",\n      \"final_url\": \"https://www.courtlistener.com/docket/123456/apple-inc-v-samsung/\",\n      \"source_kind\": \"court_docket\",\n      \"case_identifier\": \"5:11-cv-01846\",\n      \"jurisdiction\": \"N.D. Cal.\",\n      \"linked_documents\": [\n        {\n          \"title\": \"Complaint\",\n          \"url\": \"https://storage.courtlistener.com/recap/...\",\n          \"document_type\": \"complaint\"\n        }\n      ],\n      \"notes\": \"Patent infringement case. Last activity 2025-09-15.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"State court records were not accessible from this path\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"Court records database required login or subscription\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+    "label": "Aerodyne Systems v. Quillfeather Robotics",
+    "num_of_steps": null,
+    "result": {
+      "coverage_gaps": [
+        "No relevant results found."
+      ],
+      "sources": []
+    },
+    "run_id": "sample_3031393331",
+    "source_type": "legal_court_records",
+    "started_at": "2026-11-09T00:00:00+00:00",
+    "status": "COMPLETED",
+    "steps": [],
+    "streaming_url": "",
+    "url": "https://dockets.example/case/3-25-cv-01931"
+  },
+  "https://opencorporates.com/companies?q=Quillfeather%20Robotics": {
+    "access_blocked": false,
+    "attempts": [
+      {
+        "attempt_number": 1,
+        "browser_profile": "lite"
+      }
+    ],
+    "browser_config": {},
+    "category": "legal",
+    "created_at": "2026-11-09T00:00:00+00:00",
+    "error": null,
+    "finished_at": "2026-11-09T00:00:00+00:00",
+    "goal": "You are collecting raw legal source material for Quillfeather Robotics from the source labeled 'OpenCorporates lookup'. The primary jurisdiction is US.\n\nInstructions:\n1. Search corporate registry records for incorporation details, registered agents, UCC filings, liens, judgments, and beneficial ownership disclosures. Collect registry names, filing dates, and document links.\n2. Prefer official court, regulatory, and government sources over news summaries.\n3. Your job is source discovery and direct-link collection, not legal analysis.\n4. For each relevant page or document you find, return the page title, final URL, source kind, case identifier or action reference if stated, jurisdiction, and any linked legal documents.\n5. Do not interpret legal outcomes, assess liability, or summarize legal arguments. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to eight clearly relevant legal sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple Inc. v. Samsung Electronics - Docket\",\n      \"final_url\": \"https://www.courtlistener.com/docket/123456/apple-inc-v-samsung/\",\n      \"source_kind\": \"court_docket\",\n      \"case_identifier\": \"5:11-cv-01846\",\n      \"jurisdiction\": \"N.D. Cal.\",\n      \"linked_documents\": [\n        {\n          \"title\": \"Complaint\",\n          \"url\": \"https://storage.courtlistener.com/recap/...\",\n          \"document_type\": \"complaint\"\n        }\n      ],\n      \"notes\": \"Patent infringement case. Last activity 2025-09-15.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"State court records were not accessible from this path\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"Court records database required login or subscription\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+    "label": "OpenCorporates lookup",
+    "num_of_steps": null,
+    "result": {
+      "coverage_gaps": [
+        "No relevant results found."
+      ],
+      "sources": []
+    },
+    "run_id": "sample_6f74696373",
+    "source_type": "legal_corporate_registry",
+    "started_at": "2026-11-09T00:00:00+00:00",
+    "status": "COMPLETED",
+    "steps": [],
+    "streaming_url": "",
+    "url": "https://opencorporates.com/companies?q=Quillfeather%20Robotics"
+  },
+  "https://quillfeather.example": {
+    "access_blocked": false,
+    "attempts": [
+      {
+        "attempt_number": 1,
+        "browser_profile": "lite"
+      }
+    ],
+    "browser_config": {},
+    "category": "company_overview",
+    "created_at": "2026-11-09T00:00:00+00:00",
+    "error": null,
+    "finished_at": "2026-11-09T00:00:00+00:00",
+    "goal": "Extract the company overview, products, geographies, scale signals, and links to investor, leadership, careers, and newsroom pages. Respond in structured JSON if possible.",
+    "label": "Official website",
+    "num_of_steps": null,
+    "result": {
+      "capture_mode": "page",
+      "sources": [
+        {
+          "captured_text": "Quillfeather Robotics designs autonomous inspection drones for offshore wind farms. Founded in 2017, headquartered in Portland, Oregon, with about 240 employees and customers in six countries.",
+          "final_url": "https://quillfeather.example",
+          "linked_documents": [],
+          "notes": "",
+          "page_title": "Quillfeather Robotics",
+          "reporting_period": "",
+          "source_kind": "company homepage"
+        }
+      ]
+    },
+    "run_id": "sample_616d706c65",
+    "source_type": "company_homepage",
+    "started_at": "2026-11-09T00:00:00+00:00",
+    "status": "COMPLETED",
+    "steps": [],
+    "streaming_url": "",
+    "url": "https://quillfeather.example"
+  },
+  "https://quillfeather.example/careers": {
+    "access_blocked": true,
+    "attempts": [
+      {
+        "attempt_number": 1,
+        "browser_profile": "lite"
+      }
+    ],
+    "browser_config": {},
+    "category": "employees",
+    "created_at": "2026-11-09T00:00:00+00:00",
+    "error": {
+      "message": "Page showed a CAPTCHA challenge; stopped as instructed."
+    },
+    "finished_at": "2026-11-09T00:00:00+00:00",
+    "goal": "Extract hiring trends, team footprint, open roles, and location signals. Respond in structured JSON if possible.",
+    "label": "Careers page",
+    "num_of_steps": null,
+    "result": null,
+    "run_id": "sample_7265657273",
+    "source_type": "careers_page",
+    "started_at": "2026-11-09T00:00:00+00:00",
+    "status": "FAILED",
+    "steps": [],
+    "streaming_url": "",
+    "url": "https://quillfeather.example/careers"
+  },
+  "https://quillfeather.example/investors": {
+    "access_blocked": false,
+    "attempts": [
+      {
+        "attempt_number": 1,
+        "browser_profile": "lite"
+      }
+    ],
+    "browser_config": {},
+    "category": "financials",
+    "created_at": "2026-11-09T00:00:00+00:00",
+    "error": null,
+    "finished_at": "2026-11-09T00:00:00+00:00",
+    "goal": "You are collecting raw financial source material for Quillfeather Robotics from the source labeled 'Investor relations'.\n\nInstructions:\n1. Capture the investor relations hub itself, then collect raw source text and document links for the newest clearly relevant annual report, quarterly or interim results, investor presentation, and filing index.\n2. Prefer official company or regulator sources over third-party summaries.\n3. Your job is source discovery and direct-link collection, not financial analysis.\n4. For each relevant page or document you open, return the page title, final URL, source kind, reporting period if explicitly stated, and any linked financial documents.\n5. Do not calculate ratios, infer missing numbers, or extract large blocks of financial text. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to five clearly relevant financial sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"search_discovery\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple Investor Relations\",\n      \"final_url\": \"https://investor.apple.com/\",\n      \"source_kind\": \"investor_relations_hub\",\n      \"reporting_period\": \"\",\n      \"linked_documents\": [\n        {\n          \"title\": \"Annual Report 2025\",\n          \"url\": \"https://investor.apple.com/annual-report-2025.pdf\",\n          \"document_type\": \"annual_report\"\n        }\n      ],\n      \"notes\": \"Official investor relations hub with links to results, SEC filings, and annual reports. Keep notes short and source-oriented.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"Latest quarterly document was not reachable from this path\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"search_discovery\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"Search results were blocked by CAPTCHA\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+    "label": "Investor relations",
+    "num_of_steps": null,
+    "result": {
+      "sources": [
+        {
+          "captured_text": "",
+          "final_url": "https://quillfeather.example/investors",
+          "linked_documents": [
+            {
+              "document_type": "annual report",
+              "title": "Annual Report 2025",
+              "url": "https://quillfeather.example/investors/annual-report-2025.html"
+            }
+          ],
+          "notes": "",
+          "page_title": "Investor relations",
+          "reporting_period": "FY2025",
+          "source_kind": "investor relations hub"
+        }
+      ]
+    },
+    "run_id": "sample_73746f7273",
+    "source_type": "financial_investor_relations",
+    "started_at": "2026-11-09T00:00:00+00:00",
+    "status": "COMPLETED",
+    "steps": [],
+    "streaming_url": "",
+    "url": "https://quillfeather.example/investors"
+  },
+  "https://quillfeather.example/leadership": {
+    "access_blocked": false,
+    "attempts": [
+      {
+        "attempt_number": 1,
+        "browser_profile": "lite"
+      }
+    ],
+    "browser_config": {},
+    "category": "leadership",
+    "created_at": "2026-11-09T00:00:00+00:00",
+    "error": null,
+    "finished_at": "2026-11-09T00:00:00+00:00",
+    "goal": "Extract executives, founders, board members, and recent management changes. Respond in structured JSON if possible.",
+    "label": "Leadership page",
+    "num_of_steps": null,
+    "result": {
+      "sources": [
+        {
+          "captured_text": "Mara Lindqvist, Chief Executive Officer and co-founder. Daniel Osei, Chief Financial Officer since March 2025.",
+          "final_url": "https://quillfeather.example/leadership",
+          "linked_documents": [],
+          "notes": "",
+          "page_title": "Leadership",
+          "reporting_period": "",
+          "source_kind": "leadership page"
+        }
+      ]
+    },
+    "run_id": "sample_7273686970",
+    "source_type": "leadership_page",
+    "started_at": "2026-11-09T00:00:00+00:00",
+    "status": "COMPLETED",
+    "steps": [],
+    "streaming_url": "",
+    "url": "https://quillfeather.example/leadership"
+  },
+  "https://quillfeather.example/news": {
+    "access_blocked": false,
+    "attempts": [
+      {
+        "attempt_number": 1,
+        "browser_profile": "lite"
+      }
+    ],
+    "browser_config": {},
+    "category": "news",
+    "created_at": "2026-11-09T00:00:00+00:00",
+    "error": null,
+    "finished_at": "2026-11-09T00:00:00+00:00",
+    "goal": "Extract recent company announcements, launches, expansions, funding, layoffs, investigations, or leadership changes. Respond in structured JSON if possible.",
+    "label": "Newsroom",
+    "num_of_steps": null,
+    "result": {
+      "sources": [
+        {
+          "captured_text": "",
+          "final_url": "https://quillfeather.example/news",
+          "linked_documents": [
+            {
+              "document_type": "press release",
+              "title": "Quillfeather closes Series C",
+              "url": "https://quillfeather.example/news/series-c"
+            }
+          ],
+          "notes": "",
+          "page_title": "Newsroom",
+          "reporting_period": "",
+          "source_kind": "press release index"
+        }
+      ]
+    },
+    "run_id": "sample_2f6e657773",
+    "source_type": "newsroom_page",
+    "started_at": "2026-11-09T00:00:00+00:00",
+    "status": "COMPLETED",
+    "steps": [],
+    "streaming_url": "",
+    "url": "https://quillfeather.example/news"
+  },
+  "https://quillfeather.example/news/series-c": {
+    "access_blocked": false,
+    "attempts": [
+      {
+        "attempt_number": 1,
+        "browser_profile": "lite"
+      }
+    ],
+    "browser_config": {},
+    "category": "news",
+    "created_at": "2026-11-09T00:00:00+00:00",
+    "error": null,
+    "finished_at": "2026-11-09T00:00:00+00:00",
+    "goal": "You are collecting raw news source material for Quillfeather Robotics from the source labeled 'Quillfeather closes Series C'.\n\nInstructions:\n1. Search for official press releases from the company on wire services such as PR Newswire, Business Wire, or GlobeNewsWire. Collect release titles, dates, and direct URLs.\n2. Prefer named, reputable publishers over aggregator summaries or social media.\n3. Your job is source discovery and direct-link collection, not news analysis.\n4. For each relevant article or release you find, return the page title, final URL, source kind, publication date if stated, publisher name, and any linked documents.\n5. Do not summarize article content or assess sentiment. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to ten clearly relevant news sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple announces major restructuring of services division\",\n      \"final_url\": \"https://reuters.com/technology/apple-restructuring-2026-03/\",\n      \"source_kind\": \"news_article\",\n      \"publication_date\": \"2026-03-15\",\n      \"publisher\": \"Reuters\",\n      \"linked_documents\": [],\n      \"notes\": \"Reports 200 job cuts in services division effective Q2 2026.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"Industry trade press results were paywalled\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"News aggregator blocked automated access\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+    "label": "Quillfeather closes Series C",
+    "num_of_steps": null,
+    "result": {
+      "coverage_gaps": [
+        "No relevant results found."
+      ],
+      "sources": []
+    },
+    "run_id": "sample_6965732d63",
+    "source_type": "news_press_release",
+    "started_at": "2026-11-09T00:00:00+00:00",
+    "status": "COMPLETED",
+    "steps": [],
+    "streaming_url": "",
+    "url": "https://quillfeather.example/news/series-c"
+  },
+  "https://windpower-news.example/2026/01/quillfeather-recall": {
+    "access_blocked": false,
+    "attempts": [
+      {
+        "attempt_number": 1,
+        "browser_profile": "lite"
+      }
+    ],
+    "browser_config": {},
+    "category": "news",
+    "created_at": "2026-11-09T00:00:00+00:00",
+    "error": null,
+    "finished_at": "2026-11-09T00:00:00+00:00",
+    "goal": "You are collecting raw news source material for Quillfeather Robotics from the source labeled 'Quillfeather recalls 120 inspection drones'.\n\nInstructions:\n1. Search for recent news articles about the company from major outlets. Collect article titles, publication dates, publisher names, and direct article URLs. Prioritize the most recent and most material coverage.\n2. Prefer named, reputable publishers over aggregator summaries or social media.\n3. Your job is source discovery and direct-link collection, not news analysis.\n4. For each relevant article or release you find, return the page title, final URL, source kind, publication date if stated, publisher name, and any linked documents.\n5. Do not summarize article content or assess sentiment. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to ten clearly relevant news sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple announces major restructuring of services division\",\n      \"final_url\": \"https://reuters.com/technology/apple-restructuring-2026-03/\",\n      \"source_kind\": \"news_article\",\n      \"publication_date\": \"2026-03-15\",\n      \"publisher\": \"Reuters\",\n      \"linked_documents\": [],\n      \"notes\": \"Reports 200 job cuts in services division effective Q2 2026.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"Industry trade press results were paywalled\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"News aggregator blocked automated access\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+    "label": "Quillfeather recalls 120 inspection drones",
+    "num_of_steps": null,
+    "result": {
+      "coverage_gaps": [
+        "No relevant results found."
+      ],
+      "sources": []
+    },
+    "run_id": "sample_6563616c6c",
+    "source_type": "news_aggregator",
+    "started_at": "2026-11-09T00:00:00+00:00",
+    "status": "COMPLETED",
+    "steps": [],
+    "streaming_url": "",
+    "url": "https://windpower-news.example/2026/01/quillfeather-recall"
+  },
+  "https://www.bing.com/news/search?q=Quillfeather+Robotics": {
+    "access_blocked": false,
+    "attempts": [
+      {
+        "attempt_number": 1,
+        "browser_profile": "lite"
+      }
+    ],
+    "browser_config": {},
+    "category": "news",
+    "created_at": "2026-11-09T00:00:00+00:00",
+    "error": null,
+    "finished_at": "2026-11-09T00:00:00+00:00",
+    "goal": "You are collecting raw news source material for Quillfeather Robotics from the source labeled 'Recent news search'.\n\nInstructions:\n1. Starting from search results, locate recent news articles, press releases, and industry coverage about the company. Open the best paths and return the direct article URLs, publication dates, and publisher names.\n2. Prefer named, reputable publishers over aggregator summaries or social media.\n3. Your job is source discovery and direct-link collection, not news analysis.\n4. For each relevant article or release you find, return the page title, final URL, source kind, publication date if stated, publisher name, and any linked documents.\n5. Do not summarize article content or assess sentiment. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to ten clearly relevant news sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple announces major restructuring of services division\",\n      \"final_url\": \"https://reuters.com/technology/apple-restructuring-2026-03/\",\n      \"source_kind\": \"news_article\",\n      \"publication_date\": \"2026-03-15\",\n      \"publisher\": \"Reuters\",\n      \"linked_documents\": [],\n      \"notes\": \"Reports 200 job cuts in services division effective Q2 2026.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"Industry trade press results were paywalled\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"News aggregator blocked automated access\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+    "label": "Recent news search",
+    "num_of_steps": null,
+    "result": {
+      "sources": [
+        {
+          "captured_text": "",
+          "final_url": "https://windpower-news.example/2026/01/quillfeather-recall",
+          "linked_documents": [],
+          "notes": "",
+          "page_title": "Quillfeather recalls 120 inspection drones",
+          "reporting_period": "",
+          "source_kind": "news article"
+        }
+      ]
+    },
+    "run_id": "sample_6f74696373",
+    "source_type": "news_search_discovery",
+    "started_at": "2026-11-09T00:00:00+00:00",
+    "status": "COMPLETED",
+    "steps": [],
+    "streaming_url": "",
+    "url": "https://www.bing.com/news/search?q=Quillfeather+Robotics"
+  },
+  "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+FTC+DOJ+EPA+regulatory+fine+penalty+settlement": {
+    "access_blocked": false,
+    "attempts": [
+      {
+        "attempt_number": 1,
+        "browser_profile": "lite"
+      }
+    ],
+    "browser_config": {},
+    "category": "legal",
+    "created_at": "2026-11-09T00:00:00+00:00",
+    "error": null,
+    "finished_at": "2026-11-09T00:00:00+00:00",
+    "goal": "You are collecting raw legal source material for Quillfeather Robotics from the source labeled 'Regulatory action search'. The primary jurisdiction is US.\n\nInstructions:\n1. Starting from search results, locate official legal sources such as court dockets, regulatory enforcement pages, sanctions databases, or corporate registry filings involving the company. Open the best primary-source paths and return the direct source URLs and any linked legal documents.\n2. Prefer official court, regulatory, and government sources over news summaries.\n3. Your job is source discovery and direct-link collection, not legal analysis.\n4. For each relevant page or document you find, return the page title, final URL, source kind, case identifier or action reference if stated, jurisdiction, and any linked legal documents.\n5. Do not interpret legal outcomes, assess liability, or summarize legal arguments. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to eight clearly relevant legal sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple Inc. v. Samsung Electronics - Docket\",\n      \"final_url\": \"https://www.courtlistener.com/docket/123456/apple-inc-v-samsung/\",\n      \"source_kind\": \"court_docket\",\n      \"case_identifier\": \"5:11-cv-01846\",\n      \"jurisdiction\": \"N.D. Cal.\",\n      \"linked_documents\": [\n        {\n          \"title\": \"Complaint\",\n          \"url\": \"https://storage.courtlistener.com/recap/...\",\n          \"document_type\": \"complaint\"\n        }\n      ],\n      \"notes\": \"Patent infringement case. Last activity 2025-09-15.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"State court records were not accessible from this path\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"Court records database required login or subscription\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+    "label": "Regulatory action search",
+    "num_of_steps": null,
+    "result": {
+      "coverage_gaps": [
+        "No relevant results found."
+      ],
+      "sources": []
+    },
+    "run_id": "sample_656d656e74",
+    "source_type": "legal_search_discovery",
+    "started_at": "2026-11-09T00:00:00+00:00",
+    "status": "COMPLETED",
+    "steps": [],
+    "streaming_url": "",
+    "url": "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+FTC+DOJ+EPA+regulatory+fine+penalty+settlement"
+  },
+  "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+OFAC+sanctions+SDN+debarment": {
+    "access_blocked": false,
+    "attempts": [
+      {
+        "attempt_number": 1,
+        "browser_profile": "lite"
+      }
+    ],
+    "browser_config": {},
+    "category": "legal",
+    "created_at": "2026-11-09T00:00:00+00:00",
+    "error": null,
+    "finished_at": "2026-11-09T00:00:00+00:00",
+    "goal": "You are collecting raw legal source material for Quillfeather Robotics from the source labeled 'Sanctions screening'. The primary jurisdiction is US.\n\nInstructions:\n1. Starting from search results, locate official legal sources such as court dockets, regulatory enforcement pages, sanctions databases, or corporate registry filings involving the company. Open the best primary-source paths and return the direct source URLs and any linked legal documents.\n2. Prefer official court, regulatory, and government sources over news summaries.\n3. Your job is source discovery and direct-link collection, not legal analysis.\n4. For each relevant page or document you find, return the page title, final URL, source kind, case identifier or action reference if stated, jurisdiction, and any linked legal documents.\n5. Do not interpret legal outcomes, assess liability, or summarize legal arguments. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to eight clearly relevant legal sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple Inc. v. Samsung Electronics - Docket\",\n      \"final_url\": \"https://www.courtlistener.com/docket/123456/apple-inc-v-samsung/\",\n      \"source_kind\": \"court_docket\",\n      \"case_identifier\": \"5:11-cv-01846\",\n      \"jurisdiction\": \"N.D. Cal.\",\n      \"linked_documents\": [\n        {\n          \"title\": \"Complaint\",\n          \"url\": \"https://storage.courtlistener.com/recap/...\",\n          \"document_type\": \"complaint\"\n        }\n      ],\n      \"notes\": \"Patent infringement case. Last activity 2025-09-15.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"State court records were not accessible from this path\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"Court records database required login or subscription\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+    "label": "Sanctions screening",
+    "num_of_steps": null,
+    "result": {
+      "coverage_gaps": [
+        "No relevant results found."
+      ],
+      "sources": []
+    },
+    "run_id": "sample_726d656e74",
+    "source_type": "legal_search_discovery",
+    "started_at": "2026-11-09T00:00:00+00:00",
+    "status": "COMPLETED",
+    "steps": [],
+    "streaming_url": "",
+    "url": "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+OFAC+sanctions+SDN+debarment"
+  },
+  "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+SEC+enforcement+action+investigation+penalty": {
+    "access_blocked": false,
+    "attempts": [
+      {
+        "attempt_number": 1,
+        "browser_profile": "lite"
+      }
+    ],
+    "browser_config": {},
+    "category": "legal",
+    "created_at": "2026-11-09T00:00:00+00:00",
+    "error": null,
+    "finished_at": "2026-11-09T00:00:00+00:00",
+    "goal": "You are collecting raw legal source material for Quillfeather Robotics from the source labeled 'SEC enforcement search'. The primary jurisdiction is US.\n\nInstructions:\n1. Starting from search results, locate official legal sources such as court dockets, regulatory enforcement pages, sanctions databases, or corporate registry filings involving the company. Open the best primary-source paths and return the direct source URLs and any linked legal documents.\n2. Prefer official court, regulatory, and government sources over news summaries.\n3. Your job is source discovery and direct-link collection, not legal analysis.\n4. For each relevant page or document you find, return the page title, final URL, source kind, case identifier or action reference if stated, jurisdiction, and any linked legal documents.\n5. Do not interpret legal outcomes, assess liability, or summarize legal arguments. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to eight clearly relevant legal sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple Inc. v. Samsung Electronics - Docket\",\n      \"final_url\": \"https://www.courtlistener.com/docket/123456/apple-inc-v-samsung/\",\n      \"source_kind\": \"court_docket\",\n      \"case_identifier\": \"5:11-cv-01846\",\n      \"jurisdiction\": \"N.D. Cal.\",\n      \"linked_documents\": [\n        {\n          \"title\": \"Complaint\",\n          \"url\": \"https://storage.courtlistener.com/recap/...\",\n          \"document_type\": \"complaint\"\n        }\n      ],\n      \"notes\": \"Patent infringement case. Last activity 2025-09-15.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"State court records were not accessible from this path\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"Court records database required login or subscription\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+    "label": "SEC enforcement search",
+    "num_of_steps": null,
+    "result": {
+      "coverage_gaps": [
+        "No relevant results found."
+      ],
+      "sources": []
+    },
+    "run_id": "sample_6e616c7479",
+    "source_type": "legal_search_discovery",
+    "started_at": "2026-11-09T00:00:00+00:00",
+    "status": "COMPLETED",
+    "steps": [],
+    "streaming_url": "",
+    "url": "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+SEC+enforcement+action+investigation+penalty"
+  },
+  "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+analysis+report+review+coverage": {
+    "access_blocked": false,
+    "attempts": [
+      {
+        "attempt_number": 1,
+        "browser_profile": "lite"
+      }
+    ],
+    "browser_config": {},
+    "category": "news",
+    "created_at": "2026-11-09T00:00:00+00:00",
+    "error": null,
+    "finished_at": "2026-11-09T00:00:00+00:00",
+    "goal": "You are collecting raw news source material for Quillfeather Robotics from the source labeled 'Industry coverage search'.\n\nInstructions:\n1. Starting from search results, locate recent news articles, press releases, and industry coverage about the company. Open the best paths and return the direct article URLs, publication dates, and publisher names.\n2. Prefer named, reputable publishers over aggregator summaries or social media.\n3. Your job is source discovery and direct-link collection, not news analysis.\n4. For each relevant article or release you find, return the page title, final URL, source kind, publication date if stated, publisher name, and any linked documents.\n5. Do not summarize article content or assess sentiment. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to ten clearly relevant news sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple announces major restructuring of services division\",\n      \"final_url\": \"https://reuters.com/technology/apple-restructuring-2026-03/\",\n      \"source_kind\": \"news_article\",\n      \"publication_date\": \"2026-03-15\",\n      \"publisher\": \"Reuters\",\n      \"linked_documents\": [],\n      \"notes\": \"Reports 200 job cuts in services division effective Q2 2026.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"Industry trade press results were paywalled\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"News aggregator blocked automated access\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+    "label": "Industry coverage search",
+    "num_of_steps": null,
+    "result": {
+      "coverage_gaps": [
+        "No relevant results found."
+      ],
+      "sources": []
+    },
+    "run_id": "sample_6572616765",
+    "source_type": "news_search_discovery",
+    "started_at": "2026-11-09T00:00:00+00:00",
+    "status": "COMPLETED",
+    "steps": [],
+    "streaming_url": "",
+    "url": "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+analysis+report+review+coverage"
+  },
+  "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+lawsuit+layoff+investigation+scandal+recall+controversy": {
+    "access_blocked": false,
+    "attempts": [
+      {
+        "attempt_number": 1,
+        "browser_profile": "lite"
+      }
+    ],
+    "browser_config": {},
+    "category": "news",
+    "created_at": "2026-11-09T00:00:00+00:00",
+    "error": null,
+    "finished_at": "2026-11-09T00:00:00+00:00",
+    "goal": "You are collecting raw news source material for Quillfeather Robotics from the source labeled 'Negative news search'.\n\nInstructions:\n1. Starting from search results, locate recent news articles, press releases, and industry coverage about the company. Open the best paths and return the direct article URLs, publication dates, and publisher names.\n2. Prefer named, reputable publishers over aggregator summaries or social media.\n3. Your job is source discovery and direct-link collection, not news analysis.\n4. For each relevant article or release you find, return the page title, final URL, source kind, publication date if stated, publisher name, and any linked documents.\n5. Do not summarize article content or assess sentiment. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to ten clearly relevant news sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple announces major restructuring of services division\",\n      \"final_url\": \"https://reuters.com/technology/apple-restructuring-2026-03/\",\n      \"source_kind\": \"news_article\",\n      \"publication_date\": \"2026-03-15\",\n      \"publisher\": \"Reuters\",\n      \"linked_documents\": [],\n      \"notes\": \"Reports 200 job cuts in services division effective Q2 2026.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"Industry trade press results were paywalled\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"News aggregator blocked automated access\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+    "label": "Negative news search",
+    "num_of_steps": null,
+    "result": {
+      "coverage_gaps": [
+        "No relevant results found."
+      ],
+      "sources": []
+    },
+    "run_id": "sample_7665727379",
+    "source_type": "news_search_discovery",
+    "started_at": "2026-11-09T00:00:00+00:00",
+    "status": "COMPLETED",
+    "steps": [],
+    "streaming_url": "",
+    "url": "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+lawsuit+layoff+investigation+scandal+recall+controversy"
+  },
+  "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+lawsuit+litigation+court+case+filed": {
+    "access_blocked": false,
+    "attempts": [
+      {
+        "attempt_number": 1,
+        "browser_profile": "lite"
+      }
+    ],
+    "browser_config": {},
+    "category": "legal",
+    "created_at": "2026-11-09T00:00:00+00:00",
+    "error": null,
+    "finished_at": "2026-11-09T00:00:00+00:00",
+    "goal": "You are collecting raw legal source material for Quillfeather Robotics from the source labeled 'Litigation search'. The primary jurisdiction is US.\n\nInstructions:\n1. Starting from search results, locate official legal sources such as court dockets, regulatory enforcement pages, sanctions databases, or corporate registry filings involving the company. Open the best primary-source paths and return the direct source URLs and any linked legal documents.\n2. Prefer official court, regulatory, and government sources over news summaries.\n3. Your job is source discovery and direct-link collection, not legal analysis.\n4. For each relevant page or document you find, return the page title, final URL, source kind, case identifier or action reference if stated, jurisdiction, and any linked legal documents.\n5. Do not interpret legal outcomes, assess liability, or summarize legal arguments. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to eight clearly relevant legal sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple Inc. v. Samsung Electronics - Docket\",\n      \"final_url\": \"https://www.courtlistener.com/docket/123456/apple-inc-v-samsung/\",\n      \"source_kind\": \"court_docket\",\n      \"case_identifier\": \"5:11-cv-01846\",\n      \"jurisdiction\": \"N.D. Cal.\",\n      \"linked_documents\": [\n        {\n          \"title\": \"Complaint\",\n          \"url\": \"https://storage.courtlistener.com/recap/...\",\n          \"document_type\": \"complaint\"\n        }\n      ],\n      \"notes\": \"Patent infringement case. Last activity 2025-09-15.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"State court records were not accessible from this path\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"Court records database required login or subscription\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+    "label": "Litigation search",
+    "num_of_steps": null,
+    "result": {
+      "sources": [
+        {
+          "captured_text": "",
+          "final_url": "https://dockets.example/case/3-25-cv-01931",
+          "linked_documents": [],
+          "notes": "",
+          "page_title": "Aerodyne Systems v. Quillfeather Robotics",
+          "reporting_period": "",
+          "source_kind": "court docket"
+        }
+      ]
+    },
+    "run_id": "sample_66696c6564",
+    "source_type": "legal_search_discovery",
+    "started_at": "2026-11-09T00:00:00+00:00",
+    "status": "COMPLETED",
+    "steps": [],
+    "streaming_url": "",
+    "url": "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+lawsuit+litigation+court+case+filed"
+  },
+  "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+press+release+site%3Aprnewswire.com+OR+site%3Abusinesswire.com+OR+site%3Aglobenewswire.com": {
+    "access_blocked": false,
+    "attempts": [
+      {
+        "attempt_number": 1,
+        "browser_profile": "lite"
+      }
+    ],
+    "browser_config": {},
+    "category": "news",
+    "created_at": "2026-11-09T00:00:00+00:00",
+    "error": null,
+    "finished_at": "2026-11-09T00:00:00+00:00",
+    "goal": "You are collecting raw news source material for Quillfeather Robotics from the source labeled 'Press release search'.\n\nInstructions:\n1. Search for official press releases from the company on wire services such as PR Newswire, Business Wire, or GlobeNewsWire. Collect release titles, dates, and direct URLs.\n2. Prefer named, reputable publishers over aggregator summaries or social media.\n3. Your job is source discovery and direct-link collection, not news analysis.\n4. For each relevant article or release you find, return the page title, final URL, source kind, publication date if stated, publisher name, and any linked documents.\n5. Do not summarize article content or assess sentiment. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to ten clearly relevant news sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple announces major restructuring of services division\",\n      \"final_url\": \"https://reuters.com/technology/apple-restructuring-2026-03/\",\n      \"source_kind\": \"news_article\",\n      \"publication_date\": \"2026-03-15\",\n      \"publisher\": \"Reuters\",\n      \"linked_documents\": [],\n      \"notes\": \"Reports 200 job cuts in services division effective Q2 2026.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"Industry trade press results were paywalled\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"news_aggregator_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"News aggregator blocked automated access\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+    "label": "Press release search",
+    "num_of_steps": null,
+    "result": {
+      "coverage_gaps": [
+        "No relevant results found."
+      ],
+      "sources": []
+    },
+    "run_id": "sample_652e636f6d",
+    "source_type": "news_press_release",
+    "started_at": "2026-11-09T00:00:00+00:00",
+    "status": "COMPLETED",
+    "steps": [],
+    "streaming_url": "",
+    "url": "https://www.bing.com/search?q=%22Quillfeather+Robotics%22+press+release+site%3Aprnewswire.com+OR+site%3Abusinesswire.com+OR+site%3Aglobenewswire.com"
+  },
+  "https://www.courtlistener.com/?q=%22Quillfeather%20Robotics%22&type=o": {
+    "access_blocked": false,
+    "attempts": [
+      {
+        "attempt_number": 1,
+        "browser_profile": "lite"
+      }
+    ],
+    "browser_config": {},
+    "category": "legal",
+    "created_at": "2026-11-09T00:00:00+00:00",
+    "error": null,
+    "finished_at": "2026-11-09T00:00:00+00:00",
+    "goal": "You are collecting raw legal source material for Quillfeather Robotics from the source labeled 'CourtListener search'. The primary jurisdiction is US.\n\nInstructions:\n1. Search for active and recent litigation involving the company. Collect case numbers, court names, filing dates, named parties, and links to docket entries or case documents.\n2. Prefer official court, regulatory, and government sources over news summaries.\n3. Your job is source discovery and direct-link collection, not legal analysis.\n4. For each relevant page or document you find, return the page title, final URL, source kind, case identifier or action reference if stated, jurisdiction, and any linked legal documents.\n5. Do not interpret legal outcomes, assess liability, or summarize legal arguments. Keep notes short and focused on what the source is.\n6. If a page is blocked, irrelevant, or requires login, return a structured error or coverage gap instead of guessing.\n\nTermination conditions:\n- Stop after capturing up to eight clearly relevant legal sources.\n- Stop after six meaningful navigation steps if the source path is weak.\n- Stop immediately if the page shows a CAPTCHA, anti-bot wall, login gate, or access-denied message.\n\nReturn JSON matching this exact shape:\n{\n  \"success\": true,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [\n    {\n      \"page_title\": \"Apple Inc. v. Samsung Electronics - Docket\",\n      \"final_url\": \"https://www.courtlistener.com/docket/123456/apple-inc-v-samsung/\",\n      \"source_kind\": \"court_docket\",\n      \"case_identifier\": \"5:11-cv-01846\",\n      \"jurisdiction\": \"N.D. Cal.\",\n      \"linked_documents\": [\n        {\n          \"title\": \"Complaint\",\n          \"url\": \"https://storage.courtlistener.com/recap/...\",\n          \"document_type\": \"complaint\"\n        }\n      ],\n      \"notes\": \"Patent infringement case. Last activity 2025-09-15.\"\n    }\n  ],\n  \"coverage_gaps\": [\n    \"State court records were not accessible from this path\"\n  ],\n  \"error\": null\n}\n\nIf capture fails, return this shape instead:\n{\n  \"success\": false,\n  \"capture_mode\": \"court_docket_search\",\n  \"sources\": [],\n  \"coverage_gaps\": [\n    \"Court records database required login or subscription\"\n  ],\n  \"error\": {\n    \"type\": \"blocked\",\n    \"message\": \"Encountered login, paywall, CAPTCHA, or anti-bot challenge\"\n  }\n}",
+    "label": "CourtListener search",
+    "num_of_steps": null,
+    "result": {
+      "coverage_gaps": [
+        "No relevant results found."
+      ],
+      "sources": []
+    },
+    "run_id": "sample_7970653d6f",
+    "source_type": "legal_court_records",
+    "started_at": "2026-11-09T00:00:00+00:00",
+    "status": "COMPLETED",
+    "steps": [],
+    "streaming_url": "",
+    "url": "https://www.courtlistener.com/?q=%22Quillfeather%20Robotics%22&type=o"
+  }
+}

@@ -5,7 +5,7 @@ import json
 import urllib.parse
 import threading
 from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any, Callable
 
@@ -2116,7 +2116,9 @@ class ReportPipeline:
                 for specialist in get_extraction_agents(agent):
                     futures.append(executor.submit(process_specialist, agent, specialist))
 
-            for future in as_completed(futures):
+            # Collect in submission order so the claim list, and every
+            # artifact derived from it, is identical across runs.
+            for future in futures:
                 claims.extend(future.result())
 
         self._emit_stage_event(
@@ -2217,8 +2219,7 @@ class ReportPipeline:
             max_workers=min(self.config.openai_verification_max_workers, total_claims or 1)
         ) as executor:
             futures = [executor.submit(verify_single, claim) for claim in claims]
-            for future in as_completed(futures):
-                future.result()
+            ordered = [future.result() for future in futures]
 
         self._emit_stage_event(
             stage="verification",
@@ -2227,7 +2228,7 @@ class ReportPipeline:
             current=len(verified),
             total=total_claims,
         )
-        return verified
+        return ordered
 
     def _build_report(
         self,

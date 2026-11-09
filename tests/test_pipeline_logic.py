@@ -859,6 +859,42 @@ class PipelineParallelizationTests(unittest.TestCase):
         self.assertEqual(3, len(updates))
         self.assertEqual({1, 2, 3}, {event["current"] for event in updates})
 
+    def test_verified_claims_keep_extraction_order_under_concurrency(self) -> None:
+        import time
+
+        pipeline = self._build_pipeline([])
+        claims = [
+            ExtractedClaim(
+                claim_id=f"c{index}",
+                section="financials",
+                statement=f"Claim {index}",
+                importance="low",
+                confidence=0.5,
+                as_of="",
+                source_quote="",
+                evidence_ids=[],
+                raw_source_label="specialist",
+            )
+            for index in range(8)
+        ]
+
+        def slow_first(*, user_content: list[dict[str, object]], **_: object) -> dict[str, object]:
+            text = str(user_content[0].get("text", ""))
+            index = int(text.split("Claim ID: c", 1)[1].split("\n", 1)[0])
+            time.sleep(0.002 * (8 - index))
+            return {
+                "status": "supported",
+                "confidence": 1.0,
+                "rationale": "",
+                "supporting_evidence_ids": [],
+                "blocking_issues": [],
+            }
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with patch.object(pipeline.openai, "structured_response", side_effect=slow_first):
+                verified = pipeline._verify_claims(claims, [], Path(temp_dir))
+        self.assertEqual([c.claim_id for c in claims], [c.claim_id for c in verified])
+
 
 if __name__ == "__main__":
     unittest.main()

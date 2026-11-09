@@ -18,7 +18,7 @@ from gus_reporter.events import RunEvents
 from gus_reporter.evidence import normalize_tinyfish_runs
 from gus_reporter.models import EvidenceItem, ReportRequest, SourceJob, TinyfishRunRecord
 from gus_reporter.providers import BrowserAgent, SourceFetcher
-from gus_reporter.urls import _normalize_url
+from gus_reporter.urls import normalize_url
 
 
 @dataclass
@@ -75,7 +75,7 @@ class SourceAcquirer:
         scheduled_jobs = list(source_jobs)
         pending_jobs = list(source_jobs)
         tinyfish_runs: list[TinyfishRunRecord] = []
-        seen_urls = {_normalize_url(job.url) for job in scheduled_jobs if job.url.strip()}
+        seen_urls = {normalize_url(job.url) for job in scheduled_jobs if job.url.strip()}
         acquisition_wave = 0
         max_total_jobs = max(1, self.limits.max_total_jobs)
         max_acquisition_waves = max(1, self.limits.max_waves)

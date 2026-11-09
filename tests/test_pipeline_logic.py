@@ -18,9 +18,9 @@ from gus_reporter.assembly import (
     compute_publish_decision,
 )
 from gus_reporter.discovery import (
-    _guess_discovered_legal_source_type,
-    _guess_discovered_news_source_type,
-    _guess_discovered_source_type,
+    classify_legal_source,
+    classify_news_source,
+    classify_financial_source,
     build_raw_financial_source_refs,
     build_raw_legal_source_refs,
     build_raw_news_source_refs,
@@ -680,7 +680,7 @@ class DiscoveredSourceTypeHeuristicTests(unittest.TestCase):
     def test_financial_domain_heuristics_handle_schemeless_and_ports(self) -> None:
         self.assertEqual(
             "financial_sec_filings",
-            _guess_discovered_source_type(
+            classify_financial_source(
                 source_kind="filing_index",
                 document_type="",
                 url="www.sec.gov:443/Archives/edgar/data/1234",
@@ -690,7 +690,7 @@ class DiscoveredSourceTypeHeuristicTests(unittest.TestCase):
     def test_legal_domain_heuristics_handle_schemeless_and_ports(self) -> None:
         self.assertEqual(
             "legal_court_records",
-            _guess_discovered_legal_source_type(
+            classify_legal_source(
                 source_kind="",
                 document_type="",
                 url="courtlistener.com:443/docket/123/acme/",
@@ -700,7 +700,7 @@ class DiscoveredSourceTypeHeuristicTests(unittest.TestCase):
     def test_news_domain_heuristics_handle_ports(self) -> None:
         self.assertEqual(
             "news_aggregator",
-            _guess_discovered_news_source_type(
+            classify_news_source(
                 source_kind="",
                 url="https://www.reuters.com:443/world/example",
             ),

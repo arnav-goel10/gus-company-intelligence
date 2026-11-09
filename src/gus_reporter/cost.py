@@ -136,7 +136,10 @@ def estimate_run(
     max_total_jobs: int = 50,
     judge_model: str | None = None,
     kept_fraction: float = 0.6,
+    extra_judged: int = 0,
+    judge_sample: int = 0,
 ) -> dict[str, Any]:
+    """extra_judged: suppressed claims the eval also judges, per run."""
     shape = request_shape(request, max_total_jobs)
     estimates = {}
     for scenario in SCENARIOS:
@@ -166,6 +169,9 @@ def estimate_run(
         judge_usd = 0.0
         if judge_model:
             kept = round(claims * kept_fraction)
+            if judge_sample:
+                kept = min(kept, judge_sample)
+            kept += min(extra_judged, claims)
             per_item = scenario.text_tokens_per_item + (
                 scenario.tokens_per_pdf if scenario.pdfs_per_bundle else 0
             )

@@ -1,0 +1,86 @@
+{
+  "prices_read_on": "2026-11-09",
+  "request": {
+    "company_name": "Apple Inc.",
+    "company_website": "https://www.apple.com",
+    "primary_jurisdiction": "US",
+    "ticker": "AAPL"
+  },
+  "pipeline_only": {
+    "shape": {
+      "seed_jobs": 18,
+      "max_total_jobs": 50,
+      "extraction_calls": 19,
+      "sections": 8
+    },
+    "model": "gpt-5.4-mini",
+    "judge_model": null,
+    "estimates": {
+      "low": {
+        "browse_jobs": 18,
+        "claims": 38,
+        "browse_usd": 2.3,
+        "model_usd": 0.34,
+        "judge_usd": 0.0,
+        "total_usd": 2.65
+      },
+      "typical": {
+        "browse_jobs": 34,
+        "claims": 114,
+        "browse_usd": 10.88,
+        "model_usd": 7.33,
+        "judge_usd": 0.0,
+        "total_usd": 18.21
+      },
+      "high": {
+        "browse_jobs": 50,
+        "claims": 228,
+        "browse_usd": 40.0,
+        "model_usd": 91.89,
+        "judge_usd": 0.0,
+        "total_usd": 131.89
+      }
+    }
+  },
+  "scenarios": [
+    {
+      "name": "low",
+      "steps_per_browse_job": 8,
+      "spawned_jobs_fraction": 0.0,
+      "evidence_items_per_bundle": 6,
+      "text_tokens_per_item": 800,
+      "pdfs_per_bundle": 0,
+      "tokens_per_pdf": 0,
+      "claims_per_specialist": 2,
+      "extraction_output_tokens": 400,
+      "verification_output_tokens": 150,
+      "judge_cited_items": 1
+    },
+    {
+      "name": "typical",
+      "steps_per_browse_job": 20,
+      "spawned_jobs_fraction": 0.5,
+      "evidence_items_per_bundle": 15,
+      "text_tokens_per_item": 2000,
+      "pdfs_per_bundle": 1,
+      "tokens_per_pdf": 40000,
+      "claims_per_specialist": 6,
+      "extraction_output_tokens": 1200,
+      "verification_output_tokens": 250,
+      "judge_cited_items": 2
+    },
+    {
+      "name": "high",
+      "steps_per_browse_job": 50,
+      "spawned_jobs_fraction": 1.0,
+      "evidence_items_per_bundle": 30,
+      "text_tokens_per_item": 3000,
+      "pdfs_per_bundle": 4,
+      "tokens_per_pdf": 100000,
+      "claims_per_specialist": 12,
+      "extraction_output_tokens": 4000,
+      "verification_output_tokens": 600,
+      "judge_cited_items": 3
+    }
+  ]
+}

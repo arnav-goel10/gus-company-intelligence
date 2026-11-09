@@ -1,0 +1,22 @@
+Pipeline model gpt-5.4-mini, judge model gpt-5.4, Tinyfish $0.016/step.
+Exact per request: seed browse jobs, extraction calls, report sections.
+Assumed per scenario: child jobs, steps per job, page length, PDFs, claims found.
+
+company                  seed calls        low  typical     high
+apple                      18    19   $   2.83 $  23.59 $ 151.34
+microsoft                  18    19   $   2.83 $  23.59 $ 151.34
+nvidia                     18    19   $   2.83 $  23.59 $ 151.34
+boeing                     18    19   $   2.83 $  23.59 $ 151.34
+intel                      18    19   $   2.83 $  23.59 $ 151.34
+peloton                    18    19   $   2.83 $  23.59 $ 151.34
+rivian                     18    19   $   2.83 $  23.59 $ 151.34
+coinbase                   18    19   $   2.83 $  23.59 $ 151.34
+snowflake                  18    19   $   2.83 $  23.59 $ 151.34
+shopify                    18    19   $   2.83 $  23.59 $ 151.34
+grab                       18    19   $   2.83 $  23.59 $ 151.34
+sea                        18    19   $   2.83 $  23.59 $ 151.34
+fictitious-quorvane        13    19   $   2.19 $  22.63 $ 151.34
+fictitious-zentrilux       13    19   $   2.19 $  22.63 $ 151.34
+near-miss-pelotron         13    19   $   2.19 $  22.63 $ 151.34
+TOTAL                                 $  40.53 $ 350.97 $2270.10
+

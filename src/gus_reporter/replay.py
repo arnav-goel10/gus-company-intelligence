@@ -279,8 +279,8 @@ class UsageMeter:
             self.calls.append({"schema_name": kwargs.get("schema_name", ""), **usage})
         return payload, usage
 
-    def write(self, run_dir: Path) -> Path:
-        target = Path(run_dir) / "usage.json"
+    def write(self, run_dir: Path, name: str = "usage.json") -> Path:
+        target = Path(run_dir) / name
         calls = sorted(self.calls, key=lambda call: json.dumps(call, sort_keys=True))
         target.write_text(json.dumps(calls, indent=2, sort_keys=True), encoding="utf-8")
         return target

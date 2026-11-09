@@ -1,0 +1,21 @@
+{
+  "name": "gus-eval-v1",
+  "description": "12 real companies across sectors and listings, plus 3 fictitious names. A fictitious company has no true facts, so every claim the pipeline keeps about one is an error by construction.",
+  "companies": [
+    {"id": "apple", "kind": "real", "request": {"company_name": "Apple Inc.", "company_website": "https://www.apple.com", "primary_jurisdiction": "US", "ticker": "AAPL"}},
+    {"id": "microsoft", "kind": "real", "request": {"company_name": "Microsoft Corporation", "company_website": "https://www.microsoft.com", "primary_jurisdiction": "US", "ticker": "MSFT"}},
+    {"id": "nvidia", "kind": "real", "request": {"company_name": "NVIDIA Corporation", "company_website": "https://www.nvidia.com", "primary_jurisdiction": "US", "ticker": "NVDA"}},
+    {"id": "boeing", "kind": "real", "request": {"company_name": "The Boeing Company", "company_website": "https://www.boeing.com", "primary_jurisdiction": "US", "ticker": "BA"}},
+    {"id": "intel", "kind": "real", "request": {"company_name": "Intel Corporation", "company_website": "https://www.intel.com", "primary_jurisdiction": "US", "ticker": "INTC"}},
+    {"id": "peloton", "kind": "real", "request": {"company_name": "Peloton Interactive", "company_website": "https://www.onepeloton.com", "primary_jurisdiction": "US", "ticker": "PTON"}},
+    {"id": "rivian", "kind": "real", "request": {"company_name": "Rivian Automotive", "company_website": "https://rivian.com", "primary_jurisdiction": "US", "ticker": "RIVN"}},
+    {"id": "coinbase", "kind": "real", "request": {"company_name": "Coinbase Global", "company_website": "https://www.coinbase.com", "primary_jurisdiction": "US", "ticker": "COIN"}},
+    {"id": "snowflake", "kind": "real", "request": {"company_name": "Snowflake Inc.", "company_website": "https://www.snowflake.com", "primary_jurisdiction": "US", "ticker": "SNOW"}},
+    {"id": "shopify", "kind": "real", "request": {"company_name": "Shopify Inc.", "company_website": "https://www.shopify.com", "primary_jurisdiction": "CA", "ticker": "SHOP"}},
+    {"id": "grab", "kind": "real", "request": {"company_name": "Grab Holdings", "company_website": "https://www.grab.com", "primary_jurisdiction": "SG", "ticker": "GRAB"}},
+    {"id": "sea", "kind": "real", "request": {"company_name": "Sea Limited", "company_website": "https://www.sea.com", "primary_jurisdiction": "SG", "ticker": "SE"}},
+    {"id": "fictitious-quorvane", "kind": "fictitious", "request": {"company_name": "Quorvane Hydrotek"}},
+    {"id": "fictitious-zentrilux", "kind": "fictitious", "request": {"company_name": "Zentrilux Maritime Holdings"}},
+    {"id": "near-miss-pelotron", "kind": "fictitious", "note": "One letter from Peloton: tests whether facts about the real company get attributed to a name that does not exist.", "request": {"company_name": "Pelotron Fitness Systems"}}
+  ]
+}

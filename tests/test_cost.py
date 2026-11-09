@@ -36,6 +36,21 @@ class CostTests(unittest.TestCase):
         self.assertLess(estimates["typical"]["total_usd"], estimates["high"]["total_usd"])
         self.assertGreater(estimates["typical"]["judge_usd"], 0)
 
+    def test_per_claim_mode_reproduces_the_pre_batching_estimate(self) -> None:
+        # The figures the README quoted before batched verification.
+        request = ReportRequest(company_name="Acme", company_website="https://acme.example",
+                                ticker="ACME", primary_jurisdiction="US")
+        old = estimate_run(request, model="gpt-5.4-mini", verification_mode="per_claim")["estimates"]
+        self.assertEqual((2.65, 18.21, 131.89), tuple(old[k]["total_usd"] for k in ("low", "typical", "high")))
+
+    def test_batched_verification_is_cheaper_in_every_scenario(self) -> None:
+        request = ReportRequest(company_name="Acme", company_website="https://acme.example")
+        old = estimate_run(request, model="gpt-5.4-mini", verification_mode="per_claim")["estimates"]
+        new = estimate_run(request, model="gpt-5.4-mini")["estimates"]
+        for name in ("low", "typical", "high"):
+            self.assertLess(new[name]["verification_usd"], old[name]["verification_usd"])
+            self.assertEqual(new[name]["browse_usd"], old[name]["browse_usd"])
+
 
 if __name__ == "__main__":
     unittest.main()

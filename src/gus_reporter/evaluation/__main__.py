@@ -66,6 +66,7 @@ def load_suite(path: Path, only: str | None = None) -> dict[str, Any]:
 def suite_estimate(
     suite: dict[str, Any], *, model: str, judge_model: str | None, max_total_jobs: int, audit: int,
     sample: int = 0,
+    verification_mode: str = "batched",
 ) -> dict[str, Any]:
     rows = []
     totals = {"low": 0.0, "typical": 0.0, "high": 0.0}
@@ -78,6 +79,7 @@ def suite_estimate(
             max_total_jobs=max_total_jobs,
             extra_judged=audit,
             judge_sample=sample,
+            verification_mode=verification_mode,
         )
         rows.append({"id": company["id"], **estimate})
         for name in totals:
@@ -86,7 +88,9 @@ def suite_estimate(
 
 
 def print_estimate(estimate: dict[str, Any], *, model: str, judge_model: str) -> None:
+    mode = estimate["rows"][0]["verification_mode"] if estimate["rows"] else ""
     print(f"Pipeline model {model}, judge model {judge_model}, Tinyfish ${TINYFISH_USD_PER_STEP}/step.")
+    print(f"Verification: {mode}.")
     print("Exact per request: seed browse jobs, extraction calls, report sections.")
     print("Assumed per scenario: child jobs, steps per job, page length, PDFs, claims found.\n")
     print(f"{'company':24} {'seed':>4} {'calls':>5}   {'low':>8} {'typical':>8} {'high':>8}")
@@ -226,6 +230,7 @@ def cmd_estimate(args: argparse.Namespace) -> int:
     estimate = suite_estimate(
         suite, model=model, judge_model=judge_model, max_total_jobs=args.max_total_jobs,
         audit=args.audit_suppressed, sample=args.judge_sample,
+        verification_mode=args.verification_mode,
     )
     if args.json:
         print(json.dumps({"estimate": estimate, "scenarios": scenario_table()}, indent=2))
@@ -369,6 +374,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--only", help="Comma-separated company ids.")
     p.add_argument("--json", action="store_true")
     p.add_argument("--no-judge", action="store_true", help="Pipeline cost only, as for one report.")
+    p.add_argument("--verification-mode", choices=["batched", "per_claim"], default="batched",
+                   help="per_claim prices the old one-call-per-claim verifier, for comparison.")
     p.set_defaults(func=cmd_estimate)
 
     p = sub.add_parser("run", help="Estimate, confirm, run, judge and score.")

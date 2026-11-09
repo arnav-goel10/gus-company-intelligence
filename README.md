@@ -70,7 +70,7 @@ the same pipeline runs against the live APIs, a recorder, or a replay cassette.
 | Acquisition | `acquisition.py` | Up to 6 browse waves under a 50-job cap, then raw capture |
 | Evidence | `evidence.py` | How sources are bundled for the model (12,000-char text cap, at most 4 PDFs) and which specialist sees which |
 | Extraction | `extraction.py` | One model call per specialist; a failed call yields no claims |
-| Verification | `verification.py` | Model verdict per claim, then the quote check that narrows citations; an API error counts as a suppression |
+| Verification | `verification.py` | Batched model verdicts over selected passages (`passages.py`), then the quote check against full sources; a failed or missing verdict counts as a suppression |
 | Assembly | `assembly.py` | Section summaries from kept claims, risk matrix, publish or block |
 
 `gpt-5.4-mini` does extraction, verification and synthesis by default. A page that shows
@@ -108,24 +108,31 @@ Prices are list prices read on 9 Nov 2026 from
 $4.50 out per million tokens, `gpt-5.4` $2.50, $0.25, $15.00, and Tinyfish $0.016 per
 agent step. Call counts follow from the request exactly. Page length, PDF count, claims
 found and browse steps are assumptions with a low, typical and high value
-(`src/gus_reporter/cost.py`). Both rows below come from `evaluation estimate`
-(`--only apple --no-judge` for the first) and are saved in [`results/`](results/).
+(`src/gus_reporter/cost.py`). Each figure comes from `evaluation estimate`, and the
+old verifier is still priced with `--verification-mode per_claim` so both columns use
+the same assumptions. Output is saved in [`results/cost_estimates/`](results/cost_estimates/).
 
 | | Low | Typical | High |
 |---|---|---|---|
-| One company, all 8 domains (Apple request) | $2.65 | $18.21 | $131.89 |
-| Full eval, 15 companies, judge on 20 kept and 5 suppressed claims each | $40.53 | $350.97 | $2,270.10 |
+| One company, all 8 domains (`--only apple --no-judge`) | $2.54 | $12.86 | $59.64 |
+| Same, old one-call-per-claim verifier | $2.65 | $18.21 | $131.89 |
+| Full eval, 15 companies, judge on 20 kept and 5 suppressed claims each | $38.88 | $270.72 | $1,186.35 |
+| Same, old verifier | $40.53 | $350.97 | $2,270.10 |
 
-The high case is dominated by verification. Every extracted claim cites the whole
-evidence bundle its specialist saw, so each verification call re-sends up to four PDFs.
-After a real run, `usage.json` holds the billed tokens and the CLI prints the exact cost.
+Verification for one company drops from $6.16 to $0.82 typical and from $84.51 to
+$12.26 high. The verifier used to send every claim the whole evidence bundle, PDFs
+included. It now verifies a specialist's claims six at a time against the passages
+around their quotes, and attaches PDFs only for claims whose quote is in no source text,
+with the PDFs first so repeat batches hit the prompt cache. Browsing ($10.88 typical,
+$40.00 high) is now the largest cost. After a real run, `usage.json` holds the billed
+tokens and the CLI prints the exact cost.
 
 ## Quickstart
 
 Standard library only, Python 3.9 or newer.
 
 ```bash
-PYTHONPATH=src python3 -m unittest discover -s tests      # 78 tests
+PYTHONPATH=src python3 -m unittest discover -s tests      # 91 tests
 
 cp .env.example .env    # OPENAI_API_KEY and TINYFISH_API_KEY
 PYTHONPATH=src python3 -m gus_reporter.cli --request examples/company_request.json
@@ -141,7 +148,9 @@ artifacts to `runs/<timestamp>-<company>/`, including `report.md` and `usage.jso
 The golden tests in `tests/test_golden_behaviour.py` pin what planning, discovery and a
 full end-to-end run send to the model and write to disk. They were written before
 `pipeline.py` (2,600 lines) was split into the modules above, and stayed green through
-the split. The replay tests check that a recorded run reproduces exactly, and that any
+the split. When verification moved to batched passages, the golden run kept and
+suppressed the same 20 claims with the same citations, and the sample's verified claims
+did not change by a byte. The replay tests check that a recorded run reproduces exactly, and that any
 change to a prompt or to the evidence fails replay instead of passing silently.
 
 ## Operator UI
@@ -174,16 +183,18 @@ authenticated Tinyfish workflows (`tinyfish_use_vault`, `tinyfish_credential_ite
 
 ## Known limits
 
-- An extracted claim cites every source its specialist saw. The verifier narrows that to
-  the supporting ids, but verification cost scales with bundle size.
-- The claim-specific text comes before the evidence in each verification prompt, so
-  repeated evidence is not prompt-cached.
+- The verifier model sees passages, not whole sources. Two windows around the quote and
+  the two chunks that best match the claim's words are what it can see. A contradiction
+  phrased with none of the claim's words would be missed by the model, though the
+  grounding check still reads everything.
+- PDF text is not extracted locally, so claims quoting a PDF still send the PDF. Prompt
+  caching softens that but is best effort, and the estimate counts no caching for
+  extraction.
 - No SEC or XBRL parser yet. Financial pages go through browse extraction and raw capture.
 - Source planning is rule-based, with no learned source ranking.
 - The material-findings table takes every important supported claim from the financial,
   legal and news sections, good news included. It does not rank risk.
-- The cost range per company is wide ($2.65 to $131.89) because PDF-heavy evidence is
-  re-sent on every verification call. Reordering prompts for caching is the first fix.
+- The cost range per company is still wide ($2.54 to $59.64), now mostly browse steps.
 
 ## License
 

@@ -1,0 +1,673 @@
+{
+  "estimate": {
+    "rows": [
+      {
+        "id": "apple",
+        "shape": {
+          "seed_jobs": 18,
+          "max_total_jobs": 50,
+          "extraction_calls": 19,
+          "sections": 8
+        },
+        "model": "gpt-5.4-mini",
+        "judge_model": "gpt-5.4",
+        "verification_mode": "batched",
+        "estimates": {
+          "low": {
+            "browse_jobs": 18,
+            "claims": 38,
+            "browse_usd": 2.3,
+            "model_usd": 0.23,
+            "verification_usd": 0.07,
+            "judge_usd": 0.18,
+            "total_usd": 2.72
+          },
+          "typical": {
+            "browse_jobs": 34,
+            "claims": 114,
+            "browse_usd": 10.88,
+            "model_usd": 1.98,
+            "verification_usd": 0.82,
+            "judge_usd": 5.38,
+            "total_usd": 18.24
+          },
+          "high": {
+            "browse_jobs": 50,
+            "claims": 228,
+            "browse_usd": 40.0,
+            "model_usd": 19.64,
+            "verification_usd": 12.26,
+            "judge_usd": 19.44,
+            "total_usd": 79.09
+          }
+        }
+      },
+      {
+        "id": "microsoft",
+        "shape": {
+          "seed_jobs": 18,
+          "max_total_jobs": 50,
+          "extraction_calls": 19,
+          "sections": 8
+        },
+        "model": "gpt-5.4-mini",
+        "judge_model": "gpt-5.4",
+        "verification_mode": "batched",
+        "estimates": {
+          "low": {
+            "browse_jobs": 18,
+            "claims": 38,
+            "browse_usd": 2.3,
+            "model_usd": 0.23,
+            "verification_usd": 0.07,
+            "judge_usd": 0.18,
+            "total_usd": 2.72
+          },
+          "typical": {
+            "browse_jobs": 34,
+            "claims": 114,
+            "browse_usd": 10.88,
+            "model_usd": 1.98,
+            "verification_usd": 0.82,
+            "judge_usd": 5.38,
+            "total_usd": 18.24
+          },
+          "high": {
+            "browse_jobs": 50,
+            "claims": 228,
+            "browse_usd": 40.0,
+            "model_usd": 19.64,
+            "verification_usd": 12.26,
+            "judge_usd": 19.44,
+            "total_usd": 79.09
+          }
+        }
+      },
+      {
+        "id": "nvidia",
+        "shape": {
+          "seed_jobs": 18,
+          "max_total_jobs": 50,
+          "extraction_calls": 19,
+          "sections": 8
+        },
+        "model": "gpt-5.4-mini",
+        "judge_model": "gpt-5.4",
+        "verification_mode": "batched",
+        "estimates": {
+          "low": {
+            "browse_jobs": 18,
+            "claims": 38,
+            "browse_usd": 2.3,
+            "model_usd": 0.23,
+            "verification_usd": 0.07,
+            "judge_usd": 0.18,
+            "total_usd": 2.72
+          },
+          "typical": {
+            "browse_jobs": 34,
+            "claims": 114,
+            "browse_usd": 10.88,
+            "model_usd": 1.98,
+            "verification_usd": 0.82,
+            "judge_usd": 5.38,
+            "total_usd": 18.24
+          },
+          "high": {
+            "browse_jobs": 50,
+            "claims": 228,
+            "browse_usd": 40.0,
+            "model_usd": 19.64,
+            "verification_usd": 12.26,
+            "judge_usd": 19.44,
+            "total_usd": 79.09
+          }
+        }
+      },
+      {
+        "id": "boeing",
+        "shape": {
+          "seed_jobs": 18,
+          "max_total_jobs": 50,
+          "extraction_calls": 19,
+          "sections": 8
+        },
+        "model": "gpt-5.4-mini",
+        "judge_model": "gpt-5.4",
+        "verification_mode": "batched",
+        "estimates": {
+          "low": {
+            "browse_jobs": 18,
+            "claims": 38,
+            "browse_usd": 2.3,
+            "model_usd": 0.23,
+            "verification_usd": 0.07,
+            "judge_usd": 0.18,
+            "total_usd": 2.72
+          },
+          "typical": {
+            "browse_jobs": 34,
+            "claims": 114,
+            "browse_usd": 10.88,
+            "model_usd": 1.98,
+            "verification_usd": 0.82,
+            "judge_usd": 5.38,
+            "total_usd": 18.24
+          },
+          "high": {
+            "browse_jobs": 50,
+            "claims": 228,
+            "browse_usd": 40.0,
+            "model_usd": 19.64,
+            "verification_usd": 12.26,
+            "judge_usd": 19.44,
+            "total_usd": 79.09
+          }
+        }
+      },
+      {
+        "id": "intel",
+        "shape": {
+          "seed_jobs": 18,
+          "max_total_jobs": 50,
+          "extraction_calls": 19,
+          "sections": 8
+        },
+        "model": "gpt-5.4-mini",
+        "judge_model": "gpt-5.4",
+        "verification_mode": "batched",
+        "estimates": {
+          "low": {
+            "browse_jobs": 18,
+            "claims": 38,
+            "browse_usd": 2.3,
+            "model_usd": 0.23,
+            "verification_usd": 0.07,
+            "judge_usd": 0.18,
+            "total_usd": 2.72
+          },
+          "typical": {
+            "browse_jobs": 34,
+            "claims": 114,
+            "browse_usd": 10.88,
+            "model_usd": 1.98,
+            "verification_usd": 0.82,
+            "judge_usd": 5.38,
+            "total_usd": 18.24
+          },
+          "high": {
+            "browse_jobs": 50,
+            "claims": 228,
+            "browse_usd": 40.0,
+            "model_usd": 19.64,
+            "verification_usd": 12.26,
+            "judge_usd": 19.44,
+            "total_usd": 79.09
+          }
+        }
+      },
+      {
+        "id": "peloton",
+        "shape": {
+          "seed_jobs": 18,
+          "max_total_jobs": 50,
+          "extraction_calls": 19,
+          "sections": 8
+        },
+        "model": "gpt-5.4-mini",
+        "judge_model": "gpt-5.4",
+        "verification_mode": "batched",
+        "estimates": {
+          "low": {
+            "browse_jobs": 18,
+            "claims": 38,
+            "browse_usd": 2.3,
+            "model_usd": 0.23,
+            "verification_usd": 0.07,
+            "judge_usd": 0.18,
+            "total_usd": 2.72
+          },
+          "typical": {
+            "browse_jobs": 34,
+            "claims": 114,
+            "browse_usd": 10.88,
+            "model_usd": 1.98,
+            "verification_usd": 0.82,
+            "judge_usd": 5.38,
+            "total_usd": 18.24
+          },
+          "high": {
+            "browse_jobs": 50,
+            "claims": 228,
+            "browse_usd": 40.0,
+            "model_usd": 19.64,
+            "verification_usd": 12.26,
+            "judge_usd": 19.44,
+            "total_usd": 79.09
+          }
+        }
+      },
+      {
+        "id": "rivian",
+        "shape": {
+          "seed_jobs": 18,
+          "max_total_jobs": 50,
+          "extraction_calls": 19,
+          "sections": 8
+        },
+        "model": "gpt-5.4-mini",
+        "judge_model": "gpt-5.4",
+        "verification_mode": "batched",
+        "estimates": {
+          "low": {
+            "browse_jobs": 18,
+            "claims": 38,
+            "browse_usd": 2.3,
+            "model_usd": 0.23,
+            "verification_usd": 0.07,
+            "judge_usd": 0.18,
+            "total_usd": 2.72
+          },
+          "typical": {
+            "browse_jobs": 34,
+            "claims": 114,
+            "browse_usd": 10.88,
+            "model_usd": 1.98,
+            "verification_usd": 0.82,
+            "judge_usd": 5.38,
+            "total_usd": 18.24
+          },
+          "high": {
+            "browse_jobs": 50,
+            "claims": 228,
+            "browse_usd": 40.0,
+            "model_usd": 19.64,
+            "verification_usd": 12.26,
+            "judge_usd": 19.44,
+            "total_usd": 79.09
+          }
+        }
+      },
+      {
+        "id": "coinbase",
+        "shape": {
+          "seed_jobs": 18,
+          "max_total_jobs": 50,
+          "extraction_calls": 19,
+          "sections": 8
+        },
+        "model": "gpt-5.4-mini",
+        "judge_model": "gpt-5.4",
+        "verification_mode": "batched",
+        "estimates": {
+          "low": {
+            "browse_jobs": 18,
+            "claims": 38,
+            "browse_usd": 2.3,
+            "model_usd": 0.23,
+            "verification_usd": 0.07,
+            "judge_usd": 0.18,
+            "total_usd": 2.72
+          },
+          "typical": {
+            "browse_jobs": 34,
+            "claims": 114,
+            "browse_usd": 10.88,
+            "model_usd": 1.98,
+            "verification_usd": 0.82,
+            "judge_usd": 5.38,
+            "total_usd": 18.24
+          },
+          "high": {
+            "browse_jobs": 50,
+            "claims": 228,
+            "browse_usd": 40.0,
+            "model_usd": 19.64,
+            "verification_usd": 12.26,
+            "judge_usd": 19.44,
+            "total_usd": 79.09
+          }
+        }
+      },
+      {
+        "id": "snowflake",
+        "shape": {
+          "seed_jobs": 18,
+          "max_total_jobs": 50,
+          "extraction_calls": 19,
+          "sections": 8
+        },
+        "model": "gpt-5.4-mini",
+        "judge_model": "gpt-5.4",
+        "verification_mode": "batched",
+        "estimates": {
+          "low": {
+            "browse_jobs": 18,
+            "claims": 38,
+            "browse_usd": 2.3,
+            "model_usd": 0.23,
+            "verification_usd": 0.07,
+            "judge_usd": 0.18,
+            "total_usd": 2.72
+          },
+          "typical": {
+            "browse_jobs": 34,
+            "claims": 114,
+            "browse_usd": 10.88,
+            "model_usd": 1.98,
+            "verification_usd": 0.82,
+            "judge_usd": 5.38,
+            "total_usd": 18.24
+          },
+          "high": {
+            "browse_jobs": 50,
+            "claims": 228,
+            "browse_usd": 40.0,
+            "model_usd": 19.64,
+            "verification_usd": 12.26,
+            "judge_usd": 19.44,
+            "total_usd": 79.09
+          }
+        }
+      },
+      {
+        "id": "shopify",
+        "shape": {
+          "seed_jobs": 18,
+          "max_total_jobs": 50,
+          "extraction_calls": 19,
+          "sections": 8
+        },
+        "model": "gpt-5.4-mini",
+        "judge_model": "gpt-5.4",
+        "verification_mode": "batched",
+        "estimates": {
+          "low": {
+            "browse_jobs": 18,
+            "claims": 38,
+            "browse_usd": 2.3,
+            "model_usd": 0.23,
+            "verification_usd": 0.07,
+            "judge_usd": 0.18,
+            "total_usd": 2.72
+          },
+          "typical": {
+            "browse_jobs": 34,
+            "claims": 114,
+            "browse_usd": 10.88,
+            "model_usd": 1.98,
+            "verification_usd": 0.82,
+            "judge_usd": 5.38,
+            "total_usd": 18.24
+          },
+          "high": {
+            "browse_jobs": 50,
+            "claims": 228,
+            "browse_usd": 40.0,
+            "model_usd": 19.64,
+            "verification_usd": 12.26,
+            "judge_usd": 19.44,
+            "total_usd": 79.09
+          }
+        }
+      },
+      {
+        "id": "grab",
+        "shape": {
+          "seed_jobs": 18,
+          "max_total_jobs": 50,
+          "extraction_calls": 19,
+          "sections": 8
+        },
+        "model": "gpt-5.4-mini",
+        "judge_model": "gpt-5.4",
+        "verification_mode": "batched",
+        "estimates": {
+          "low": {
+            "browse_jobs": 18,
+            "claims": 38,
+            "browse_usd": 2.3,
+            "model_usd": 0.23,
+            "verification_usd": 0.07,
+            "judge_usd": 0.18,
+            "total_usd": 2.72
+          },
+          "typical": {
+            "browse_jobs": 34,
+            "claims": 114,
+            "browse_usd": 10.88,
+            "model_usd": 1.98,
+            "verification_usd": 0.82,
+            "judge_usd": 5.38,
+            "total_usd": 18.24
+          },
+          "high": {
+            "browse_jobs": 50,
+            "claims": 228,
+            "browse_usd": 40.0,
+            "model_usd": 19.64,
+            "verification_usd": 12.26,
+            "judge_usd": 19.44,
+            "total_usd": 79.09
+          }
+        }
+      },
+      {
+        "id": "sea",
+        "shape": {
+          "seed_jobs": 18,
+          "max_total_jobs": 50,
+          "extraction_calls": 19,
+          "sections": 8
+        },
+        "model": "gpt-5.4-mini",
+        "judge_model": "gpt-5.4",
+        "verification_mode": "batched",
+        "estimates": {
+          "low": {
+            "browse_jobs": 18,
+            "claims": 38,
+            "browse_usd": 2.3,
+            "model_usd": 0.23,
+            "verification_usd": 0.07,
+            "judge_usd": 0.18,
+            "total_usd": 2.72
+          },
+          "typical": {
+            "browse_jobs": 34,
+            "claims": 114,
+            "browse_usd": 10.88,
+            "model_usd": 1.98,
+            "verification_usd": 0.82,
+            "judge_usd": 5.38,
+            "total_usd": 18.24
+          },
+          "high": {
+            "browse_jobs": 50,
+            "claims": 228,
+            "browse_usd": 40.0,
+            "model_usd": 19.64,
+            "verification_usd": 12.26,
+            "judge_usd": 19.44,
+            "total_usd": 79.09
+          }
+        }
+      },
+      {
+        "id": "fictitious-quorvane",
+        "shape": {
+          "seed_jobs": 13,
+          "max_total_jobs": 50,
+          "extraction_calls": 19,
+          "sections": 8
+        },
+        "model": "gpt-5.4-mini",
+        "judge_model": "gpt-5.4",
+        "verification_mode": "batched",
+        "estimates": {
+          "low": {
+            "browse_jobs": 13,
+            "claims": 38,
+            "browse_usd": 1.66,
+            "model_usd": 0.23,
+            "verification_usd": 0.07,
+            "judge_usd": 0.18,
+            "total_usd": 2.08
+          },
+          "typical": {
+            "browse_jobs": 31,
+            "claims": 114,
+            "browse_usd": 9.92,
+            "model_usd": 1.98,
+            "verification_usd": 0.82,
+            "judge_usd": 5.38,
+            "total_usd": 17.28
+          },
+          "high": {
+            "browse_jobs": 50,
+            "claims": 228,
+            "browse_usd": 40.0,
+            "model_usd": 19.64,
+            "verification_usd": 12.26,
+            "judge_usd": 19.44,
+            "total_usd": 79.09
+          }
+        }
+      },
+      {
+        "id": "fictitious-zentrilux",
+        "shape": {
+          "seed_jobs": 13,
+          "max_total_jobs": 50,
+          "extraction_calls": 19,
+          "sections": 8
+        },
+        "model": "gpt-5.4-mini",
+        "judge_model": "gpt-5.4",
+        "verification_mode": "batched",
+        "estimates": {
+          "low": {
+            "browse_jobs": 13,
+            "claims": 38,
+            "browse_usd": 1.66,
+            "model_usd": 0.23,
+            "verification_usd": 0.07,
+            "judge_usd": 0.18,
+            "total_usd": 2.08
+          },
+          "typical": {
+            "browse_jobs": 31,
+            "claims": 114,
+            "browse_usd": 9.92,
+            "model_usd": 1.98,
+            "verification_usd": 0.82,
+            "judge_usd": 5.38,
+            "total_usd": 17.28
+          },
+          "high": {
+            "browse_jobs": 50,
+            "claims": 228,
+            "browse_usd": 40.0,
+            "model_usd": 19.64,
+            "verification_usd": 12.26,
+            "judge_usd": 19.44,
+            "total_usd": 79.09
+          }
+        }
+      },
+      {
+        "id": "near-miss-pelotron",
+        "shape": {
+          "seed_jobs": 13,
+          "max_total_jobs": 50,
+          "extraction_calls": 19,
+          "sections": 8
+        },
+        "model": "gpt-5.4-mini",
+        "judge_model": "gpt-5.4",
+        "verification_mode": "batched",
+        "estimates": {
+          "low": {
+            "browse_jobs": 13,
+            "claims": 38,
+            "browse_usd": 1.66,
+            "model_usd": 0.23,
+            "verification_usd": 0.07,
+            "judge_usd": 0.18,
+            "total_usd": 2.08
+          },
+          "typical": {
+            "browse_jobs": 31,
+            "claims": 114,
+            "browse_usd": 9.92,
+            "model_usd": 1.98,
+            "verification_usd": 0.82,
+            "judge_usd": 5.38,
+            "total_usd": 17.28
+          },
+          "high": {
+            "browse_jobs": 50,
+            "claims": 228,
+            "browse_usd": 40.0,
+            "model_usd": 19.64,
+            "verification_usd": 12.26,
+            "judge_usd": 19.44,
+            "total_usd": 79.09
+          }
+        }
+      }
+    ],
+    "totals": {
+      "low": 38.88,
+      "typical": 270.72,
+      "high": 1186.35
+    }
+  },
+  "scenarios": [
+    {
+      "name": "low",
+      "steps_per_browse_job": 8,
+      "spawned_jobs_fraction": 0.0,
+      "evidence_items_per_bundle": 6,
+      "text_tokens_per_item": 800,
+      "pdfs_per_bundle": 0,
+      "tokens_per_pdf": 0,
+      "claims_per_specialist": 2,
+      "extraction_output_tokens": 400,
+      "verification_output_tokens": 150,
+      "judge_cited_items": 1,
+      "quote_in_text_fraction": 0.9,
+      "prompt_cache_hit_rate": 0.9
+    },
+    {
+      "name": "typical",
+      "steps_per_browse_job": 20,
+      "spawned_jobs_fraction": 0.5,
+      "evidence_items_per_bundle": 15,
+      "text_tokens_per_item": 2000,
+      "pdfs_per_bundle": 1,
+      "tokens_per_pdf": 40000,
+      "claims_per_specialist": 6,
+      "extraction_output_tokens": 1200,
+      "verification_output_tokens": 250,
+      "judge_cited_items": 2,
+      "quote_in_text_fraction": 0.7,
+      "prompt_cache_hit_rate": 0.5
+    },
+    {
+      "name": "high",
+      "steps_per_browse_job": 50,
+      "spawned_jobs_fraction": 1.0,
+      "evidence_items_per_bundle": 30,
+      "text_tokens_per_item": 3000,
+      "pdfs_per_bundle": 4,
+      "tokens_per_pdf": 100000,
+      "claims_per_specialist": 12,
+      "extraction_output_tokens": 4000,
+      "verification_output_tokens": 600,
+      "judge_cited_items": 3,
+      "quote_in_text_fraction": 0.4,
+      "prompt_cache_hit_rate": 0.0
+    }
+  ]
+}

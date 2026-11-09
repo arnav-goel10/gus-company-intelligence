@@ -102,13 +102,57 @@ class Scenario:
     extraction_output_tokens: int
     verification_output_tokens: int
     judge_cited_items: int
+    quote_in_text_fraction: float  # claims whose quote occurs in some source text
+    prompt_cache_hit_rate: float  # share of a repeated PDF prefix the API bills as cached
 
 
 SCENARIOS = (
-    Scenario("low", 8, 0.0, 6, 800, 0, 0, 2, 400, 150, 1),
-    Scenario("typical", 20, 0.5, 15, 2000, 1, 40_000, 6, 1200, 250, 2),
-    Scenario("high", 50, 1.0, 30, 3000, 4, 100_000, 12, 4000, 600, 3),
+    Scenario("low", 8, 0.0, 6, 800, 0, 0, 2, 400, 150, 1, 0.9, 0.9),
+    Scenario("typical", 20, 0.5, 15, 2000, 1, 40_000, 6, 1200, 250, 2, 0.7, 0.5),
+    Scenario("high", 50, 1.0, 30, 3000, 4, 100_000, 12, 4000, 600, 3, 0.4, 0.0),
 )
+
+VERIFICATION_MODES = ("batched", "per_claim")
+_BATCH_SIZE = 6  # gus_reporter.verification.BATCH_SIZE
+_CLAIM_TEXT_TOKENS = 80  # claim id, statement and quote in the batch prompt
+# Two 1,200-character windows around the quote plus two 800-character chunks.
+_PASSAGE_TOKENS_PER_CLAIM = 1000
+# Six 800-character chunks when the quote is in no source text.
+_FALLBACK_TOKENS_PER_CLAIM = 1200
+
+
+def _ceil_div(a: float, b: int) -> int:
+    return int(-(-a // b))
+
+
+def verification_tokens(scenario: "Scenario", claims_per_group: int) -> tuple[int, int, int]:
+    """(input, cached input, output) tokens to verify one specialist's claims, batched.
+
+    Claims whose quote is in text go in text-only batches with their passages.
+    The rest go in PDF batches when the bundle has PDFs: the first PDF batch
+    pays full price for the attachments, later ones get the cache hit rate.
+    """
+    bundle_text = scenario.evidence_items_per_bundle * scenario.text_tokens_per_item
+    passage = min(_PASSAGE_TOKENS_PER_CLAIM, bundle_text) + _CLAIM_TEXT_TOKENS
+    fallback = min(_FALLBACK_TOKENS_PER_CLAIM, bundle_text) + _CLAIM_TEXT_TOKENS
+    in_text = round(claims_per_group * scenario.quote_in_text_fraction)
+    needs_pdf = claims_per_group - in_text if scenario.pdfs_per_bundle else 0
+    text_only = claims_per_group - needs_pdf
+
+    text_batches = _ceil_div(text_only, _BATCH_SIZE)
+    pdf_batches = _ceil_div(needs_pdf, _BATCH_SIZE)
+    pdf_tokens = scenario.pdfs_per_bundle * scenario.tokens_per_pdf
+    input_tokens = (
+        (text_batches + pdf_batches) * _PROMPT_OVERHEAD_TOKENS
+        + in_text * passage
+        + (claims_per_group - in_text) * fallback
+        + pdf_batches * pdf_tokens
+    )
+    cached = round(max(0, pdf_batches - 1) * pdf_tokens * scenario.prompt_cache_hit_rate)
+    output_tokens = claims_per_group * scenario.verification_output_tokens + (
+        text_batches + pdf_batches
+    ) * 50
+    return input_tokens, cached, output_tokens
 
 _PROMPT_OVERHEAD_TOKENS = 600  # system prompt, preamble, schema
 _SECTION_INPUT_TOKENS = 2500
@@ -138,8 +182,15 @@ def estimate_run(
     kept_fraction: float = 0.6,
     extra_judged: int = 0,
     judge_sample: int = 0,
+    verification_mode: str = "batched",
 ) -> dict[str, Any]:
-    """extra_judged: suppressed claims the eval also judges, per run."""
+    """extra_judged: suppressed claims the eval also judges, per run.
+
+    verification_mode "per_claim" prices the old scheme (one call per claim
+    with the whole bundle), so before and after use the same assumptions.
+    """
+    if verification_mode not in VERIFICATION_MODES:
+        raise ValueError(f"verification_mode must be one of {VERIFICATION_MODES}")
     shape = request_shape(request, max_total_jobs)
     estimates = {}
     for scenario in SCENARIOS:
@@ -152,17 +203,27 @@ def estimate_run(
             + scenario.pdfs_per_bundle * scenario.tokens_per_pdf
         )
         claims = shape["extraction_calls"] * scenario.claims_per_specialist
-        # Verification re-sends the specialist's whole evidence bundle with every
-        # claim, because an extracted claim cites every item it was shown.
-        model_usd = token_cost(
+        if verification_mode == "per_claim":
+            # One call per claim, re-sending the specialist's whole bundle.
+            verify_in = claims * (bundle_tokens + _PROMPT_OVERHEAD_TOKENS)
+            verify_cached = 0
+            verify_out = claims * scenario.verification_output_tokens
+        else:
+            per_group = verification_tokens(scenario, scenario.claims_per_specialist)
+            verify_in, verify_cached, verify_out = (
+                shape["extraction_calls"] * value for value in per_group
+            )
+        verification_usd = token_cost(
+            model, input_tokens=verify_in, cached_input_tokens=verify_cached, output_tokens=verify_out
+        )
+        # Extraction prompt caching is best effort and not counted.
+        model_usd = verification_usd + token_cost(
             model,
             input_tokens=shape["extraction_calls"] * (bundle_tokens + _PROMPT_OVERHEAD_TOKENS)
-            + claims * (bundle_tokens + _PROMPT_OVERHEAD_TOKENS)
             + shape["sections"] * _SECTION_INPUT_TOKENS
             + _EXECUTIVE_INPUT_TOKENS,
             cached_input_tokens=0,
             output_tokens=shape["extraction_calls"] * scenario.extraction_output_tokens
-            + claims * scenario.verification_output_tokens
             + shape["sections"] * _SECTION_OUTPUT_TOKENS
             + _EXECUTIVE_OUTPUT_TOKENS,
         )
@@ -186,10 +247,17 @@ def estimate_run(
             "claims": claims,
             "browse_usd": round(browse_usd, 2),
             "model_usd": round(model_usd, 2),
+            "verification_usd": round(verification_usd, 2),
             "judge_usd": round(judge_usd, 2),
             "total_usd": round(browse_usd + model_usd + judge_usd, 2),
         }
-    return {"shape": shape, "model": model, "judge_model": judge_model, "estimates": estimates}
+    return {
+        "shape": shape,
+        "model": model,
+        "judge_model": judge_model,
+        "verification_mode": verification_mode,
+        "estimates": estimates,
+    }
 
 
 def scenario_table() -> list[dict[str, Any]]:

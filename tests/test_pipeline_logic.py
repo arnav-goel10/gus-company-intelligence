@@ -14,9 +14,10 @@ from gus_reporter.models import (
     TinyfishRunRecord,
     VerifiedClaim,
 )
-from gus_reporter.pipeline import (
-    ReportPipeline,
-    _build_openai_user_content,
+from gus_reporter.assembly import (
+    compute_publish_decision,
+)
+from gus_reporter.discovery import (
     _guess_discovered_legal_source_type,
     _guess_discovered_news_source_type,
     _guess_discovered_source_type,
@@ -26,10 +27,17 @@ from gus_reporter.pipeline import (
     build_spawned_financial_source_jobs,
     build_spawned_legal_source_jobs,
     build_spawned_news_source_jobs,
-    compute_publish_decision,
+)
+from gus_reporter.evidence import (
+    _build_openai_user_content,
     normalize_tinyfish_runs,
-    seed_source_jobs,
     select_evidence_for_extraction_agent,
+)
+from gus_reporter.pipeline import (
+    ReportPipeline,
+)
+from gus_reporter.planning import (
+    seed_source_jobs,
 )
 
 
@@ -760,7 +768,7 @@ class PipelineParallelizationTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             with patch.object(pipeline.openai, "structured_response", side_effect=fake_structured_response):
-                claims = pipeline._extract_claims(request, evidence, Path(temp_dir))
+                claims = pipeline.extractor.extract(request, evidence, Path(temp_dir))
 
         self.assertEqual(4, len(claims))
         specialist_updates = [
@@ -844,7 +852,7 @@ class PipelineParallelizationTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             with patch.object(pipeline.openai, "structured_response", side_effect=fake_verification_response):
-                verified = pipeline._verify_claims(claims, evidence, Path(temp_dir))
+                verified = pipeline.verifier.verify(claims, evidence, Path(temp_dir))
 
         self.assertEqual(3, len(verified))
         by_id = {claim.claim_id: claim for claim in verified}
@@ -892,7 +900,7 @@ class PipelineParallelizationTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             with patch.object(pipeline.openai, "structured_response", side_effect=slow_first):
-                verified = pipeline._verify_claims(claims, [], Path(temp_dir))
+                verified = pipeline.verifier.verify(claims, [], Path(temp_dir))
         self.assertEqual([c.claim_id for c in claims], [c.claim_id for c in verified])
 
 

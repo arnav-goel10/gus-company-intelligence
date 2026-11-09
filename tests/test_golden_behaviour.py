@@ -21,14 +21,18 @@ from gus_reporter.config import AppConfig
 from gus_reporter.models import ReportRequest
 from gus_reporter.openai_client import OpenAIClient
 from gus_reporter.tinyfish_client import TinyfishClient
-from gus_reporter.pipeline import (
-    ReportPipeline,
+from gus_reporter.discovery import (
     build_raw_financial_source_refs,
     build_raw_legal_source_refs,
     build_raw_news_source_refs,
     build_spawned_financial_source_jobs,
     build_spawned_legal_source_jobs,
     build_spawned_news_source_jobs,
+)
+from gus_reporter.pipeline import (
+    ReportPipeline,
+)
+from gus_reporter.planning import (
     seed_source_jobs,
 )
 

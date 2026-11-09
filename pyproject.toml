@@ -2,7 +2,7 @@
 name = "gus-reporter"
 version = "0.1.0"
 description = "GUS: autonomous company-intelligence pipeline with claim-level provenance and fail-closed verification"
-requires-python = ">=3.11"
+requires-python = ">=3.9"
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [{ name = "Arnav Goel" }]

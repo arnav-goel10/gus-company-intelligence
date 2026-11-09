@@ -5,7 +5,7 @@ import threading
 import uuid
 from copy import deepcopy
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -37,7 +37,7 @@ def _default_stages() -> dict[str, dict[str, Any]]:
 
 
 def _path_mtime_iso(path: Path) -> str:
-    return datetime.fromtimestamp(path.stat().st_mtime, tz=UTC).replace(
+    return datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).replace(
         microsecond=0
     ).isoformat()
 

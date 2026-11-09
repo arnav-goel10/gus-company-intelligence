@@ -10,11 +10,29 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.9", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Run unit tests (stdlib only, no dependencies)
+      - name: Unit, golden and replay tests (stdlib only)
         run: PYTHONPATH=src python -m unittest discover -s tests -v
+      - name: Offline sample run with no API keys
+        run: |
+          PYTHONPATH=src python -m gus_reporter.cli \
+            --request examples/sample_run/request.json \
+            --replay examples/sample_run/cassette --output-dir /tmp/gus-sample
+      - name: Eval scoring on the sample, no API calls
+        run: |
+          PYTHONPATH=src python -m gus_reporter.evaluation score \
+            --run examples/sample_run/output --labels eval/labels/sample_run.csv
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/ruff-action@v3
+        with:
+          version: "0.6.9"
+          args: check src tests scripts --select F,E9

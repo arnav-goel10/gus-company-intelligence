@@ -24,7 +24,7 @@ import dataclasses
 import json
 import random
 import sys
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -178,7 +178,7 @@ def score_dirs(
     per_run = [score_run(name, kind, path, labels) for name, kind, path in runs]
     result: dict[str, Any] = {
         "suite": suite_name,
-        "scored_at": datetime.now(tz=UTC).isoformat(timespec="seconds"),
+        "scored_at": datetime.now(tz=timezone.utc).isoformat(timespec="seconds"),
         "per_run": per_run,
         "aggregate": aggregate(per_run),
     }
@@ -245,7 +245,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     if not confirm(f"Typical spend ${estimate['totals']['typical']:.2f}{budget}.", args.yes):
         return 1
 
-    stamp = datetime.now(tz=UTC).strftime("%Y%m%dT%H%M%SZ")
+    stamp = datetime.now(tz=timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     out_dir = Path(args.out or f"results/eval/{stamp}")
     runs_dir = out_dir / "runs"
     spent = 0.0

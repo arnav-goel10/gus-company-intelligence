@@ -265,7 +265,7 @@ class TinyfishClient:
             )
 
         pending_runs: list[_PendingRun] = []
-        for (index, job), run_id in zip(indexed_jobs, run_ids, strict=True):
+        for (index, job), run_id in zip(indexed_jobs, run_ids):
             self._emit_source_job_event(
                 job=job,
                 status="running",

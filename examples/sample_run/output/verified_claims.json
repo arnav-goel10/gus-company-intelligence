@@ -3,12 +3,12 @@
     "as_of": "2026-02",
     "blocking_issues": [],
     "claim_id": "company_overview_overview_agent_001",
-    "confidence": 0.95,
+    "confidence": 0.9,
     "evidence_ids": [
       "tinyfish_company_overview_001"
     ],
     "importance": "high",
-    "rationale": "The quoted text appears verbatim in the cited source.",
+    "rationale": "The cited source states this.",
     "section": "company_overview",
     "source_quote": "designs autonomous inspection drones for offshore wind farms",
     "statement": "Quillfeather designs autonomous inspection drones for offshore wind farms.",
@@ -18,12 +18,12 @@
     "as_of": "2026-02",
     "blocking_issues": [],
     "claim_id": "company_overview_overview_agent_002",
-    "confidence": 0.95,
+    "confidence": 0.9,
     "evidence_ids": [
       "tinyfish_company_overview_001"
     ],
     "importance": "medium",
-    "rationale": "The quoted text appears verbatim in the cited source.",
+    "rationale": "The cited source states this.",
     "section": "company_overview",
     "source_quote": "headquartered in Portland, Oregon, with about 240 employees",
     "statement": "Quillfeather is headquartered in Portland, Oregon, and has about 240 employees.",
@@ -33,12 +33,12 @@
     "as_of": "2026-02",
     "blocking_issues": [],
     "claim_id": "financials_financial_statement_agent_001",
-    "confidence": 0.95,
+    "confidence": 0.9,
     "evidence_ids": [
       "direct_financials_001"
     ],
     "importance": "high",
-    "rationale": "The quoted text appears verbatim in the cited source.",
+    "rationale": "The cited source states this.",
     "section": "financials",
     "source_quote": "FY2025 revenue $48.2 million, up 31% from $36.8 million",
     "statement": "FY2025 revenue was $48.2 million, up 31% from $36.8 million.",
@@ -46,10 +46,25 @@
   },
   {
     "as_of": "2026-02",
+    "blocking_issues": [],
+    "claim_id": "financials_financial_statement_agent_002",
+    "confidence": 0.9,
+    "evidence_ids": [
+      "direct_financials_001"
+    ],
+    "importance": "high",
+    "rationale": "The cited source states this.",
+    "section": "financials",
+    "source_quote": "Net loss $6.4 million",
+    "statement": "Quillfeather reported a net loss of $6.4 million for FY2025.",
+    "status": "supported"
+  },
+  {
+    "as_of": "2026-02",
     "blocking_issues": [
       "The investor page reports a net loss of $6.4 million for FY2025."
     ],
-    "claim_id": "financials_financial_statement_agent_002",
+    "claim_id": "financials_financial_statement_agent_003",
     "confidence": 0.9,
     "evidence_ids": [
       "direct_financials_001",
@@ -67,12 +82,12 @@
     "as_of": "2026-02",
     "blocking_issues": [],
     "claim_id": "financials_capital_structure_agent_001",
-    "confidence": 0.95,
+    "confidence": 0.9,
     "evidence_ids": [
       "direct_financials_002"
     ],
     "importance": "high",
-    "rationale": "The quoted text appears verbatim in the cited source.",
+    "rationale": "The cited source states this.",
     "section": "financials",
     "source_quote": "issued a $15 million convertible note due 2027",
     "statement": "Quillfeather issued a $15 million convertible note due 2027.",
@@ -81,7 +96,7 @@
   {
     "as_of": "2026-02",
     "blocking_issues": [
-      "quote not found"
+      "Grounding check: the extraction quote does not appear in any source the claim was extracted from."
     ],
     "claim_id": "financials_funding_guidance_agent_001",
     "confidence": 0.9,
@@ -90,23 +105,23 @@
       "direct_financials_002",
       "tinyfish_financials_005"
     ],
-    "importance": "high",
-    "rationale": "The quoted support does not appear in any source shown.",
+    "importance": "medium",
+    "rationale": "Grounding check: the extraction quote does not appear in any source the claim was extracted from. Model rationale: The cited source states this.",
     "section": "financials",
-    "source_quote": "raised $60 million in a Series C round led by Harbor Point Ventures",
-    "statement": "Quillfeather raised a $60 million Series C led by Harbor Point Ventures in February 2026.",
+    "source_quote": "we expect FY2026 revenue above $70 million",
+    "statement": "Management expects FY2026 revenue above $70 million.",
     "status": "unsupported"
   },
   {
     "as_of": "2026-02",
     "blocking_issues": [],
     "claim_id": "financials_financial_risk_agent_001",
-    "confidence": 0.95,
+    "confidence": 0.9,
     "evidence_ids": [
       "direct_financials_002"
     ],
     "importance": "high",
-    "rationale": "The quoted text appears verbatim in the cited source.",
+    "rationale": "The cited source states this.",
     "section": "financials",
     "source_quote": "Brightwater Energy, accounted for 28% of revenue",
     "statement": "One customer, Brightwater Energy, accounted for 28% of FY2025 revenue.",
@@ -116,12 +131,12 @@
     "as_of": "2026-02",
     "blocking_issues": [],
     "claim_id": "legal_legal_case_locator_001",
-    "confidence": 0.95,
+    "confidence": 0.9,
     "evidence_ids": [
       "direct_legal_001"
     ],
     "importance": "high",
-    "rationale": "The quoted text appears verbatim in the cited source.",
+    "rationale": "The cited source states this.",
     "section": "legal",
     "source_quote": "Patent infringement complaint filed 3 September 2025 in the District of Oregon. Status: pending.",
     "statement": "Aerodyne Systems sued Quillfeather for patent infringement in September 2025; the case is pending.",
@@ -172,12 +187,12 @@
     "as_of": "2026-02",
     "blocking_issues": [],
     "claim_id": "news_news_event_locator_001",
-    "confidence": 0.95,
+    "confidence": 0.9,
     "evidence_ids": [
       "direct_news_002"
     ],
     "importance": "high",
-    "rationale": "The quoted text appears verbatim in the cited source.",
+    "rationale": "The cited source states this.",
     "section": "news",
     "source_quote": "raised $60 million in a Series C round led by Harbor Point Ventures",
     "statement": "Quillfeather raised a $60 million Series C led by Harbor Point Ventures on 12 February 2026.",
@@ -187,12 +202,12 @@
     "as_of": "2026-02",
     "blocking_issues": [],
     "claim_id": "news_news_negative_signal_agent_001",
-    "confidence": 0.95,
+    "confidence": 0.9,
     "evidence_ids": [
       "direct_news_003"
     ],
     "importance": "high",
-    "rationale": "The quoted text appears verbatim in the cited source.",
+    "rationale": "The cited source states this.",
     "section": "news",
     "source_quote": "recalled 120 drones in January 2026 after reports of battery faults",
     "statement": "Quillfeather recalled 120 drones in January 2026 after battery fault reports.",
@@ -220,12 +235,12 @@
     "as_of": "2026-02",
     "blocking_issues": [],
     "claim_id": "leadership_leadership_agent_001",
-    "confidence": 0.95,
+    "confidence": 0.9,
     "evidence_ids": [
       "tinyfish_leadership_002"
     ],
     "importance": "high",
-    "rationale": "The quoted text appears verbatim in the cited source.",
+    "rationale": "The cited source states this.",
     "section": "leadership",
     "source_quote": "Mara Lindqvist, Chief Executive Officer and co-founder",
     "statement": "Mara Lindqvist is chief executive and a co-founder.",
@@ -235,12 +250,12 @@
     "as_of": "2026-02",
     "blocking_issues": [],
     "claim_id": "leadership_leadership_agent_002",
-    "confidence": 0.95,
+    "confidence": 0.9,
     "evidence_ids": [
       "tinyfish_leadership_002"
     ],
     "importance": "medium",
-    "rationale": "The quoted text appears verbatim in the cited source.",
+    "rationale": "The cited source states this.",
     "section": "leadership",
     "source_quote": "Daniel Osei, Chief Financial Officer since March 2025",
     "statement": "Daniel Osei has been chief financial officer since March 2025.",

@@ -45,6 +45,9 @@
     "schema_name": "claim_verification"
   },
   {
+    "schema_name": "claim_verification"
+  },
+  {
     "schema_name": "company_overview_overview_agent_claim_extraction"
   },
   {

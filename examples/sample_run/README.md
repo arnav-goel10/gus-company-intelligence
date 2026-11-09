@@ -9,7 +9,7 @@ PYTHONPATH=src python3 -m gus_reporter.cli \
 ```
 
 It writes a fresh run directory identical to [`output/`](output/) (CI checks this).
-Start with [`output/report.md`](output/report.md): ten kept claims, each next to the
+Start with [`output/report.md`](output/report.md): eleven kept claims, each next to the
 source it cites, and five suppressed claims with the verifier's reason.
 
 **What is real and what is authored.** Quillfeather Robotics is fictional and every
@@ -18,11 +18,12 @@ model's answers were written by hand in
 [`scripts/build_sample_cassette.py`](../../scripts/build_sample_cassette.py), because
 recording a live run costs money. Everything between them is the production code path:
 source planning, browse waves and child-job discovery, raw fetch and HTML parsing,
-evidence bundling and routing to the 16 specialists, the publish gate, the risk matrix
-and the renderer. The authored verifier keeps a claim only if its quote appears in a
-source it was shown, and rejects four claims on scripted grounds (a contradicted net
-profit, an unchecked sanctions screen, an unsourced incorporation state, an
-over-general coverage claim).
+evidence bundling and routing to the 16 specialists its five focus areas use (all eight
+use 19), the publish gate, the risk matrix
+and the renderer. The authored model verifier rejects four claims on scripted grounds (a
+contradicted net profit, an unchecked sanctions screen, an unsourced incorporation
+state, an over-general coverage claim). The fifth, a revenue guidance figure no source
+contains, is suppressed by the pipeline's own grounding check in `verification.py`.
 
 So this sample shows the mechanics and the artifact trail. It is not evidence of model
 quality; that is what [`eval/`](../../eval/) measures.

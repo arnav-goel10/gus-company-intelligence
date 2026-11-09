@@ -5,9 +5,9 @@ The sample is a fictional company, Quillfeather Robotics, on reserved
 hand, because recording a real run costs money. Everything between them is
 the real pipeline: planning, browse waves, discovery, raw fetch and HTML
 parsing, evidence bundling, the publish gate, the risk matrix and the
-renderer. The authored verifier follows one rule (a claim is supported only
-if its quote appears in a source it was shown) plus four scripted rejections,
-so the sample shows both kept and suppressed claims.
+renderer. The authored verifier makes four scripted rejections and accepts
+everything else, so one fabricated claim reaches the pipeline's own
+grounding check, which suppresses it.
 
 Run from the repo root:
 
@@ -264,6 +264,7 @@ EXTRACTIONS: dict[str, list[tuple[str, str, str]]] = {
     "financial_statement_agent": [
         ("FY2025 revenue was $48.2 million, up 31% from $36.8 million.",
          "FY2025 revenue $48.2 million, up 31% from $36.8 million", "high"),
+        ("Quillfeather reported a net loss of $6.4 million for FY2025.", "Net loss $6.4 million", "high"),
         ("Quillfeather reported a net profit in FY2025.", "Net loss $6.4 million", "high"),
     ],
     "capital_structure_agent": [
@@ -271,8 +272,8 @@ EXTRACTIONS: dict[str, list[tuple[str, str, str]]] = {
          "issued a $15 million convertible note due 2027", "high"),
     ],
     "funding_guidance_agent": [
-        ("Quillfeather raised a $60 million Series C led by Harbor Point Ventures in February 2026.",
-         "raised $60 million in a Series C round led by Harbor Point Ventures", "high"),
+        ("Management expects FY2026 revenue above $70 million.",
+         "we expect FY2026 revenue above $70 million", "medium"),
     ],
     "financial_risk_agent": [
         ("One customer, Brightwater Energy, accounted for 28% of FY2025 revenue.",
@@ -351,15 +352,13 @@ class AuthoredModel:
                 if marker in claim:
                     return {"status": status, "confidence": 0.9, "rationale": rationale,
                             "supporting_evidence_ids": [], "blocking_issues": [rationale]}
+            # Otherwise the authored verifier accepts the claim, the way a model can
+            # be talked into it. The pipeline's grounding check gets the last word.
             hits = [eid for eid, body in _evidence_blocks(text).items()
                     if quote and _squash(quote) in _squash(body)]
-            if hits:
-                return {"status": "supported", "confidence": 0.95,
-                        "rationale": "The quoted text appears verbatim in the cited source.",
-                        "supporting_evidence_ids": hits[:1], "blocking_issues": []}
-            return {"status": "unsupported", "confidence": 0.9,
-                    "rationale": "The quoted support does not appear in any source shown.",
-                    "supporting_evidence_ids": [], "blocking_issues": ["quote not found"]}
+            return {"status": "supported", "confidence": 0.9,
+                    "rationale": "The cited source states this.",
+                    "supporting_evidence_ids": hits[:1], "blocking_issues": []}
         if schema_name.endswith("_section_summary"):
             statements = [line.split("- Statement: ", 1)[1].split(" | ", 1)[0]
                           for line in text.splitlines() if line.startswith("- Statement: ")]

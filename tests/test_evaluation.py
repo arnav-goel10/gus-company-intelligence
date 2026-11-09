@@ -103,15 +103,15 @@ class ScoringTests(unittest.TestCase):
     def test_sample_run_scores_with_hand_labels(self) -> None:
         labels = read_labels(ROOT / "eval" / "labels" / "sample_run.csv")
         row = score_run("output", "real", SAMPLE_OUTPUT, labels)
-        self.assertEqual(15, row["claims_extracted"])
-        self.assertEqual(10, row["claims_kept"])
-        self.assertEqual(10, row["kept_judged"])
-        self.assertEqual(10, row["citations"]["quote_grounded"])
+        self.assertEqual(16, row["claims_extracted"])
+        self.assertEqual(11, row["claims_kept"])
+        self.assertEqual(11, row["kept_judged"])
+        self.assertEqual(11, row["citations"]["quote_grounded"])
 
     def test_kept_claims_on_a_fictitious_company_are_counted_as_errors(self) -> None:
         row = score_run("fake", "fictitious", SAMPLE_OUTPUT)
         agg = aggregate([row])
-        self.assertEqual(10, agg["fictitious"]["claims_kept"])
+        self.assertEqual(11, agg["fictitious"]["claims_kept"])
         self.assertEqual(1, agg["fictitious"]["runs_with_any_kept_claim"])
 
     def test_judge_run_writes_judgements_that_scoring_reads(self) -> None:
@@ -136,7 +136,9 @@ class SpendGateTests(unittest.TestCase):
         ), patch.object(eval_cli, "live_clients") as live, patch(
             "sys.stdin", io.StringIO("")
         ), contextlib.redirect_stdout(out):
-            code = eval_cli.main(["run", "--suite", str(ROOT / "eval" / "suite.json")])
+            code = eval_cli.main(
+                ["run", "--suite", str(ROOT / "eval" / "suite.json"), "--max-usd", "1"]
+            )
         self.assertEqual(1, code)
         live.assert_not_called()
         self.assertIn("TOTAL", out.getvalue())

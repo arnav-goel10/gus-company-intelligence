@@ -11,6 +11,16 @@
     },
     "usage": {}
   },
+  "claim_verification:05ae8cdc356e55ef93156a1c": {
+    "response": {
+      "blocking_issues": [],
+      "confidence": 0.9,
+      "rationale": "The cited source states this.",
+      "status": "supported",
+      "supporting_evidence_ids": []
+    },
+    "usage": {}
+  },
   "claim_verification:071c47809bed1c652dab2a0a": {
     "response": {
       "blocking_issues": [
@@ -23,23 +33,11 @@
     },
     "usage": {}
   },
-  "claim_verification:1bcaf5920deec373b2045fef": {
-    "response": {
-      "blocking_issues": [
-        "quote not found"
-      ],
-      "confidence": 0.9,
-      "rationale": "The quoted support does not appear in any source shown.",
-      "status": "unsupported",
-      "supporting_evidence_ids": []
-    },
-    "usage": {}
-  },
   "claim_verification:3222d7dc88686e98579aaf7e": {
     "response": {
       "blocking_issues": [],
-      "confidence": 0.95,
-      "rationale": "The quoted text appears verbatim in the cited source.",
+      "confidence": 0.9,
+      "rationale": "The cited source states this.",
       "status": "supported",
       "supporting_evidence_ids": [
         "direct_news_003"
@@ -50,8 +48,8 @@
   "claim_verification:524c94efb25609dd83c147e6": {
     "response": {
       "blocking_issues": [],
-      "confidence": 0.95,
-      "rationale": "The quoted text appears verbatim in the cited source.",
+      "confidence": 0.9,
+      "rationale": "The cited source states this.",
       "status": "supported",
       "supporting_evidence_ids": [
         "direct_financials_002"
@@ -62,8 +60,8 @@
   "claim_verification:5983f57f3492074e924113ba": {
     "response": {
       "blocking_issues": [],
-      "confidence": 0.95,
-      "rationale": "The quoted text appears verbatim in the cited source.",
+      "confidence": 0.9,
+      "rationale": "The cited source states this.",
       "status": "supported",
       "supporting_evidence_ids": [
         "direct_legal_001"
@@ -71,7 +69,55 @@
     },
     "usage": {}
   },
-  "claim_verification:5c5dc987e6a84ae3afcb07c0": {
+  "claim_verification:63c6eb93d1c3c7063f12e26a": {
+    "response": {
+      "blocking_issues": [],
+      "confidence": 0.9,
+      "rationale": "The cited source states this.",
+      "status": "supported",
+      "supporting_evidence_ids": [
+        "direct_financials_001"
+      ]
+    },
+    "usage": {}
+  },
+  "claim_verification:7a5f74d89ac22a584e582517": {
+    "response": {
+      "blocking_issues": [],
+      "confidence": 0.9,
+      "rationale": "The cited source states this.",
+      "status": "supported",
+      "supporting_evidence_ids": [
+        "tinyfish_company_overview_001"
+      ]
+    },
+    "usage": {}
+  },
+  "claim_verification:808a87897cb2d48302c84ada": {
+    "response": {
+      "blocking_issues": [],
+      "confidence": 0.9,
+      "rationale": "The cited source states this.",
+      "status": "supported",
+      "supporting_evidence_ids": [
+        "tinyfish_leadership_002"
+      ]
+    },
+    "usage": {}
+  },
+  "claim_verification:8b6a546ab30bcbebfb763d7e": {
+    "response": {
+      "blocking_issues": [],
+      "confidence": 0.9,
+      "rationale": "The cited source states this.",
+      "status": "supported",
+      "supporting_evidence_ids": [
+        "direct_news_002"
+      ]
+    },
+    "usage": {}
+  },
+  "claim_verification:9712bf5a0bd3dfcbe8d8eec1": {
     "response": {
       "blocking_issues": [
         "The investor page reports a net loss of $6.4 million for FY2025."
@@ -83,11 +129,11 @@
     },
     "usage": {}
   },
-  "claim_verification:63c6eb93d1c3c7063f12e26a": {
+  "claim_verification:aecb9d46e2218118133384a5": {
     "response": {
       "blocking_issues": [],
-      "confidence": 0.95,
-      "rationale": "The quoted text appears verbatim in the cited source.",
+      "confidence": 0.9,
+      "rationale": "The cited source states this.",
       "status": "supported",
       "supporting_evidence_ids": [
         "direct_financials_001"
@@ -95,47 +141,11 @@
     },
     "usage": {}
   },
-  "claim_verification:7a5f74d89ac22a584e582517": {
-    "response": {
-      "blocking_issues": [],
-      "confidence": 0.95,
-      "rationale": "The quoted text appears verbatim in the cited source.",
-      "status": "supported",
-      "supporting_evidence_ids": [
-        "tinyfish_company_overview_001"
-      ]
-    },
-    "usage": {}
-  },
-  "claim_verification:808a87897cb2d48302c84ada": {
-    "response": {
-      "blocking_issues": [],
-      "confidence": 0.95,
-      "rationale": "The quoted text appears verbatim in the cited source.",
-      "status": "supported",
-      "supporting_evidence_ids": [
-        "tinyfish_leadership_002"
-      ]
-    },
-    "usage": {}
-  },
-  "claim_verification:8b6a546ab30bcbebfb763d7e": {
-    "response": {
-      "blocking_issues": [],
-      "confidence": 0.95,
-      "rationale": "The quoted text appears verbatim in the cited source.",
-      "status": "supported",
-      "supporting_evidence_ids": [
-        "direct_news_002"
-      ]
-    },
-    "usage": {}
-  },
   "claim_verification:b057bcc9c815e84dd74af5be": {
     "response": {
       "blocking_issues": [],
-      "confidence": 0.95,
-      "rationale": "The quoted text appears verbatim in the cited source.",
+      "confidence": 0.9,
+      "rationale": "The cited source states this.",
       "status": "supported",
       "supporting_evidence_ids": [
         "direct_financials_002"
@@ -146,8 +156,8 @@
   "claim_verification:c9fd814c92ec36b9914b5cd0": {
     "response": {
       "blocking_issues": [],
-      "confidence": 0.95,
-      "rationale": "The quoted text appears verbatim in the cited source.",
+      "confidence": 0.9,
+      "rationale": "The cited source states this.",
       "status": "supported",
       "supporting_evidence_ids": [
         "tinyfish_company_overview_001"
@@ -158,8 +168,8 @@
   "claim_verification:e49b60ac6d0e19e7607ed219": {
     "response": {
       "blocking_issues": [],
-      "confidence": 0.95,
-      "rationale": "The quoted text appears verbatim in the cited source.",
+      "confidence": 0.9,
+      "rationale": "The cited source states this.",
       "status": "supported",
       "supporting_evidence_ids": [
         "tinyfish_leadership_002"
@@ -203,7 +213,7 @@
     },
     "usage": {}
   },
-  "company_overview_section_summary:eb3b3391e7c2ac1607a001dc": {
+  "company_overview_section_summary:7a42fe432af2f3fb7a1d1c76": {
     "response": {
       "highlights": [
         "Quillfeather designs autonomous inspection drones for offshore wind farms.",
@@ -216,7 +226,7 @@
     },
     "usage": {}
   },
-  "executive_company_report:6d2e3322327ea7f9bf32726d": {
+  "executive_company_report:f57858c99ec617b335cb3e40": {
     "response": {
       "diligence_conclusion": "Publishable with the listed risks flagged for follow-up.",
       "entity_profile": "Inspection drones for offshore wind, Portland, Oregon, about 240 staff.",
@@ -291,6 +301,14 @@
           "importance": "high",
           "section": "financials",
           "source_quote": "Net loss $6.4 million",
+          "statement": "Quillfeather reported a net loss of $6.4 million for FY2025."
+        },
+        {
+          "as_of": "2026-02",
+          "confidence": 0.8,
+          "importance": "high",
+          "section": "financials",
+          "source_quote": "Net loss $6.4 million",
           "statement": "Quillfeather reported a net profit in FY2025."
         }
       ],
@@ -304,30 +322,30 @@
         {
           "as_of": "2026-02",
           "confidence": 0.8,
-          "importance": "high",
+          "importance": "medium",
           "section": "financials",
-          "source_quote": "raised $60 million in a Series C round led by Harbor Point Ventures",
-          "statement": "Quillfeather raised a $60 million Series C led by Harbor Point Ventures in February 2026."
+          "source_quote": "we expect FY2026 revenue above $70 million",
+          "statement": "Management expects FY2026 revenue above $70 million."
         }
       ],
       "document_summary": ""
     },
     "usage": {}
   },
-  "financials_section_summary:65ea5c106ab52f773617b5a1": {
+  "financials_section_summary:07042b613479c2af73bee8e3": {
     "response": {
       "data_gaps": [],
       "highlights": [
         "FY2025 revenue was $48.2 million, up 31% from $36.8 million.",
-        "Quillfeather issued a $15 million convertible note due 2027.",
-        "One customer, Brightwater Energy, accounted for 28% of FY2025 revenue."
+        "Quillfeather reported a net loss of $6.4 million for FY2025.",
+        "Quillfeather issued a $15 million convertible note due 2027."
       ],
       "key_metrics": [],
       "recommendations": [
         "Confirm the cited figures against primary filings."
       ],
       "red_flags": [],
-      "summary": "FY2025 revenue was $48.2 million, up 31% from $36.8 million. Quillfeather issued a $15 million convertible note due 2027. One customer, Brightwater Energy, accounted for 28% of FY2025 revenue."
+      "summary": "FY2025 revenue was $48.2 million, up 31% from $36.8 million. Quillfeather reported a net loss of $6.4 million for FY2025. Quillfeather issued a $15 million convertible note due 2027. One customer, Brightwater Energy, accounted for 28% of FY2025 revenue."
     },
     "usage": {}
   },
@@ -355,7 +373,7 @@
     },
     "usage": {}
   },
-  "leadership_section_summary:a527bac03fc16f462ab1b08b": {
+  "leadership_section_summary:ff25434c578815cfb72b087c": {
     "response": {
       "highlights": [
         "Mara Lindqvist is chief executive and a co-founder.",
@@ -430,7 +448,7 @@
     },
     "usage": {}
   },
-  "legal_section_summary:49982df4f6c11193bbd8ecdf": {
+  "legal_section_summary:d63043dd819a15e85b4b5b03": {
     "response": {
       "active_matters": [],
       "data_gaps": [],
@@ -502,7 +520,7 @@
     },
     "usage": {}
   },
-  "news_section_summary:b218480749724a4020512fb2": {
+  "news_section_summary:0e2016847de9cbd21d3b6ced": {
     "response": {
       "coverage_density": "heavy",
       "coverage_sentiment": "net_positive",

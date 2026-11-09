@@ -64,7 +64,7 @@ def load_suite(path: Path, only: str | None = None) -> dict[str, Any]:
 
 
 def suite_estimate(
-    suite: dict[str, Any], *, model: str, judge_model: str, max_total_jobs: int, audit: int,
+    suite: dict[str, Any], *, model: str, judge_model: str | None, max_total_jobs: int, audit: int,
     sample: int = 0,
 ) -> dict[str, Any]:
     rows = []
@@ -222,13 +222,15 @@ def write_results(result: dict[str, Any], out_dir: Path) -> None:
 def cmd_estimate(args: argparse.Namespace) -> int:
     suite = load_suite(Path(args.suite), args.only)
     model = AppConfig.from_env(require_api_keys=False).openai_model
+    judge_model = None if args.no_judge else args.judge_model
     estimate = suite_estimate(
-        suite, model=model, judge_model=args.judge_model, max_total_jobs=args.max_total_jobs,
+        suite, model=model, judge_model=judge_model, max_total_jobs=args.max_total_jobs,
         audit=args.audit_suppressed, sample=args.judge_sample,
     )
-    print_estimate(estimate, model=model, judge_model=args.judge_model)
     if args.json:
         print(json.dumps({"estimate": estimate, "scenarios": scenario_table()}, indent=2))
+    else:
+        print_estimate(estimate, model=model, judge_model=judge_model or "none")
     return 0
 
 
@@ -241,7 +243,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         max_total_jobs=args.max_total_jobs, audit=args.audit_suppressed, sample=args.judge_sample,
     )
     print_estimate(estimate, model=config.openai_model, judge_model=args.judge_model)
-    budget = f" with a hard stop at ${args.max_usd:.2f}" if args.max_usd else ""
+    budget = f", stopping before any company that would take spend past ${args.max_usd:.2f}"
     if not confirm(f"Typical spend ${estimate['totals']['typical']:.2f}{budget}.", args.yes):
         return 1
 
@@ -252,7 +254,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     typical = {row["id"]: row["estimates"]["typical"]["total_usd"] for row in estimate["rows"]}
     failures = {}
     for company in suite["companies"]:
-        if args.max_usd and spent + typical[company["id"]] > args.max_usd:
+        if spent + typical[company["id"]] > args.max_usd:
             print(f"Stopping before {company['id']}: ${spent:.2f} spent, budget ${args.max_usd:.2f}.")
             break
         cassette = Cassette(out_dir / "cassettes" / company["id"])
@@ -366,12 +368,14 @@ def build_parser() -> argparse.ArgumentParser:
     common(p)
     p.add_argument("--only", help="Comma-separated company ids.")
     p.add_argument("--json", action="store_true")
+    p.add_argument("--no-judge", action="store_true", help="Pipeline cost only, as for one report.")
     p.set_defaults(func=cmd_estimate)
 
     p = sub.add_parser("run", help="Estimate, confirm, run, judge and score.")
     common(p)
     p.add_argument("--only", help="Comma-separated company ids.")
-    p.add_argument("--max-usd", type=float, default=0.0, help="Stop before a company would pass this.")
+    p.add_argument("--max-usd", type=float, required=True,
+                   help="Budget. Stops before a company whose typical estimate would pass it.")
     p.add_argument("--out", help="Output directory (default results/eval/<timestamp>).")
     p.add_argument("--yes", action="store_true", help="Skip the confirmation prompt.")
     p.set_defaults(func=cmd_run)

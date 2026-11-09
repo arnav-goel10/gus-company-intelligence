@@ -1,0 +1,8 @@
+Pipeline model gpt-5.4-mini, judge model none, Tinyfish $0.016/step.
+Exact per request: seed browse jobs, extraction calls, report sections.
+Assumed per scenario: child jobs, steps per job, page length, PDFs, claims found.
+
+company                  seed calls        low  typical     high
+apple                      18    19   $   2.65 $  18.21 $ 131.89
+TOTAL                                 $   2.65 $  18.21 $ 131.89
+

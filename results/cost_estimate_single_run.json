@@ -1,45 +1,48 @@
 {
-  "prices_read_on": "2026-11-09",
-  "request": {
-    "company_name": "Apple Inc.",
-    "company_website": "https://www.apple.com",
-    "primary_jurisdiction": "US",
-    "ticker": "AAPL"
-  },
-  "pipeline_only": {
-    "shape": {
-      "seed_jobs": 18,
-      "max_total_jobs": 50,
-      "extraction_calls": 19,
-      "sections": 8
-    },
-    "model": "gpt-5.4-mini",
-    "judge_model": null,
-    "estimates": {
-      "low": {
-        "browse_jobs": 18,
-        "claims": 38,
-        "browse_usd": 2.3,
-        "model_usd": 0.34,
-        "judge_usd": 0.0,
-        "total_usd": 2.65
-      },
-      "typical": {
-        "browse_jobs": 34,
-        "claims": 114,
-        "browse_usd": 10.88,
-        "model_usd": 7.33,
-        "judge_usd": 0.0,
-        "total_usd": 18.21
-      },
-      "high": {
-        "browse_jobs": 50,
-        "claims": 228,
-        "browse_usd": 40.0,
-        "model_usd": 91.89,
-        "judge_usd": 0.0,
-        "total_usd": 131.89
+  "estimate": {
+    "rows": [
+      {
+        "id": "apple",
+        "shape": {
+          "seed_jobs": 18,
+          "max_total_jobs": 50,
+          "extraction_calls": 19,
+          "sections": 8
+        },
+        "model": "gpt-5.4-mini",
+        "judge_model": null,
+        "estimates": {
+          "low": {
+            "browse_jobs": 18,
+            "claims": 38,
+            "browse_usd": 2.3,
+            "model_usd": 0.34,
+            "judge_usd": 0.0,
+            "total_usd": 2.65
+          },
+          "typical": {
+            "browse_jobs": 34,
+            "claims": 114,
+            "browse_usd": 10.88,
+            "model_usd": 7.33,
+            "judge_usd": 0.0,
+            "total_usd": 18.21
+          },
+          "high": {
+            "browse_jobs": 50,
+            "claims": 228,
+            "browse_usd": 40.0,
+            "model_usd": 91.89,
+            "judge_usd": 0.0,
+            "total_usd": 131.89
+          }
+        }
       }
+    ],
+    "totals": {
+      "low": 2.65,
+      "typical": 18.21,
+      "high": 131.89
     }
   },
   "scenarios": [

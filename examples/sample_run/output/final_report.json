@@ -3,7 +3,7 @@
   "diligence_conclusion": "Publishable with the listed risks flagged for follow-up.",
   "entity_profile": "Inspection drones for offshore wind, Portland, Oregon, about 240 staff.",
   "executive_summary": "Quillfeather Robotics is a venture-backed maker of offshore wind inspection drones growing revenue 31% to $48.2 million while still loss-making. A pending patent suit, a January 2026 drone recall and 28% revenue concentration in one customer are the main risks.",
-  "generated_at": "2026-11-09T14:51:50+00:00",
+  "generated_at": "2026-11-09T18:41:53+00:00",
   "key_findings": [
     "Revenue grew 31% to $48.2 million in FY2025; the company is not profitable.",
     "A patent infringement case filed by Aerodyne Systems is pending.",
@@ -35,6 +35,15 @@
         "direct_financials_001"
       ],
       "issue": "FY2025 revenue was $48.2 million, up 31% from $36.8 million.",
+      "recommendation": "Request primary financial statements and reconcile any quantitative exposure before relying on the claim.",
+      "section": "financials",
+      "severity": "high"
+    },
+    {
+      "evidence_ids": [
+        "direct_financials_001"
+      ],
+      "issue": "Quillfeather reported a net loss of $6.4 million for FY2025.",
       "recommendation": "Request primary financial statements and reconcile any quantitative exposure before relying on the claim.",
       "section": "financials",
       "severity": "high"
@@ -110,8 +119,8 @@
       ],
       "highlights": [
         "FY2025 revenue was $48.2 million, up 31% from $36.8 million.",
-        "Quillfeather issued a $15 million convertible note due 2027.",
-        "One customer, Brightwater Energy, accounted for 28% of FY2025 revenue."
+        "Quillfeather reported a net loss of $6.4 million for FY2025.",
+        "Quillfeather issued a $15 million convertible note due 2027."
       ],
       "name": "financials",
       "recommendations": [
@@ -123,7 +132,7 @@
         "key_metrics": [],
         "red_flags": []
       },
-      "summary": "FY2025 revenue was $48.2 million, up 31% from $36.8 million. Quillfeather issued a $15 million convertible note due 2027. One customer, Brightwater Energy, accounted for 28% of FY2025 revenue."
+      "summary": "FY2025 revenue was $48.2 million, up 31% from $36.8 million. Quillfeather reported a net loss of $6.4 million for FY2025. Quillfeather issued a $15 million convertible note due 2027. One customer, Brightwater Energy, accounted for 28% of FY2025 revenue."
     },
     {
       "evidence_ids": [
@@ -533,6 +542,6 @@
       "url": "https://windpower-news.example/2026/01/quillfeather-recall"
     }
   ],
-  "total_claims": 15,
+  "total_claims": 16,
   "unsupported_claims": 5
 }

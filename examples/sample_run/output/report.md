@@ -2,7 +2,7 @@
 
 **Publish decision: publish.** Coverage and verification thresholds were met.
 
-10 claims kept, 5 suppressed by verification, 23 sources captured.
+11 claims kept, 5 suppressed by verification. 7 of 23 captured sources are cited.
 
 ## Executive summary
 
@@ -14,11 +14,12 @@ Quillfeather Robotics is a venture-backed maker of offshore wind inspection dron
 - A patent infringement case filed by Aerodyne Systems is pending.
 - One customer accounts for 28% of revenue.
 
-## Risk matrix
+## Material findings
 
-| Severity | Section | Issue | Evidence |
+| Importance | Section | Finding | Evidence |
 |---|---|---|---|
 | high | financials | FY2025 revenue was $48.2 million, up 31% from $36.8 million. | [`direct_financials_001`](https://quillfeather.example/investors) |
+| high | financials | Quillfeather reported a net loss of $6.4 million for FY2025. | [`direct_financials_001`](https://quillfeather.example/investors) |
 | high | financials | Quillfeather issued a $15 million convertible note due 2027. | [`direct_financials_002`](https://quillfeather.example/investors/annual-report-2025.html) |
 | high | financials | One customer, Brightwater Energy, accounted for 28% of FY2025 revenue. | [`direct_financials_002`](https://quillfeather.example/investors/annual-report-2025.html) |
 | high | legal | Aerodyne Systems sued Quillfeather for patent infringement in September 2025; the case is pending. | [`direct_legal_001`](https://dockets.example/case/3-25-cv-01931) |
@@ -40,10 +41,13 @@ Quillfeather designs autonomous inspection drones for offshore wind farms. Quill
 
 ### financials (supported)
 
-FY2025 revenue was $48.2 million, up 31% from $36.8 million. Quillfeather issued a $15 million convertible note due 2027. One customer, Brightwater Energy, accounted for 28% of FY2025 revenue.
+FY2025 revenue was $48.2 million, up 31% from $36.8 million. Quillfeather reported a net loss of $6.4 million for FY2025. Quillfeather issued a $15 million convertible note due 2027. One customer, Brightwater Energy, accounted for 28% of FY2025 revenue.
 
 - FY2025 revenue was $48.2 million, up 31% from $36.8 million.
   > FY2025 revenue $48.2 million, up 31% from $36.8 million
+  Source: [`direct_financials_001`](https://quillfeather.example/investors)
+- Quillfeather reported a net loss of $6.4 million for FY2025.
+  > Net loss $6.4 million
   Source: [`direct_financials_001`](https://quillfeather.example/investors)
 - Quillfeather issued a $15 million convertible note due 2027.
   > issued a $15 million convertible note due 2027
@@ -89,7 +93,7 @@ Extracted by an agent, then rejected by the verifier. None of these reach the se
 | Claim | Status | Verifier reason |
 |---|---|---|
 | Quillfeather reported a net profit in FY2025. | contradicted | The investor page reports a net loss of $6.4 million for FY2025. |
-| Quillfeather raised a $60 million Series C led by Harbor Point Ventures in February 2026. | unsupported | The quoted support does not appear in any source shown. |
+| Management expects FY2026 revenue above $70 million. | unsupported | Grounding check: the extraction quote does not appear in any source the claim was extracted from. Model rationale: The cited source states this. |
 | Quillfeather does not appear on any sanctions list. | insufficient_evidence | No sanctions screening source was captured, so absence from a list was never checked. |
 | Quillfeather was incorporated in Delaware in 2017. | unsupported | No captured source states where the company is incorporated. |
 | Press coverage of Quillfeather is overwhelmingly positive. | insufficient_evidence | Two articles, one negative, cannot support a claim about overall coverage. |

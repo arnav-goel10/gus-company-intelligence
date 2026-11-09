@@ -41,13 +41,14 @@ def render_markdown(run_dir: Path) -> str:
                 parts.append(f"[`{evidence_id}`]({item['url']})")
         return ", ".join(parts) or "none"
 
+    cited_by_kept = {eid for claim in kept for eid in claim["evidence_ids"]}
     lines = [
         f"# {report['company_name']}: company intelligence report",
         "",
         f"**Publish decision: {report['publish_decision']}.** {report['publish_reason']}",
         "",
-        f"{len(kept)} claims kept, {len(suppressed)} suppressed by verification, "
-        f"{len(evidence)} sources captured.",
+        f"{len(kept)} claims kept, {len(suppressed)} suppressed by verification. "
+        f"{len(cited_by_kept)} of {len(evidence)} captured sources are cited.",
         "",
         "## Executive summary",
         "",
@@ -59,7 +60,15 @@ def render_markdown(run_dir: Path) -> str:
         lines += [f"- {item}" for item in report["key_findings"]]
         lines.append("")
     if report.get("risk_matrix"):
-        lines += ["## Risk matrix", "", "| Severity | Section | Issue | Evidence |", "|---|---|---|---|"]
+        # build_risk_matrix keeps every high or medium importance claim from the
+        # financial, legal, news and risk sections, good news included, so the
+        # report calls it what it is.
+        lines += [
+            "## Material findings",
+            "",
+            "| Importance | Section | Finding | Evidence |",
+            "|---|---|---|---|",
+        ]
         for entry in report["risk_matrix"]:
             lines.append(
                 f"| {entry['severity']} | {entry['section']} | {_cell(entry['issue'])} | "

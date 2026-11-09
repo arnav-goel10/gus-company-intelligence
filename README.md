@@ -4,13 +4,14 @@
 
 Give GUS a company name. A browse agent collects the company's own pages, filings,
 court and registry searches and news, and up to 19 specialist LLM agents across 8 domains extract claims from
-what it found. A verifier then re-reads every claim against the sources it cites. Claims
-that fail are suppressed and listed with the reason, and the report is blocked outright
-when too few sections survive.
+what it found. Each claim carries a verbatim quote. A verifier model re-reads it against
+the evidence it came from, then a deterministic check keeps only the sources that
+contain the quote and suppresses the claim if none do. Suppressed claims are listed with
+the reason, and the report is blocked outright when too few sections survive.
 
 ## See it in 30 seconds
 
-No API keys, no network, about one second:
+No API keys and no network needed:
 
 ```bash
 git clone https://github.com/arnav-goel10/gus-company-intelligence && cd gus-company-intelligence
@@ -18,27 +19,29 @@ PYTHONPATH=src python3 -m gus_reporter.cli \
   --request examples/sample_run/request.json --replay examples/sample_run/cassette
 ```
 
-This replays a recorded run of the full pipeline and writes the report, every claim and
-every intermediate artifact. An excerpt of the [output](examples/sample_run/output/report.md):
+This replays a recorded run of the full pipeline and writes the report plus every
+intermediate artifact. An excerpt of the [output](examples/sample_run/output/report.md):
 
 ```text
 Publish decision: publish. Coverage and verification thresholds were met.
-10 claims kept, 5 suppressed by verification, 23 sources captured.
+11 claims kept, 5 suppressed by verification. 7 of 23 captured sources are cited.
 
 - FY2025 revenue was $48.2 million, up 31% from $36.8 million.
   > FY2025 revenue $48.2 million, up 31% from $36.8 million
   Source: direct_financials_001 (https://quillfeather.example/investors)
 
 Suppressed claims
-| Quillfeather reported a net profit in FY2025.       | contradicted          | The investor page reports a net loss of $6.4 million for FY2025. |
-| Quillfeather does not appear on any sanctions list. | insufficient_evidence | No sanctions screening source was captured, so absence from a list was never checked. |
-| Quillfeather was incorporated in Delaware in 2017.  | unsupported           | No captured source states where the company is incorporated. |
+| Quillfeather reported a net profit in FY2025.        | contradicted          | The investor page reports a net loss of $6.4 million for FY2025. |
+| Management expects FY2026 revenue above $70 million. | unsupported           | Grounding check: the extraction quote does not appear in any source the claim was extracted from. |
+| Quillfeather does not appear on any sanctions list.  | insufficient_evidence | No sanctions screening source was captured, so absence from a list was never checked. |
 ```
 
 The sample company is fictional, and its web pages and model answers were written by
-hand so the demo costs nothing. The code between them is the production path.
-[examples/sample_run/README.md](examples/sample_run/README.md) says exactly which parts
-are authored. CI replays it on every push and fails if the output changes.
+hand so the demo costs nothing. Everything else is the code a live run uses, and
+[examples/sample_run/README.md](examples/sample_run/README.md) lists which parts are
+authored. The revenue guidance claim above got past the authored verifier and was caught
+by the pipeline's own grounding check. CI replays the sample on every push to `main` and
+every pull request, and a test fails if any output file changes.
 
 ## How a run works
 
@@ -67,16 +70,16 @@ the same pipeline runs against the live APIs, a recorder, or a replay cassette.
 | Acquisition | `acquisition.py` | Up to 6 browse waves under a 50-job cap, then raw capture |
 | Evidence | `evidence.py` | How sources are bundled for the model (12,000-char text cap, at most 4 PDFs) and which specialist sees which |
 | Extraction | `extraction.py` | One model call per specialist; a failed call yields no claims |
-| Verification | `verification.py` | Keep or suppress each claim; an API error suppresses, it never passes |
+| Verification | `verification.py` | Model verdict per claim, then the quote check that narrows citations; an API error counts as a suppression |
 | Assembly | `assembly.py` | Section summaries from kept claims, risk matrix, publish or block |
 
-A page that shows a CAPTCHA or bot wall is recorded as blocked and skipped. GUS uses a
-standard browser profile, never retries around a block, and its raw fetcher identifies
-itself with a project user agent.
+`gpt-5.4-mini` does extraction, verification and synthesis by default. A page that shows
+a CAPTCHA or bot wall is recorded as blocked and skipped, with no retry in another
+browser profile, and the raw fetcher sends a `gus-reporter` user agent.
 
 ## Evaluation
 
-[`eval/`](eval/README.md) holds a 15-company suite: 12 real companies listed in the US,
+[`eval/`](eval/README.md) holds a 15-company suite: 12 real companies headquartered in the US,
 Canada and Singapore, and 3 names that do not exist, one of them a letter away from
 Peloton. Any claim kept about a fictitious company is an error by construction. The
 harness reports, with Wilson 95% intervals:
@@ -90,19 +93,23 @@ harness reports, with Wilson 95% intervals:
 
 ```bash
 PYTHONPATH=src python3 -m gus_reporter.evaluation estimate   # prints the cost, spends nothing
-PYTHONPATH=src python3 -m gus_reporter.evaluation run --max-usd 150
+PYTHONPATH=src python3 -m gus_reporter.evaluation run --max-usd 400
 ```
 
-`run` prints the estimate and waits for `yes` before any paid call. The suite has not
-been run against live APIs yet, so this README reports no precision number.
+`run` prints the estimate and waits for `yes` before any paid call. `--max-usd` is
+required, and the run stops before any company whose typical estimate would take spend
+past it. The suite has not been run against live APIs yet.
 
 ## Cost
 
-Prices are list prices read on 9 Nov 2026: `gpt-5.4-mini` $0.75 in, $0.075 cached,
+Prices are list prices read on 9 Nov 2026 from
+[OpenAI](https://developers.openai.com/api/docs/pricing) and
+[Tinyfish](https://www.tinyfish.ai/pricing): `gpt-5.4-mini` $0.75 in, $0.075 cached,
 $4.50 out per million tokens, `gpt-5.4` $2.50, $0.25, $15.00, and Tinyfish $0.016 per
 agent step. Call counts follow from the request exactly. Page length, PDF count, claims
 found and browse steps are assumptions with a low, typical and high value
-(`src/gus_reporter/cost.py`). Saved output is in [`results/`](results/).
+(`src/gus_reporter/cost.py`). Both rows below come from `evaluation estimate`
+(`--only apple --no-judge` for the first) and are saved in [`results/`](results/).
 
 | | Low | Typical | High |
 |---|---|---|---|
@@ -118,7 +125,7 @@ After a real run, `usage.json` holds the billed tokens and the CLI prints the ex
 Standard library only, Python 3.9 or newer.
 
 ```bash
-PYTHONPATH=src python3 -m unittest discover -s tests      # 73 tests, under a second
+PYTHONPATH=src python3 -m unittest discover -s tests      # 78 tests
 
 cp .env.example .env    # OPENAI_API_KEY and TINYFISH_API_KEY
 PYTHONPATH=src python3 -m gus_reporter.cli --request examples/company_request.json
@@ -173,6 +180,10 @@ authenticated Tinyfish workflows (`tinyfish_use_vault`, `tinyfish_credential_ite
   repeated evidence is not prompt-cached.
 - No SEC or XBRL parser yet. Financial pages go through browse extraction and raw capture.
 - Source planning is rule-based, with no learned source ranking.
+- The material-findings table takes every important supported claim from the financial,
+  legal and news sections, good news included. It does not rank risk.
+- The cost range per company is wide ($2.65 to $131.89) because PDF-heavy evidence is
+  re-sent on every verification call. Reordering prompts for caching is the first fix.
 
 ## License
 

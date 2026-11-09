@@ -53,6 +53,21 @@
     "raw_source_label": "financial_statement_agent",
     "section": "financials",
     "source_quote": "Net loss $6.4 million",
+    "statement": "Quillfeather reported a net loss of $6.4 million for FY2025."
+  },
+  {
+    "as_of": "2026-02",
+    "claim_id": "financials_financial_statement_agent_003",
+    "confidence": 0.8,
+    "evidence_ids": [
+      "direct_financials_001",
+      "direct_financials_002",
+      "tinyfish_financials_005"
+    ],
+    "importance": "high",
+    "raw_source_label": "financial_statement_agent",
+    "section": "financials",
+    "source_quote": "Net loss $6.4 million",
     "statement": "Quillfeather reported a net profit in FY2025."
   },
   {
@@ -79,11 +94,11 @@
       "direct_financials_002",
       "tinyfish_financials_005"
     ],
-    "importance": "high",
+    "importance": "medium",
     "raw_source_label": "funding_guidance_agent",
     "section": "financials",
-    "source_quote": "raised $60 million in a Series C round led by Harbor Point Ventures",
-    "statement": "Quillfeather raised a $60 million Series C led by Harbor Point Ventures in February 2026."
+    "source_quote": "we expect FY2026 revenue above $70 million",
+    "statement": "Management expects FY2026 revenue above $70 million."
   },
   {
     "as_of": "2026-02",

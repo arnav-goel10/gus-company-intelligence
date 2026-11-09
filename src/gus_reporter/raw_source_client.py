@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -116,6 +117,17 @@ def _is_textual(url: str, content_type_header: str) -> bool:
     return extension in {".html", ".htm", ".txt", ".json", ".xml", ".csv"}
 
 
+@dataclass
+class FetchedSource:
+    """One HTTP fetch: the body and headers, or the error that replaced them."""
+
+    final_url: str = ""
+    content_type: str = ""
+    body: bytes = b""
+    retrieved_at: str = ""
+    error: str | None = None
+
+
 class RawSourceClient:
     def __init__(
         self,
@@ -178,49 +190,15 @@ class RawSourceClient:
                 None,
             )
 
-        request = urllib.request.Request(
-            url,
-            headers={
-                "User-Agent": DEFAULT_USER_AGENT,
-                "Accept": (
-                    "application/pdf,text/html,application/xhtml+xml,"
-                    "application/json,text/plain,text/csv,*/*"
-                ),
-            },
-        )
-        try:
-            if self.timeout_seconds is None:
-                response_context = urllib.request.urlopen(request)
-            else:
-                response_context = urllib.request.urlopen(
-                    request,
-                    timeout=self.timeout_seconds,
-                )
-            with response_context as response:
-                body = response.read()
-                final_url = response.geturl()
-                content_type_header = response.headers.get("Content-Type", "")
-        except urllib.error.HTTPError as exc:
-            detail = exc.read().decode("utf-8", errors="replace")
+        fetched = self.fetch(url)
+        if fetched.error is not None:
             return (
-                {
-                    "label": label,
-                    "url": url,
-                    "status": "error",
-                    "error": f"HTTP {exc.code}: {detail.strip()}",
-                },
+                {"label": label, "url": url, "status": "error", "error": fetched.error},
                 None,
             )
-        except urllib.error.URLError as exc:
-            return (
-                {
-                    "label": label,
-                    "url": url,
-                    "status": "error",
-                    "error": str(exc.reason),
-                },
-                None,
-            )
+        body = fetched.body
+        final_url = fetched.final_url
+        content_type_header = fetched.content_type
 
         final_url = str(final_url).strip() or url
         extension = _guess_extension(final_url, content_type_header)
@@ -279,7 +257,7 @@ class RawSourceClient:
             label=label,
             category=category,
             url=final_url,
-            retrieved_at=utc_now_iso(),
+            retrieved_at=fetched.retrieved_at,
             content=self._render_evidence_summary(
                 label=label,
                 url=final_url,
@@ -312,6 +290,36 @@ class RawSourceClient:
             },
             evidence,
         )
+
+    def fetch(self, url: str) -> FetchedSource:
+        """Download one URL. Recording and replay clients override only this."""
+        request = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": DEFAULT_USER_AGENT,
+                "Accept": (
+                    "application/pdf,text/html,application/xhtml+xml,"
+                    "application/json,text/plain,text/csv,*/*"
+                ),
+            },
+        )
+        try:
+            if self.timeout_seconds is None:
+                response_context = urllib.request.urlopen(request)
+            else:
+                response_context = urllib.request.urlopen(request, timeout=self.timeout_seconds)
+            with response_context as response:
+                return FetchedSource(
+                    final_url=response.geturl(),
+                    content_type=response.headers.get("Content-Type", ""),
+                    body=response.read(),
+                    retrieved_at=utc_now_iso(),
+                )
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace")
+            return FetchedSource(error=f"HTTP {exc.code}: {detail.strip()}")
+        except urllib.error.URLError as exc:
+            return FetchedSource(error=str(exc.reason))
 
     def _render_evidence_summary(
         self,

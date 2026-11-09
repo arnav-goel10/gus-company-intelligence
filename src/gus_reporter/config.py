@@ -80,12 +80,17 @@ class AppConfig:
     tinyfish_request_retry_backoff_seconds: float
 
     @classmethod
-    def from_env(cls) -> "AppConfig":
+    def from_env(cls, *, require_api_keys: bool = True) -> "AppConfig":
+        """Read configuration from the environment and .env.
+
+        Replay runs pass require_api_keys=False: they never reach a live API.
+        """
         load_runtime_env()
+        get_key = _require_env if require_api_keys else (lambda name: os.getenv(name, "").strip())
         model = os.getenv("OPENAI_MODEL", "gpt-5.4-mini").strip() or "gpt-5.4-mini"
         return cls(
-            openai_api_key=_require_env("OPENAI_API_KEY"),
-            tinyfish_api_key=_require_env("TINYFISH_API_KEY"),
+            openai_api_key=get_key("OPENAI_API_KEY"),
+            tinyfish_api_key=get_key("TINYFISH_API_KEY"),
             openai_base_url=os.getenv(
                 "OPENAI_BASE_URL", "https://api.openai.com/v1"
             ).rstrip("/"),

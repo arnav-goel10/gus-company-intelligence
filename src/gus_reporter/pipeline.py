@@ -24,6 +24,34 @@ from gus_reporter.tinyfish_client import TinyfishClient
 from gus_reporter.verification import ClaimVerifier
 
 
+def live_clients(
+    config: AppConfig,
+    progress_callback: Callable[[dict[str, Any]], None] | None = None,
+) -> tuple[TinyfishClient, RawSourceClient, OpenAIClient]:
+    """The real Tinyfish, raw-fetch and OpenAI clients for a config."""
+    browser = TinyfishClient(
+        api_key=config.tinyfish_api_key,
+        base_url=config.tinyfish_base_url,
+        poll_interval_seconds=config.tinyfish_poll_interval_seconds,
+        poll_timeout_seconds=config.tinyfish_poll_timeout_seconds,
+        request_timeout_seconds=config.tinyfish_request_timeout_seconds,
+        batch_size=config.tinyfish_batch_size,
+        request_max_retries=config.tinyfish_request_max_retries,
+        request_retry_backoff_seconds=config.tinyfish_request_retry_backoff_seconds,
+        event_callback=progress_callback,
+    )
+    fetcher = RawSourceClient(timeout_seconds=config.raw_source_timeout_seconds)
+    llm = OpenAIClient(
+        api_key=config.openai_api_key,
+        base_url=config.openai_base_url,
+        model=config.openai_model,
+        request_timeout_seconds=config.openai_request_timeout_seconds,
+        request_max_retries=config.openai_request_max_retries,
+        request_retry_backoff_seconds=config.openai_request_retry_backoff_seconds,
+    )
+    return browser, fetcher, llm
+
+
 class ReportPipeline:
     def __init__(
         self,
@@ -38,28 +66,14 @@ class ReportPipeline:
         self.progress_callback = progress_callback
         self.storage = RunStorage(config.report_output_dir)
         self.events = RunEvents(self.storage, progress_callback)
-        self.tinyfish: BrowserAgent = browser or TinyfishClient(
-            api_key=config.tinyfish_api_key,
-            base_url=config.tinyfish_base_url,
-            poll_interval_seconds=config.tinyfish_poll_interval_seconds,
-            poll_timeout_seconds=config.tinyfish_poll_timeout_seconds,
-            request_timeout_seconds=config.tinyfish_request_timeout_seconds,
-            batch_size=config.tinyfish_batch_size,
-            request_max_retries=config.tinyfish_request_max_retries,
-            request_retry_backoff_seconds=config.tinyfish_request_retry_backoff_seconds,
-            event_callback=progress_callback,
-        )
-        self.raw_source_client: SourceFetcher = fetcher or RawSourceClient(
-            timeout_seconds=config.raw_source_timeout_seconds
-        )
-        self.openai: StructuredModel = llm or OpenAIClient(
-            api_key=config.openai_api_key,
-            base_url=config.openai_base_url,
-            model=config.openai_model,
-            request_timeout_seconds=config.openai_request_timeout_seconds,
-            request_max_retries=config.openai_request_max_retries,
-            request_retry_backoff_seconds=config.openai_request_retry_backoff_seconds,
-        )
+        if browser is None or fetcher is None or llm is None:
+            live_browser, live_fetcher, live_llm = live_clients(config, progress_callback)
+            browser = browser or live_browser
+            fetcher = fetcher or live_fetcher
+            llm = llm or live_llm
+        self.tinyfish: BrowserAgent = browser
+        self.raw_source_client: SourceFetcher = fetcher
+        self.openai: StructuredModel = llm
         self.acquirer = SourceAcquirer(
             browser=self.tinyfish,
             fetcher=self.raw_source_client,

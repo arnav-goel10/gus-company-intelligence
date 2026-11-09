@@ -9,6 +9,19 @@ from typing import Any
 MAX_RETRY_BACKOFF_SECONDS = 60.0
 
 
+def extract_usage(response: dict[str, Any], model: str) -> dict[str, Any]:
+    usage = response.get("usage") or {}
+    input_details = usage.get("input_tokens_details") or {}
+    output_details = usage.get("output_tokens_details") or {}
+    return {
+        "model": str(response.get("model") or model),
+        "input_tokens": int(usage.get("input_tokens") or 0),
+        "cached_input_tokens": int(input_details.get("cached_tokens") or 0),
+        "output_tokens": int(usage.get("output_tokens") or 0),
+        "reasoning_tokens": int(output_details.get("reasoning_tokens") or 0),
+    }
+
+
 class OpenAIClient:
     def __init__(
         self,
@@ -39,6 +52,29 @@ class OpenAIClient:
         max_output_tokens: int = 4000,
         background: bool = True,
     ) -> dict[str, Any]:
+        payload, _usage = self.structured_response_with_usage(
+            schema_name=schema_name,
+            schema=schema,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            user_content=user_content,
+            max_output_tokens=max_output_tokens,
+            background=background,
+        )
+        return payload
+
+    def structured_response_with_usage(
+        self,
+        *,
+        schema_name: str,
+        schema: dict[str, Any],
+        system_prompt: str,
+        user_prompt: str = "",
+        user_content: list[dict[str, Any]] | None = None,
+        max_output_tokens: int = 4000,
+        background: bool = True,
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        """Same as structured_response, plus the token usage the API billed."""
         if user_content is None:
             user_content = [{"type": "input_text", "text": user_prompt}]
         payload: dict[str, Any] = {
@@ -68,7 +104,7 @@ class OpenAIClient:
             raise RuntimeError(f"OpenAI refused structured request: {refusal}")
         text = self._extract_output_text(response)
         try:
-            return json.loads(text)
+            return json.loads(text), extract_usage(response, self.model)
         except json.JSONDecodeError as exc:
             raise RuntimeError(f"OpenAI response was not valid JSON: {text}") from exc
 

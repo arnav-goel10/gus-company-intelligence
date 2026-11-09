@@ -9,10 +9,11 @@ passages the model was shown.
 
 Cost. Claims from the same specialist share one evidence bundle, so they are
 verified together in batches of up to BATCH_SIZE. Each batch carries only the
-passages its claims need (gus_reporter.passages). Claims whose quote is in no
-source text fall back to wider context plus the bundle's PDFs; those batches
-put the PDFs first so later batches over the same PDFs hit the prompt cache,
-and the first such batch per bundle runs before the rest to warm that cache.
+passages its claims need (gus_reporter.passages). A bundle with PDFs whose
+text was never extracted attaches them to every batch, as the old verifier
+did per claim, but puts them first so later batches over the same PDFs hit
+the prompt cache, and the first such batch per bundle runs before the rest
+to warm that cache.
 """
 
 from __future__ import annotations
@@ -27,7 +28,7 @@ from typing import Any
 
 from gus_reporter.events import RunEvents
 from gus_reporter.evidence import file_inputs
-from gus_reporter.passages import context_for_claim, render_passages
+from gus_reporter.passages import context_for_claim, is_unextracted_pdf, render_passages
 from gus_reporter.models import EvidenceItem, ExtractedClaim, VerifiedClaim
 from gus_reporter.prompts import VERIFICATION_SYSTEM_PROMPT
 from gus_reporter.providers import StructuredModel
@@ -40,12 +41,6 @@ def _fold(text: str) -> str:
 
 def _searchable_text(item: EvidenceItem) -> str:
     return f"{item.metadata.get('openai_input_text', '')}\n{item.content}"
-
-
-def _is_unextracted_pdf(item: EvidenceItem) -> bool:
-    return bool(item.metadata.get("openai_input_file_path")) and not str(
-        item.metadata.get("openai_input_text", "")
-    ).strip()
 
 
 def ground_citation(
@@ -67,7 +62,7 @@ def ground_citation(
     if containing:
         preferred = [eid for eid in named if eid in containing]
         return dataclasses.replace(verified, evidence_ids=preferred or containing)
-    pdfs = [eid for eid in named if _is_unextracted_pdf(evidence_map[eid])]
+    pdfs = [eid for eid in named if is_unextracted_pdf(evidence_map[eid])]
     if quote and pdfs:
         return dataclasses.replace(verified, evidence_ids=pdfs)
     reason = (
@@ -229,7 +224,8 @@ class ClaimVerifier:
                     schema=verification_batch_schema([c.claim_id for c in batch.claims]),
                     system_prompt=VERIFICATION_SYSTEM_PROMPT,
                     user_content=batch_user_content(batch, run_dir),
-                    max_output_tokens=600 + 400 * len(batch.claims),
+                    # The old verifier allowed 1,200 tokens per claim; keep that.
+                    max_output_tokens=1200 * len(batch.claims),
                 )
                 verdicts: dict[str, dict[str, Any]] = {}
                 for verdict in payload.get("verdicts", []):

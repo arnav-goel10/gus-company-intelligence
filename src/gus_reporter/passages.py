@@ -8,9 +8,10 @@ truncated to its first 12,000 characters. Now each claim gets:
   - the chunks that best match the claim's own words, so a contradiction
     stated away from the quote is still in front of the verifier.
 
-When the quote occurs in no source text, the claim falls back to wider
-context: more matching chunks, plus the PDFs whose text the pipeline never
-extracted, since the quote may come from one of them.
+A source of up to WHOLE_SOURCE_CHARS characters is shown in full. When the
+quote occurs in no source text, the claim falls back to wider context: more
+matching chunks. PDFs whose text the pipeline never extracted cannot be
+searched, so every claim whose bundle has one is shown the PDF, as before.
 
 Matching folds case and whitespace, the same rule the grounding check uses.
 """
@@ -25,8 +26,10 @@ from gus_reporter.models import EvidenceItem
 QUOTE_WINDOW_CHARS = 1200  # kept on each side of a quote occurrence
 CHUNK_CHARS = 800
 CHUNK_OVERLAP_CHARS = 150
-STATEMENT_CHUNKS = 2  # best-matching chunks added for every claim
+STATEMENT_CHUNKS = 3  # best-matching chunks added for every claim
 FALLBACK_CHUNKS = 6  # best-matching chunks when the quote is nowhere in text
+WHOLE_SOURCE_CHARS = 6000  # a source this short is shown in full
+MAX_QUOTE_OCCURRENCES = 3  # windows per source, so a common phrase cannot flood the prompt
 
 _STOPWORDS = frozenset(
     "a an and are as at be by for from has have in is it its of on or that the this to was "
@@ -85,7 +88,7 @@ def quote_spans(text: str, quote: str) -> list[tuple[int, int]]:
 def _terms(text: str) -> set[str]:
     return {
         token
-        for token in re.findall(r"[a-z0-9$%.]+", text.lower())
+        for token in re.findall(r"[a-z0-9$%]+(?:\.[0-9]+)?", text.lower())
         if len(token) > 2 and token not in _STOPWORDS
     }
 
@@ -125,7 +128,9 @@ def context_for_claim(statement: str, quote: str, items: list[EvidenceItem]) -> 
     context = ClaimContext()
     for item in items:
         text = source_text(item)
-        for start, end in quote_spans(text, quote):
+        if text and len(text) <= WHOLE_SOURCE_CHARS:
+            context.spans.setdefault(item.evidence_id, []).append((0, len(text)))
+        for start, end in quote_spans(text, quote)[:MAX_QUOTE_OCCURRENCES]:
             context.quote_in_text = True
             context.spans.setdefault(item.evidence_id, []).append(
                 (max(0, start - QUOTE_WINDOW_CHARS), min(len(text), end + QUOTE_WINDOW_CHARS))
@@ -139,8 +144,7 @@ def context_for_claim(statement: str, quote: str, items: list[EvidenceItem]) -> 
     for chunk in ranked[: STATEMENT_CHUNKS if context.quote_in_text else FALLBACK_CHUNKS]:
         context.spans.setdefault(chunk.evidence_id, []).append((chunk.start, chunk.end))
 
-    if not context.quote_in_text:
-        context.pdf_ids = [item.evidence_id for item in items if is_unextracted_pdf(item)]
+    context.pdf_ids = [item.evidence_id for item in items if is_unextracted_pdf(item)]
     return context
 
 

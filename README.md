@@ -68,7 +68,7 @@ the same pipeline runs against the live APIs, a recorder, or a replay cassette.
 | Planning | `planning.py` | The first wave of browse jobs, purely from the request |
 | Discovery | `discovery.py` | Which found URLs become new browse jobs and which are downloaded, by one policy per category |
 | Acquisition | `acquisition.py` | Up to 6 browse waves under a 50-job cap, then raw capture |
-| Evidence | `evidence.py` | How sources are bundled for the model (12,000-char text cap, at most 4 PDFs) and which specialist sees which |
+| Evidence | `evidence.py` | How sources are bundled for extraction (12,000-char text cap per source, at most 4 PDFs) and which specialist sees which |
 | Extraction | `extraction.py` | One model call per specialist; a failed call yields no claims |
 | Verification | `verification.py` | Batched model verdicts over selected passages (`passages.py`), then the quote check against full sources; a failed or missing verdict counts as a suppression |
 | Assembly | `assembly.py` | Section summaries from kept claims, risk matrix, publish or block |
@@ -114,16 +114,18 @@ the same assumptions. Output is saved in [`results/cost_estimates/`](results/cos
 
 | | Low | Typical | High |
 |---|---|---|---|
-| One company, all 8 domains (`--only apple --no-judge`) | $2.54 | $12.86 | $59.64 |
+| One company, all 8 domains (`--only apple --no-judge`) | $2.58 | $12.86 | $59.66 |
 | Same, old one-call-per-claim verifier | $2.65 | $18.21 | $131.89 |
-| Full eval, 15 companies, judge on 20 kept and 5 suppressed claims each | $38.88 | $270.72 | $1,186.35 |
+| Full eval, 15 companies, judge on 20 kept and 5 suppressed claims each | $39.48 | $270.87 | $1,186.50 |
 | Same, old verifier | $40.53 | $350.97 | $2,270.10 |
 
 Verification for one company drops from $6.16 to $0.82 typical and from $84.51 to
-$12.26 high. The verifier used to send every claim the whole evidence bundle, PDFs
-included. It now verifies a specialist's claims six at a time against the passages
-around their quotes, and attaches PDFs only for claims whose quote is in no source text,
-with the PDFs first so repeat batches hit the prompt cache. Browsing ($10.88 typical,
+$12.27 high. The verifier used to send every claim the whole evidence bundle, PDFs
+included. It now verifies a specialist's claims six at a time. Text sources are cut to
+the passages around each quote plus the chunks that best match the claim, and a source
+under 6,000 characters is shown whole. PDFs, whose text is never extracted, still go to
+every batch, first in the prompt so repeat batches can hit the prompt cache. The high
+case assumes no cache hits, so its saving comes from batching alone. Browsing ($10.88 typical,
 $40.00 high) is now the largest cost. After a real run, `usage.json` holds the billed
 tokens and the CLI prints the exact cost.
 
@@ -132,7 +134,7 @@ tokens and the CLI prints the exact cost.
 Standard library only, Python 3.9 or newer.
 
 ```bash
-PYTHONPATH=src python3 -m unittest discover -s tests      # 91 tests
+PYTHONPATH=src python3 -m unittest discover -s tests      # 93 tests
 
 cp .env.example .env    # OPENAI_API_KEY and TINYFISH_API_KEY
 PYTHONPATH=src python3 -m gus_reporter.cli --request examples/company_request.json
@@ -183,18 +185,17 @@ authenticated Tinyfish workflows (`tinyfish_use_vault`, `tinyfish_credential_ite
 
 ## Known limits
 
-- The verifier model sees passages, not whole sources. Two windows around the quote and
-  the two chunks that best match the claim's words are what it can see. A contradiction
-  phrased with none of the claim's words would be missed by the model, though the
-  grounding check still reads everything.
-- PDF text is not extracted locally, so claims quoting a PDF still send the PDF. Prompt
-  caching softens that but is best effort, and the estimate counts no caching for
-  extraction.
+- In a text source over 6,000 characters the verifier model sees up to three windows
+  around the quote and the three chunks that best match the claim's words. A
+  contradiction there that shares none of the claim's words is not shown to it. The
+  grounding check still reads every source in full.
+- PDF text is not extracted locally, so every verification batch over a PDF bundle
+  still sends the PDFs. Prompt caching softens that but is best effort.
 - No SEC or XBRL parser yet. Financial pages go through browse extraction and raw capture.
 - Source planning is rule-based, with no learned source ranking.
 - The material-findings table takes every important supported claim from the financial,
   legal and news sections, good news included. It does not rank risk.
-- The cost range per company is still wide ($2.54 to $59.64), now mostly browse steps.
+- The cost range per company is still wide ($2.58 to $59.66), now mostly browse steps.
 
 ## License
 

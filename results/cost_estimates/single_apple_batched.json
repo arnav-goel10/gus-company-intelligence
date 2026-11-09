@@ -17,10 +17,10 @@
             "browse_jobs": 18,
             "claims": 38,
             "browse_usd": 2.3,
-            "model_usd": 0.23,
-            "verification_usd": 0.07,
+            "model_usd": 0.27,
+            "verification_usd": 0.11,
             "judge_usd": 0.0,
-            "total_usd": 2.54
+            "total_usd": 2.58
           },
           "typical": {
             "browse_jobs": 34,
@@ -35,18 +35,18 @@
             "browse_jobs": 50,
             "claims": 228,
             "browse_usd": 40.0,
-            "model_usd": 19.64,
-            "verification_usd": 12.26,
+            "model_usd": 19.66,
+            "verification_usd": 12.27,
             "judge_usd": 0.0,
-            "total_usd": 59.64
+            "total_usd": 59.66
           }
         }
       }
     ],
     "totals": {
-      "low": 2.54,
+      "low": 2.58,
       "typical": 12.86,
-      "high": 59.64
+      "high": 59.66
     }
   },
   "scenarios": [

@@ -115,10 +115,11 @@ SCENARIOS = (
 VERIFICATION_MODES = ("batched", "per_claim")
 _BATCH_SIZE = 6  # gus_reporter.verification.BATCH_SIZE
 _CLAIM_TEXT_TOKENS = 80  # claim id, statement and quote in the batch prompt
-# Two 1,200-character windows around the quote plus two 800-character chunks.
-_PASSAGE_TOKENS_PER_CLAIM = 1000
+# Two 1,200-character windows around the quote plus three 800-character chunks.
+_PASSAGE_TOKENS_PER_CLAIM = 1200
+_WHOLE_SOURCE_CHARS = 6000  # gus_reporter.passages.WHOLE_SOURCE_CHARS; about 4 chars a token
 # Six 800-character chunks when the quote is in no source text.
-_FALLBACK_TOKENS_PER_CLAIM = 1200
+_FALLBACK_TOKENS_PER_CLAIM = 1300
 
 
 def _ceil_div(a: float, b: int) -> int:
@@ -128,30 +129,34 @@ def _ceil_div(a: float, b: int) -> int:
 def verification_tokens(scenario: "Scenario", claims_per_group: int) -> tuple[int, int, int]:
     """(input, cached input, output) tokens to verify one specialist's claims, batched.
 
-    Claims whose quote is in text go in text-only batches with their passages.
-    The rest go in PDF batches when the bundle has PDFs: the first PDF batch
-    pays full price for the attachments, later ones get the cache hit rate.
+    When the bundle has PDFs every batch attaches them (their text cannot be
+    searched): the first batch pays full price, later ones get the cache hit
+    rate. Claims whose quote is in text get passages, the rest wider context.
     """
     bundle_text = scenario.evidence_items_per_bundle * scenario.text_tokens_per_item
-    passage = min(_PASSAGE_TOKENS_PER_CLAIM, bundle_text) + _CLAIM_TEXT_TOKENS
-    fallback = min(_FALLBACK_TOKENS_PER_CLAIM, bundle_text) + _CLAIM_TEXT_TOKENS
     in_text = round(claims_per_group * scenario.quote_in_text_fraction)
-    needs_pdf = claims_per_group - in_text if scenario.pdfs_per_bundle else 0
+    needs_pdf = claims_per_group if scenario.pdfs_per_bundle else 0
     text_only = claims_per_group - needs_pdf
-
     text_batches = _ceil_div(text_only, _BATCH_SIZE)
     pdf_batches = _ceil_div(needs_pdf, _BATCH_SIZE)
+    batches = text_batches + pdf_batches
     pdf_tokens = scenario.pdfs_per_bundle * scenario.tokens_per_pdf
+
+    if scenario.text_tokens_per_item * 4 <= _WHOLE_SOURCE_CHARS:
+        # Short sources are shown whole, so each batch carries the whole text bundle.
+        evidence_tokens = batches * bundle_text
+    else:
+        per_batch_cap = bundle_text
+        passages = in_text * _PASSAGE_TOKENS_PER_CLAIM + (claims_per_group - in_text) * _FALLBACK_TOKENS_PER_CLAIM
+        evidence_tokens = min(passages, batches * per_batch_cap)
     input_tokens = (
-        (text_batches + pdf_batches) * _PROMPT_OVERHEAD_TOKENS
-        + in_text * passage
-        + (claims_per_group - in_text) * fallback
+        batches * _PROMPT_OVERHEAD_TOKENS
+        + claims_per_group * _CLAIM_TEXT_TOKENS
+        + evidence_tokens
         + pdf_batches * pdf_tokens
     )
     cached = round(max(0, pdf_batches - 1) * pdf_tokens * scenario.prompt_cache_hit_rate)
-    output_tokens = claims_per_group * scenario.verification_output_tokens + (
-        text_batches + pdf_batches
-    ) * 50
+    output_tokens = claims_per_group * scenario.verification_output_tokens + batches * 50
     return input_tokens, cached, output_tokens
 
 _PROMPT_OVERHEAD_TOKENS = 600  # system prompt, preamble, schema

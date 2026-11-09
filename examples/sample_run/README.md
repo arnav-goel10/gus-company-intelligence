@@ -8,7 +8,7 @@ PYTHONPATH=src python3 -m gus_reporter.cli \
   --replay examples/sample_run/cassette
 ```
 
-It writes a fresh run directory identical to [`output/`](output/) (CI checks this).
+It writes a fresh run directory identical to [`output/`](output/) (a test in `tests/test_sample_run.py` checks this on every CI run).
 Start with [`output/report.md`](output/report.md): eleven kept claims, each next to the
 source it cites, and five suppressed claims with the verifier's reason.
 

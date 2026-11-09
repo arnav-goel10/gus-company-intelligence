@@ -4,20 +4,20 @@ Exact per request: seed browse jobs, extraction calls, report sections.
 Assumed per scenario: child jobs, steps per job, page length, PDFs, claims found.
 
 company                  seed calls        low  typical     high
-apple                      18    19   $   2.72 $  18.24 $  79.09
-microsoft                  18    19   $   2.72 $  18.24 $  79.09
-nvidia                     18    19   $   2.72 $  18.24 $  79.09
-boeing                     18    19   $   2.72 $  18.24 $  79.09
-intel                      18    19   $   2.72 $  18.24 $  79.09
-peloton                    18    19   $   2.72 $  18.24 $  79.09
-rivian                     18    19   $   2.72 $  18.24 $  79.09
-coinbase                   18    19   $   2.72 $  18.24 $  79.09
-snowflake                  18    19   $   2.72 $  18.24 $  79.09
-shopify                    18    19   $   2.72 $  18.24 $  79.09
-grab                       18    19   $   2.72 $  18.24 $  79.09
-sea                        18    19   $   2.72 $  18.24 $  79.09
-fictitious-quorvane        13    19   $   2.08 $  17.28 $  79.09
-fictitious-zentrilux       13    19   $   2.08 $  17.28 $  79.09
-near-miss-pelotron         13    19   $   2.08 $  17.28 $  79.09
-TOTAL                                 $  38.88 $ 270.72 $1186.35
+apple                      18    19   $   2.76 $  18.25 $  79.10
+microsoft                  18    19   $   2.76 $  18.25 $  79.10
+nvidia                     18    19   $   2.76 $  18.25 $  79.10
+boeing                     18    19   $   2.76 $  18.25 $  79.10
+intel                      18    19   $   2.76 $  18.25 $  79.10
+peloton                    18    19   $   2.76 $  18.25 $  79.10
+rivian                     18    19   $   2.76 $  18.25 $  79.10
+coinbase                   18    19   $   2.76 $  18.25 $  79.10
+snowflake                  18    19   $   2.76 $  18.25 $  79.10
+shopify                    18    19   $   2.76 $  18.25 $  79.10
+grab                       18    19   $   2.76 $  18.25 $  79.10
+sea                        18    19   $   2.76 $  18.25 $  79.10
+fictitious-quorvane        13    19   $   2.12 $  17.29 $  79.10
+fictitious-zentrilux       13    19   $   2.12 $  17.29 $  79.10
+near-miss-pelotron         13    19   $   2.12 $  17.29 $  79.10
+TOTAL                                 $  39.48 $ 270.87 $1186.50
 

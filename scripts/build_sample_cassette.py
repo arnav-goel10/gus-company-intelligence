@@ -351,7 +351,7 @@ class AuthoredModel:
                  if part.get("type") == "input_text"]
         text = "\n\n".join(parts)
         if schema_name.endswith("_claim_extraction"):
-            specialist = text.split("Specialist: ", 1)[1].split("\n", 1)[0]
+            specialist = (system_prompt + "\n" + text).split("Specialist: ", 1)[1].split("\n", 1)[0]
             section = schema["properties"]["claims"]["items"]["properties"]["section"]["enum"][0]
             return {
                 "document_summary": "",

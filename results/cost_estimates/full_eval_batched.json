@@ -17,10 +17,10 @@
             "browse_jobs": 18,
             "claims": 38,
             "browse_usd": 2.3,
-            "model_usd": 0.23,
-            "verification_usd": 0.07,
+            "model_usd": 0.27,
+            "verification_usd": 0.11,
             "judge_usd": 0.18,
-            "total_usd": 2.72
+            "total_usd": 2.76
           },
           "typical": {
             "browse_jobs": 34,
@@ -29,16 +29,16 @@
             "model_usd": 1.98,
             "verification_usd": 0.82,
             "judge_usd": 5.38,
-            "total_usd": 18.24
+            "total_usd": 18.25
           },
           "high": {
             "browse_jobs": 50,
             "claims": 228,
             "browse_usd": 40.0,
-            "model_usd": 19.64,
-            "verification_usd": 12.26,
+            "model_usd": 19.66,
+            "verification_usd": 12.27,
             "judge_usd": 19.44,
-            "total_usd": 79.09
+            "total_usd": 79.1
           }
         }
       },
@@ -58,10 +58,10 @@
             "browse_jobs": 18,
             "claims": 38,
             "browse_usd": 2.3,
-            "model_usd": 0.23,
-            "verification_usd": 0.07,
+            "model_usd": 0.27,
+            "verification_usd": 0.11,
             "judge_usd": 0.18,
-            "total_usd": 2.72
+            "total_usd": 2.76
           },
           "typical": {
             "browse_jobs": 34,
@@ -70,16 +70,16 @@
             "model_usd": 1.98,
             "verification_usd": 0.82,
             "judge_usd": 5.38,
-            "total_usd": 18.24
+            "total_usd": 18.25
           },
           "high": {
             "browse_jobs": 50,
             "claims": 228,
             "browse_usd": 40.0,
-            "model_usd": 19.64,
-            "verification_usd": 12.26,
+            "model_usd": 19.66,
+            "verification_usd": 12.27,
             "judge_usd": 19.44,
-            "total_usd": 79.09
+            "total_usd": 79.1
           }
         }
       },
@@ -99,10 +99,10 @@
             "browse_jobs": 18,
             "claims": 38,
             "browse_usd": 2.3,
-            "model_usd": 0.23,
-            "verification_usd": 0.07,
+            "model_usd": 0.27,
+            "verification_usd": 0.11,
             "judge_usd": 0.18,
-            "total_usd": 2.72
+            "total_usd": 2.76
           },
           "typical": {
             "browse_jobs": 34,
@@ -111,16 +111,16 @@
             "model_usd": 1.98,
             "verification_usd": 0.82,
             "judge_usd": 5.38,
-            "total_usd": 18.24
+            "total_usd": 18.25
           },
           "high": {
             "browse_jobs": 50,
             "claims": 228,
             "browse_usd": 40.0,
-            "model_usd": 19.64,
-            "verification_usd": 12.26,
+            "model_usd": 19.66,
+            "verification_usd": 12.27,
             "judge_usd": 19.44,
-            "total_usd": 79.09
+            "total_usd": 79.1
           }
         }
       },
@@ -140,10 +140,10 @@
             "browse_jobs": 18,
             "claims": 38,
             "browse_usd": 2.3,
-            "model_usd": 0.23,
-            "verification_usd": 0.07,
+            "model_usd": 0.27,
+            "verification_usd": 0.11,
             "judge_usd": 0.18,
-            "total_usd": 2.72
+            "total_usd": 2.76
           },
           "typical": {
             "browse_jobs": 34,
@@ -152,16 +152,16 @@
             "model_usd": 1.98,
             "verification_usd": 0.82,
             "judge_usd": 5.38,
-            "total_usd": 18.24
+            "total_usd": 18.25
           },
           "high": {
             "browse_jobs": 50,
             "claims": 228,
             "browse_usd": 40.0,
-            "model_usd": 19.64,
-            "verification_usd": 12.26,
+            "model_usd": 19.66,
+            "verification_usd": 12.27,
             "judge_usd": 19.44,
-            "total_usd": 79.09
+            "total_usd": 79.1
           }
         }
       },
@@ -181,10 +181,10 @@
             "browse_jobs": 18,
             "claims": 38,
             "browse_usd": 2.3,
-            "model_usd": 0.23,
-            "verification_usd": 0.07,
+            "model_usd": 0.27,
+            "verification_usd": 0.11,
             "judge_usd": 0.18,
-            "total_usd": 2.72
+            "total_usd": 2.76
           },
           "typical": {
             "browse_jobs": 34,
@@ -193,16 +193,16 @@
             "model_usd": 1.98,
             "verification_usd": 0.82,
             "judge_usd": 5.38,
-            "total_usd": 18.24
+            "total_usd": 18.25
           },
           "high": {
             "browse_jobs": 50,
             "claims": 228,
             "browse_usd": 40.0,
-            "model_usd": 19.64,
-            "verification_usd": 12.26,
+            "model_usd": 19.66,
+            "verification_usd": 12.27,
             "judge_usd": 19.44,
-            "total_usd": 79.09
+            "total_usd": 79.1
           }
         }
       },
@@ -222,10 +222,10 @@
             "browse_jobs": 18,
             "claims": 38,
             "browse_usd": 2.3,
-            "model_usd": 0.23,
-            "verification_usd": 0.07,
+            "model_usd": 0.27,
+            "verification_usd": 0.11,
             "judge_usd": 0.18,
-            "total_usd": 2.72
+            "total_usd": 2.76
           },
           "typical": {
             "browse_jobs": 34,
@@ -234,16 +234,16 @@
             "model_usd": 1.98,
             "verification_usd": 0.82,
             "judge_usd": 5.38,
-            "total_usd": 18.24
+            "total_usd": 18.25
           },
           "high": {
             "browse_jobs": 50,
             "claims": 228,
             "browse_usd": 40.0,
-            "model_usd": 19.64,
-            "verification_usd": 12.26,
+            "model_usd": 19.66,
+            "verification_usd": 12.27,
             "judge_usd": 19.44,
-            "total_usd": 79.09
+            "total_usd": 79.1
           }
         }
       },
@@ -263,10 +263,10 @@
             "browse_jobs": 18,
             "claims": 38,
             "browse_usd": 2.3,
-            "model_usd": 0.23,
-            "verification_usd": 0.07,
+            "model_usd": 0.27,
+            "verification_usd": 0.11,
             "judge_usd": 0.18,
-            "total_usd": 2.72
+            "total_usd": 2.76
           },
           "typical": {
             "browse_jobs": 34,
@@ -275,16 +275,16 @@
             "model_usd": 1.98,
             "verification_usd": 0.82,
             "judge_usd": 5.38,
-            "total_usd": 18.24
+            "total_usd": 18.25
           },
           "high": {
             "browse_jobs": 50,
             "claims": 228,
             "browse_usd": 40.0,
-            "model_usd": 19.64,
-            "verification_usd": 12.26,
+            "model_usd": 19.66,
+            "verification_usd": 12.27,
             "judge_usd": 19.44,
-            "total_usd": 79.09
+            "total_usd": 79.1
           }
         }
       },
@@ -304,10 +304,10 @@
             "browse_jobs": 18,
             "claims": 38,
             "browse_usd": 2.3,
-            "model_usd": 0.23,
-            "verification_usd": 0.07,
+            "model_usd": 0.27,
+            "verification_usd": 0.11,
             "judge_usd": 0.18,
-            "total_usd": 2.72
+            "total_usd": 2.76
           },
           "typical": {
             "browse_jobs": 34,
@@ -316,16 +316,16 @@
             "model_usd": 1.98,
             "verification_usd": 0.82,
             "judge_usd": 5.38,
-            "total_usd": 18.24
+            "total_usd": 18.25
           },
           "high": {
             "browse_jobs": 50,
             "claims": 228,
             "browse_usd": 40.0,
-            "model_usd": 19.64,
-            "verification_usd": 12.26,
+            "model_usd": 19.66,
+            "verification_usd": 12.27,
             "judge_usd": 19.44,
-            "total_usd": 79.09
+            "total_usd": 79.1
           }
         }
       },
@@ -345,10 +345,10 @@
             "browse_jobs": 18,
             "claims": 38,
             "browse_usd": 2.3,
-            "model_usd": 0.23,
-            "verification_usd": 0.07,
+            "model_usd": 0.27,
+            "verification_usd": 0.11,
             "judge_usd": 0.18,
-            "total_usd": 2.72
+            "total_usd": 2.76
           },
           "typical": {
             "browse_jobs": 34,
@@ -357,16 +357,16 @@
             "model_usd": 1.98,
             "verification_usd": 0.82,
             "judge_usd": 5.38,
-            "total_usd": 18.24
+            "total_usd": 18.25
           },
           "high": {
             "browse_jobs": 50,
             "claims": 228,
             "browse_usd": 40.0,
-            "model_usd": 19.64,
-            "verification_usd": 12.26,
+            "model_usd": 19.66,
+            "verification_usd": 12.27,
             "judge_usd": 19.44,
-            "total_usd": 79.09
+            "total_usd": 79.1
           }
         }
       },
@@ -386,10 +386,10 @@
             "browse_jobs": 18,
             "claims": 38,
             "browse_usd": 2.3,
-            "model_usd": 0.23,
-            "verification_usd": 0.07,
+            "model_usd": 0.27,
+            "verification_usd": 0.11,
             "judge_usd": 0.18,
-            "total_usd": 2.72
+            "total_usd": 2.76
           },
           "typical": {
             "browse_jobs": 34,
@@ -398,16 +398,16 @@
             "model_usd": 1.98,
             "verification_usd": 0.82,
             "judge_usd": 5.38,
-            "total_usd": 18.24
+            "total_usd": 18.25
           },
           "high": {
             "browse_jobs": 50,
             "claims": 228,
             "browse_usd": 40.0,
-            "model_usd": 19.64,
-            "verification_usd": 12.26,
+            "model_usd": 19.66,
+            "verification_usd": 12.27,
             "judge_usd": 19.44,
-            "total_usd": 79.09
+            "total_usd": 79.1
           }
         }
       },
@@ -427,10 +427,10 @@
             "browse_jobs": 18,
             "claims": 38,
             "browse_usd": 2.3,
-            "model_usd": 0.23,
-            "verification_usd": 0.07,
+            "model_usd": 0.27,
+            "verification_usd": 0.11,
             "judge_usd": 0.18,
-            "total_usd": 2.72
+            "total_usd": 2.76
           },
           "typical": {
             "browse_jobs": 34,
@@ -439,16 +439,16 @@
             "model_usd": 1.98,
             "verification_usd": 0.82,
             "judge_usd": 5.38,
-            "total_usd": 18.24
+            "total_usd": 18.25
           },
           "high": {
             "browse_jobs": 50,
             "claims": 228,
             "browse_usd": 40.0,
-            "model_usd": 19.64,
-            "verification_usd": 12.26,
+            "model_usd": 19.66,
+            "verification_usd": 12.27,
             "judge_usd": 19.44,
-            "total_usd": 79.09
+            "total_usd": 79.1
           }
         }
       },
@@ -468,10 +468,10 @@
             "browse_jobs": 18,
             "claims": 38,
             "browse_usd": 2.3,
-            "model_usd": 0.23,
-            "verification_usd": 0.07,
+            "model_usd": 0.27,
+            "verification_usd": 0.11,
             "judge_usd": 0.18,
-            "total_usd": 2.72
+            "total_usd": 2.76
           },
           "typical": {
             "browse_jobs": 34,
@@ -480,16 +480,16 @@
             "model_usd": 1.98,
             "verification_usd": 0.82,
             "judge_usd": 5.38,
-            "total_usd": 18.24
+            "total_usd": 18.25
           },
           "high": {
             "browse_jobs": 50,
             "claims": 228,
             "browse_usd": 40.0,
-            "model_usd": 19.64,
-            "verification_usd": 12.26,
+            "model_usd": 19.66,
+            "verification_usd": 12.27,
             "judge_usd": 19.44,
-            "total_usd": 79.09
+            "total_usd": 79.1
           }
         }
       },
@@ -509,10 +509,10 @@
             "browse_jobs": 13,
             "claims": 38,
             "browse_usd": 1.66,
-            "model_usd": 0.23,
-            "verification_usd": 0.07,
+            "model_usd": 0.27,
+            "verification_usd": 0.11,
             "judge_usd": 0.18,
-            "total_usd": 2.08
+            "total_usd": 2.12
           },
           "typical": {
             "browse_jobs": 31,
@@ -521,16 +521,16 @@
             "model_usd": 1.98,
             "verification_usd": 0.82,
             "judge_usd": 5.38,
-            "total_usd": 17.28
+            "total_usd": 17.29
           },
           "high": {
             "browse_jobs": 50,
             "claims": 228,
             "browse_usd": 40.0,
-            "model_usd": 19.64,
-            "verification_usd": 12.26,
+            "model_usd": 19.66,
+            "verification_usd": 12.27,
             "judge_usd": 19.44,
-            "total_usd": 79.09
+            "total_usd": 79.1
           }
         }
       },
@@ -550,10 +550,10 @@
             "browse_jobs": 13,
             "claims": 38,
             "browse_usd": 1.66,
-            "model_usd": 0.23,
-            "verification_usd": 0.07,
+            "model_usd": 0.27,
+            "verification_usd": 0.11,
             "judge_usd": 0.18,
-            "total_usd": 2.08
+            "total_usd": 2.12
           },
           "typical": {
             "browse_jobs": 31,
@@ -562,16 +562,16 @@
             "model_usd": 1.98,
             "verification_usd": 0.82,
             "judge_usd": 5.38,
-            "total_usd": 17.28
+            "total_usd": 17.29
           },
           "high": {
             "browse_jobs": 50,
             "claims": 228,
             "browse_usd": 40.0,
-            "model_usd": 19.64,
-            "verification_usd": 12.26,
+            "model_usd": 19.66,
+            "verification_usd": 12.27,
             "judge_usd": 19.44,
-            "total_usd": 79.09
+            "total_usd": 79.1
           }
         }
       },
@@ -591,10 +591,10 @@
             "browse_jobs": 13,
             "claims": 38,
             "browse_usd": 1.66,
-            "model_usd": 0.23,
-            "verification_usd": 0.07,
+            "model_usd": 0.27,
+            "verification_usd": 0.11,
             "judge_usd": 0.18,
-            "total_usd": 2.08
+            "total_usd": 2.12
           },
           "typical": {
             "browse_jobs": 31,
@@ -603,24 +603,24 @@
             "model_usd": 1.98,
             "verification_usd": 0.82,
             "judge_usd": 5.38,
-            "total_usd": 17.28
+            "total_usd": 17.29
           },
           "high": {
             "browse_jobs": 50,
             "claims": 228,
             "browse_usd": 40.0,
-            "model_usd": 19.64,
-            "verification_usd": 12.26,
+            "model_usd": 19.66,
+            "verification_usd": 12.27,
             "judge_usd": 19.44,
-            "total_usd": 79.09
+            "total_usd": 79.1
           }
         }
       }
     ],
     "totals": {
-      "low": 38.88,
-      "typical": 270.72,
-      "high": 1186.35
+      "low": 39.48,
+      "typical": 270.87,
+      "high": 1186.5
     }
   },
   "scenarios": [

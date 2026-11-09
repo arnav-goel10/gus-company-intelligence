@@ -60,25 +60,39 @@ class PassageTests(unittest.TestCase):
         )
         self.assertIn("restated down to $41.0 million", render_passages([item], context.spans))
 
-    def test_missing_quote_falls_back_to_wider_context_and_pdfs(self) -> None:
-        items = [_text("ir", "Revenue grew. " + FILLER), _pdf("ar")]
+    def test_missing_quote_falls_back_to_wider_context(self) -> None:
+        items = [_text("ir", "Revenue grew. " + FILLER + "Gross margin 41% for the year. " + FILLER)]
         context = context_for_claim("Gross margin was 41%.", "gross margin was 41%", items)
         self.assertFalse(context.quote_in_text)
-        self.assertEqual(["ar"], context.pdf_ids)
+        self.assertIn("Gross margin 41% for the year", render_passages(items, context.spans))
 
-    def test_found_quote_never_attaches_pdfs(self) -> None:
+    def test_unsearchable_pdfs_are_shown_even_when_the_quote_is_in_text(self) -> None:
+        # The PDF might contradict a quote found elsewhere, and its text cannot be searched.
         items = [_text("ir", "Gross margin was 41%."), _pdf("ar")]
-        self.assertEqual([], context_for_claim("Margin 41%.", "gross margin was 41%", items).pdf_ids)
+        self.assertEqual(["ar"], context_for_claim("Margin 41%.", "gross margin was 41%", items).pdf_ids)
+
+    def test_a_short_source_is_shown_whole(self) -> None:
+        # A decisive note sharing no words with the claim must still be visible.
+        note = "The board withdrew the previously published results pending restatement."
+        item = _text("ir", "Revenue was $48.2 million in FY2025. " * 40 + note)
+        context = context_for_claim("Revenue was $48.2 million.", "Revenue was $48.2 million", [item])
+        self.assertIn(note, render_passages([item], context.spans))
+
+    def test_a_common_quote_cannot_flood_the_prompt(self) -> None:
+        item = _text("ar", ("net sales rose. " + "Lorem ipsum dolor sit amet. " * 100) * 80)
+        context = context_for_claim("Net sales rose.", "net sales", [item])
+        self.assertLess(len(render_passages([item], context.spans)), 12_000)
 
 
 class BatchPlanTests(unittest.TestCase):
     def setUp(self) -> None:
         self.items = {"ir": _text("ir", "Revenue was $10. Cash was $5."), "ar": _pdf("ar")}
 
-    def test_claims_sharing_a_bundle_are_batched_and_split_by_pdf_need(self) -> None:
-        claims = [_claim(f"t{i}", "Revenue was $10.", "Revenue was $10", ["ir", "ar"]) for i in range(8)]
+    def test_claims_sharing_a_bundle_are_batched_six_at_a_time(self) -> None:
+        text_only = {"ir": self.items["ir"]}
+        claims = [_claim(f"t{i}", "Revenue was $10.", "Revenue was $10", ["ir"]) for i in range(8)]
         claims += [_claim(f"p{i}", "Debt was $3.", "debt was $3", ["ir", "ar"]) for i in range(7)]
-        batches = plan_batches(claims, self.items, batch_size=6)
+        batches = plan_batches(claims, {**text_only, "ar": self.items["ar"]}, batch_size=6)
         sizes = [(len(b.claims), bool(b.pdf_ids), b.warms_cache) for b in batches]
         self.assertEqual([(6, False, False), (2, False, False), (6, True, True), (1, True, False)], sizes)
 
@@ -120,7 +134,7 @@ class BatchFailureTests(unittest.TestCase):
 
         self.assertEqual({"insufficient_evidence"}, {c.status for c in self._verify(stray)})
 
-    def test_supported_verdicts_still_pass_the_grounding_check(self) -> None:
+    def test_supported_verdicts_with_a_present_quote_are_kept(self) -> None:
         def accept_all(*, user_content, **_):  # type: ignore[no-untyped-def]
             return {"verdicts": [{"claim_id": f"c{i}", "status": "supported", "confidence": 1,
                                   "rationale": "", "supporting_evidence_ids": ["ir"],

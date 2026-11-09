@@ -39,7 +39,7 @@ class SeedSourceJobsTests(unittest.TestCase):
             company_name="Apple",
             focus_areas=["financials"],
         )
-        jobs = seed_source_jobs(request, "stealth")
+        jobs = seed_source_jobs(request, "lite")
         self.assertEqual(3, len(jobs))
         self.assertTrue(all(job.category == "financials" for job in jobs))
         self.assertTrue(all(job.source_type == "financial_search_discovery" for job in jobs))
@@ -51,7 +51,7 @@ class SeedSourceJobsTests(unittest.TestCase):
             company_website="https://example.com",
             primary_jurisdiction="US",
         )
-        jobs = seed_source_jobs(request, "stealth")
+        jobs = seed_source_jobs(request, "lite")
         # 3 base (homepage, leadership, careers)
         # + 1 newsroom (news category)
         # + 2 financial IR candidates
@@ -60,7 +60,7 @@ class SeedSourceJobsTests(unittest.TestCase):
         self.assertEqual(16, len(jobs))
         self.assertEqual("https://example.com", jobs[0].url)
         self.assertEqual("https://example.com/leadership", jobs[1].url)
-        self.assertEqual("stealth", jobs[0].browser_profile)
+        self.assertEqual("lite", jobs[0].browser_profile)
         self.assertEqual("company_homepage", jobs[0].source_type)
         self.assertEqual("financial_investor_candidate", jobs[4].source_type)
         self.assertEqual("lite", jobs[4].browser_profile)
@@ -69,7 +69,7 @@ class SeedSourceJobsTests(unittest.TestCase):
         news_jobs = [j for j in jobs if j.category == "news"]
         self.assertEqual(6, len(legal_jobs))
         self.assertEqual(5, len(news_jobs))  # 1 newsroom + 4 search seeds
-        self.assertTrue(all(j.allow_stealth_fallback for j in legal_jobs))
+        self.assertTrue(all(j.proxy_country_code == "" for j in jobs))
 
     def test_financial_seed_jobs_include_ir_and_sec_when_available(self) -> None:
         request = ReportRequest(
@@ -81,7 +81,7 @@ class SeedSourceJobsTests(unittest.TestCase):
             financial_source_urls=["https://example.com/annual-report"],
             focus_areas=["financials"],
         )
-        jobs = seed_source_jobs(request, "stealth")
+        jobs = seed_source_jobs(request, "lite")
         financial_jobs = [job for job in jobs if job.category == "financials"]
         financial_urls = [job.url for job in financial_jobs]
         self.assertIn("https://example.com/investors", financial_urls)
@@ -90,7 +90,6 @@ class SeedSourceJobsTests(unittest.TestCase):
             financial_urls,
         )
         self.assertTrue(all(job.enable_agent_memory for job in financial_jobs))
-        self.assertTrue(all(job.allow_stealth_fallback for job in financial_jobs))
         self.assertTrue(all(job.browser_profile == "lite" for job in financial_jobs))
 
     def test_request_level_tinyfish_settings_propagate_to_seeded_jobs(self) -> None:
@@ -103,7 +102,7 @@ class SeedSourceJobsTests(unittest.TestCase):
             tinyfish_credential_item_ids=["item_abc123"],
             tinyfish_enable_agent_memory=True,
         )
-        jobs = seed_source_jobs(request, "stealth")
+        jobs = seed_source_jobs(request, "lite")
         self.assertTrue(jobs)
         self.assertTrue(all(job.use_vault for job in jobs))
         self.assertEqual(["item_abc123"], jobs[0].credential_item_ids)
@@ -148,7 +147,7 @@ class SeedSourceJobsTests(unittest.TestCase):
         spawned = build_spawned_financial_source_jobs(
             request,
             runs,
-            "stealth",
+            "lite",
             existing_urls,
         )
         spawned_urls = [job.url for job in spawned]
@@ -444,7 +443,7 @@ class LegalSourceSeedingTests(unittest.TestCase):
             company_name="Acme Corp",
             focus_areas=["legal"],
         )
-        jobs = seed_source_jobs(request, "stealth")
+        jobs = seed_source_jobs(request, "lite")
         self.assertTrue(len(jobs) >= 6)
         self.assertTrue(all(j.category == "legal" for j in jobs))
         search_jobs = [j for j in jobs if j.source_type == "legal_search_discovery"]
@@ -462,7 +461,7 @@ class LegalSourceSeedingTests(unittest.TestCase):
             focus_areas=["legal"],
             legal_source_urls=["https://example.com/case-filing.pdf"],
         )
-        jobs = seed_source_jobs(request, "stealth")
+        jobs = seed_source_jobs(request, "lite")
         direct_jobs = [j for j in jobs if j.source_type == "legal_document"]
         self.assertEqual(1, len(direct_jobs))
         self.assertEqual("https://example.com/case-filing.pdf", direct_jobs[0].url)
@@ -473,7 +472,7 @@ class LegalSourceSeedingTests(unittest.TestCase):
             ticker="ACME",
             focus_areas=["legal"],
         )
-        jobs = seed_source_jobs(request, "stealth")
+        jobs = seed_source_jobs(request, "lite")
         sec_jobs = [j for j in jobs if "SEC enforcement" in j.label]
         self.assertTrue(len(sec_jobs) >= 1)
 
@@ -484,7 +483,7 @@ class NewsSourceSeedingTests(unittest.TestCase):
             company_name="Acme Corp",
             focus_areas=["news"],
         )
-        jobs = seed_source_jobs(request, "stealth")
+        jobs = seed_source_jobs(request, "lite")
         self.assertEqual(4, len(jobs))
         self.assertTrue(all(j.category == "news" for j in jobs))
         labels = [j.label for j in jobs]
@@ -499,7 +498,7 @@ class NewsSourceSeedingTests(unittest.TestCase):
             focus_areas=["news"],
             news_source_urls=["https://reuters.com/acme-article"],
         )
-        jobs = seed_source_jobs(request, "stealth")
+        jobs = seed_source_jobs(request, "lite")
         direct_jobs = [j for j in jobs if j.source_type == "news_document"]
         self.assertEqual(1, len(direct_jobs))
         self.assertEqual("https://reuters.com/acme-article", direct_jobs[0].url)
@@ -541,7 +540,7 @@ class LegalSpawnedJobTests(unittest.TestCase):
         ]
         existing_urls: set[str] = set()
         spawned = build_spawned_legal_source_jobs(
-            request, runs, "stealth", existing_urls,
+            request, runs, "lite", existing_urls,
         )
         spawned_urls = [j.url for j in spawned]
         self.assertIn(
@@ -585,7 +584,7 @@ class NewsSpawnedJobTests(unittest.TestCase):
         ]
         existing_urls: set[str] = set()
         spawned = build_spawned_news_source_jobs(
-            request, runs, "stealth", existing_urls,
+            request, runs, "lite", existing_urls,
         )
         spawned_urls = [j.url for j in spawned]
         self.assertIn("https://reuters.com/acme-layoffs", spawned_urls)
@@ -722,7 +721,6 @@ class PipelineParallelizationTests(unittest.TestCase):
             tinyfish_batch_size=10,
             tinyfish_max_total_jobs=10,
             tinyfish_max_acquisition_waves=2,
-            tinyfish_retry_with_stealth=True,
             tinyfish_request_max_retries=0,
             tinyfish_request_retry_backoff_seconds=0.1,
         )

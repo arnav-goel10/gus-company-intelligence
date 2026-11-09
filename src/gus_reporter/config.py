@@ -4,6 +4,8 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+from gus_reporter.models import require_permitted_browser_profile
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DOTENV_PATH = REPO_ROOT / ".env"
@@ -40,11 +42,6 @@ def _require_env(name: str) -> str:
     return value
 
 
-def _env_flag(name: str, default: str) -> bool:
-    value = os.getenv(name, default).strip().lower()
-    return value in {"1", "true", "yes", "on"}
-
-
 def _env_optional_int(name: str, default: str) -> int | None:
     raw_value = os.getenv(name, default).strip()
     if not raw_value:
@@ -79,7 +76,6 @@ class AppConfig:
     tinyfish_batch_size: int
     tinyfish_max_total_jobs: int
     tinyfish_max_acquisition_waves: int
-    tinyfish_retry_with_stealth: bool
     tinyfish_request_max_retries: int
     tinyfish_request_retry_backoff_seconds: float
 
@@ -98,10 +94,9 @@ class AppConfig:
                 "TINYFISH_BASE_URL", "https://agent.tinyfish.ai/v1"
             ).rstrip("/"),
             report_output_dir=resolve_report_output_dir(),
-            tinyfish_default_browser_profile=os.getenv(
-                "TINYFISH_DEFAULT_BROWSER_PROFILE", "lite"
-            ).strip()
-            or "lite",
+            tinyfish_default_browser_profile=require_permitted_browser_profile(
+                os.getenv("TINYFISH_DEFAULT_BROWSER_PROFILE", "lite").strip() or "lite"
+            ),
             tinyfish_poll_interval_seconds=int(
                 os.getenv("TINYFISH_POLL_INTERVAL_SECONDS", "5")
             ),
@@ -139,9 +134,6 @@ class AppConfig:
             ),
             tinyfish_max_acquisition_waves=int(
                 os.getenv("TINYFISH_MAX_ACQUISITION_WAVES", "6")
-            ),
-            tinyfish_retry_with_stealth=_env_flag(
-                "TINYFISH_RETRY_WITH_STEALTH", "true"
             ),
             tinyfish_request_max_retries=int(
                 os.getenv("TINYFISH_REQUEST_MAX_RETRIES", "3")

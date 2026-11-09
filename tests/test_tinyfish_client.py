@@ -14,7 +14,6 @@ class FakeTinyfishClient(TinyfishClient):
             poll_interval_seconds=0,
             poll_timeout_seconds=5,
             batch_size=20,
-            retry_with_stealth=True,
             request_max_retries=0,
             request_retry_backoff_seconds=0.1,
         )
@@ -54,7 +53,6 @@ class TinyfishClientTests(unittest.TestCase):
             poll_interval_seconds=1,
             poll_timeout_seconds=5,
             batch_size=20,
-            retry_with_stealth=True,
             request_max_retries=0,
             request_retry_backoff_seconds=0.1,
         )
@@ -81,8 +79,10 @@ class TinyfishClientTests(unittest.TestCase):
             payload["proxy_config"],
         )
 
-    def test_run_jobs_retries_blocked_financial_job_with_stealth(self) -> None:
+    def test_blocked_job_is_recorded_as_blocked_and_never_retried(self) -> None:
+        events: list[dict] = []
         client = FakeTinyfishClient()
+        client.event_callback = events.append
         job = SourceJob(
             label="Investor relations",
             category="financials",
@@ -90,15 +90,42 @@ class TinyfishClientTests(unittest.TestCase):
             goal="Extract financial disclosures",
             source_type="financial_investor_relations",
             browser_profile="lite",
-            proxy_country_code="US",
-            allow_stealth_fallback=True,
         )
         records = client.run_jobs([job])
         self.assertEqual(1, len(records))
-        self.assertEqual(["lite", "stealth"], client.started_profiles)
+        self.assertEqual(["lite"], client.started_profiles)
+        self.assertEqual("FAILED", records[0].status)
+        self.assertTrue(records[0].access_blocked)
+        self.assertEqual(1, len(records[0].attempts))
+        finished = [e for e in events if e.get("status") == "failed"]
+        self.assertIn("not retried", finished[-1]["message"])
+
+    def test_clean_run_is_not_marked_blocked(self) -> None:
+        client = FakeTinyfishClient()
+        client.started_profiles.append("lite")  # next run id is run_2 (clean)
+        job = SourceJob(
+            label="Investor relations",
+            category="financials",
+            url="https://example.com/investors",
+            goal="Extract financial disclosures",
+            browser_profile="lite",
+        )
+        records = client.run_jobs([job])
         self.assertEqual("COMPLETED", records[0].status)
-        self.assertEqual(2, len(records[0].attempts))
-        self.assertEqual("stealth", records[0].attempts[-1]["browser_profile"])
+        self.assertFalse(records[0].access_blocked)
+
+    def test_stealth_profile_is_rejected(self) -> None:
+        with self.assertRaises(ValueError):
+            SourceJob.from_dict(
+                {
+                    "label": "x",
+                    "category": "news",
+                    "url": "https://example.com",
+                    "goal": "g",
+                    "browser_profile": "stealth",
+                },
+                "lite",
+            )
 
     def test_completed_record_normalizes_string_none_streaming_url(self) -> None:
         client = TinyfishClient(
@@ -107,7 +134,6 @@ class TinyfishClientTests(unittest.TestCase):
             poll_interval_seconds=1,
             poll_timeout_seconds=5,
             batch_size=50,
-            retry_with_stealth=True,
             request_max_retries=0,
             request_retry_backoff_seconds=0.1,
         )

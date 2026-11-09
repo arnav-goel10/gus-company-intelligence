@@ -71,6 +71,20 @@ class RuntimeEnvTests(unittest.TestCase):
         self.assertIsNone(config.raw_source_timeout_seconds)
         self.assertIsNone(config.openai_request_timeout_seconds)
 
+    def test_app_config_rejects_stealth_browser_profile(self) -> None:
+        with patch.dict(
+            os.environ,
+            {
+                "OPENAI_API_KEY": "test-openai",
+                "TINYFISH_API_KEY": "test-tinyfish",
+                "TINYFISH_DEFAULT_BROWSER_PROFILE": "stealth",
+            },
+            clear=True,
+        ):
+            with patch("gus_reporter.config.load_runtime_env"):
+                with self.assertRaises(ValueError):
+                    AppConfig.from_env()
+
 
 if __name__ == "__main__":
     unittest.main()

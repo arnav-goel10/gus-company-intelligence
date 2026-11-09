@@ -65,19 +65,16 @@ def _job_defaults(
     *,
     source_type: str,
     category: str,
-    proxy_country_code: str,
 ) -> dict[str, Any]:
     is_deep = category in _DEEP_ACQUISITION_CATEGORIES
     browser_profile = "lite" if is_deep else default_browser_profile
     return {
         "source_type": source_type,
         "browser_profile": browser_profile,
-        "proxy_country_code": proxy_country_code,
         "preferred_run_mode": "async",
         "use_vault": request.tinyfish_use_vault,
         "credential_item_ids": list(request.tinyfish_credential_item_ids),
         "enable_agent_memory": request.tinyfish_enable_agent_memory or is_deep,
-        "allow_stealth_fallback": is_deep,
     }
 
 
@@ -170,7 +167,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
         return request.source_jobs
     jobs: list[SourceJob] = []
     website = request.company_website.rstrip("/")
-    proxy_country = request.primary_jurisdiction[:2].upper()
     if website:
         jobs.extend(
             [
@@ -184,7 +180,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                         default_browser_profile,
                         source_type="company_homepage",
                         category="company_overview",
-                        proxy_country_code=proxy_country,
                     ),
                 ),
                 SourceJob(
@@ -197,7 +192,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                         default_browser_profile,
                         source_type="leadership_page",
                         category="leadership",
-                        proxy_country_code=proxy_country,
                     ),
                 ),
                 SourceJob(
@@ -210,7 +204,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                         default_browser_profile,
                         source_type="careers_page",
                         category="employees",
-                        proxy_country_code=proxy_country,
                     ),
                 ),
                 SourceJob(
@@ -223,7 +216,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                         default_browser_profile,
                         source_type="newsroom_page",
                         category="news",
-                        proxy_country_code=proxy_country,
                     ),
                 ),
             ]
@@ -246,7 +238,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                         default_browser_profile,
                         source_type="financial_investor_relations",
                         category="financials",
-                        proxy_country_code=proxy_country,
                     ),
                 )
             )
@@ -268,7 +259,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                             default_browser_profile,
                             source_type="financial_investor_candidate",
                             category="financials",
-                            proxy_country_code=proxy_country,
                         ),
                     ),
                     SourceJob(
@@ -286,7 +276,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                             default_browser_profile,
                             source_type="financial_investor_candidate",
                             category="financials",
-                            proxy_country_code=proxy_country,
                         ),
                     ),
                 ]
@@ -308,7 +297,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                         default_browser_profile,
                         source_type="financial_sec_filings",
                         category="financials",
-                        proxy_country_code="US",
                     ),
                 )
             )
@@ -352,7 +340,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                             default_browser_profile,
                             source_type="financial_search_discovery",
                             category="financials",
-                            proxy_country_code=proxy_country,
                         ),
                     )
                 )
@@ -394,7 +381,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                         default_browser_profile,
                         source_type="legal_search_discovery",
                         category="legal",
-                        proxy_country_code=proxy_country,
                     ),
                 )
             )
@@ -417,7 +403,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                     default_browser_profile,
                     source_type="legal_court_records",
                     category="legal",
-                    proxy_country_code=proxy_country,
                 ),
             )
         )
@@ -440,7 +425,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                     default_browser_profile,
                     source_type="legal_corporate_registry",
                     category="legal",
-                    proxy_country_code=proxy_country,
                 ),
             )
         )
@@ -465,7 +449,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                         default_browser_profile,
                         source_type="legal_search_discovery",
                         category="legal",
-                        proxy_country_code="US",
                     ),
                 )
             )
@@ -487,7 +470,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                             default_browser_profile,
                             source_type="legal_document",
                             category="legal",
-                            proxy_country_code=proxy_country,
                         ),
                     )
                 )
@@ -512,7 +494,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                     default_browser_profile,
                     source_type="news_search_discovery",
                     category="news",
-                    proxy_country_code=proxy_country,
                 ),
             )
         )
@@ -535,7 +516,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                     default_browser_profile,
                     source_type="news_search_discovery",
                     category="news",
-                    proxy_country_code=proxy_country,
                 ),
             )
         )
@@ -559,7 +539,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                     default_browser_profile,
                     source_type="news_press_release",
                     category="news",
-                    proxy_country_code=proxy_country,
                 ),
             )
         )
@@ -582,7 +561,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                     default_browser_profile,
                     source_type="news_search_discovery",
                     category="news",
-                    proxy_country_code=proxy_country,
                 ),
             )
         )
@@ -604,7 +582,6 @@ def seed_source_jobs(request: ReportRequest, default_browser_profile: str) -> li
                             default_browser_profile,
                             source_type="news_document",
                             category="news",
-                            proxy_country_code=proxy_country,
                         ),
                     )
                 )
@@ -659,7 +636,6 @@ def build_spawned_financial_source_jobs(
     existing_urls: set[str],
 ) -> list[SourceJob]:
     spawned: list[SourceJob] = []
-    proxy_country = request.primary_jurisdiction[:2].upper()
 
     def maybe_add_job(
         *,
@@ -687,7 +663,6 @@ def build_spawned_financial_source_jobs(
                     default_browser_profile,
                     source_type=source_type,
                     category="financials",
-                    proxy_country_code="US" if source_type == "financial_sec_filings" else proxy_country,
                 ),
             )
         )
@@ -812,7 +787,6 @@ def build_spawned_legal_source_jobs(
     existing_urls: set[str],
 ) -> list[SourceJob]:
     spawned: list[SourceJob] = []
-    proxy_country = request.primary_jurisdiction[:2].upper()
 
     def maybe_add_job(
         *,
@@ -840,7 +814,6 @@ def build_spawned_legal_source_jobs(
                     default_browser_profile,
                     source_type=source_type,
                     category="legal",
-                    proxy_country_code=proxy_country,
                 ),
             )
         )
@@ -901,7 +874,6 @@ def build_spawned_news_source_jobs(
     existing_urls: set[str],
 ) -> list[SourceJob]:
     spawned: list[SourceJob] = []
-    proxy_country = request.primary_jurisdiction[:2].upper()
 
     def maybe_add_job(
         *,
@@ -929,7 +901,6 @@ def build_spawned_news_source_jobs(
                     default_browser_profile,
                     source_type=source_type,
                     category="news",
-                    proxy_country_code=proxy_country,
                 ),
             )
         )
@@ -1360,6 +1331,8 @@ def _render_tinyfish_evidence(run: TinyfishRunRecord) -> str:
         f"Source type: {run.source_type}",
         f"Source URL: {run.url}",
     ]
+    if run.access_blocked:
+        sections.append("Access: the site refused automated access; nothing was captured.")
     if isinstance(run.result, dict):
         capture_mode = str(run.result.get("capture_mode", "")).strip()
         if capture_mode:
@@ -1709,7 +1682,6 @@ class ReportPipeline:
             poll_timeout_seconds=config.tinyfish_poll_timeout_seconds,
             request_timeout_seconds=config.tinyfish_request_timeout_seconds,
             batch_size=config.tinyfish_batch_size,
-            retry_with_stealth=config.tinyfish_retry_with_stealth,
             request_max_retries=config.tinyfish_request_max_retries,
             request_retry_backoff_seconds=config.tinyfish_request_retry_backoff_seconds,
             event_callback=progress_callback,

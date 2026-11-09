@@ -11,9 +11,10 @@ from typing import Any
 from gus_reporter.models import EvidenceItem, utc_now_iso
 
 
+# Identify as what we are. SEC EDGAR, for one, asks automated clients to
+# declare themselves; spoofing a desktop browser would hide that.
 DEFAULT_USER_AGENT = (
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    "gus-reporter/0.1 (+https://github.com/arnav-goel10/gus-company-intelligence)"
 )
 PDF_EXTENSIONS = {".pdf"}
 TEXTUAL_CONTENT_TYPES = {

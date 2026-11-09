@@ -17,14 +17,14 @@ request ──► planning ──► acquisition ──► extraction ──► 
               │              │               │                  its own source evidence
               │              │               └─ domain agents emit typed claims
               │              │                  (financial fans out into specialists)
-              │              └─ Tinyfish browses sources (lite, retries blocked
-              │                 pages with stealth), then raw HTML/text/PDF capture
+              │              └─ Tinyfish browses sources (pages that refuse
+              │                 automated access are logged, not retried), then raw HTML/text/PDF capture
               └─ deterministic source seeding: IR pages, SEC filing
                  indexes, explicit URLs, web-search discovery
 ```
 
 1. **Planning** seeds source jobs deterministically from the request: investor-relations pages, `/investors` candidates, SEC filing indexes when a ticker is supplied, explicit URLs, and web-search discovery when only a name is given.
-2. **Acquisition** runs Tinyfish browse jobs in bounded batches (`lite` first, automatic `stealth` retry for blocked financial pages), then downloads the actual HTML, text, and PDF artifacts the models will read.
+2. **Acquisition** runs Tinyfish browse jobs in bounded batches (a standard browser profile; a page that shows a bot wall or CAPTCHA is recorded as blocked and skipped, never retried around), then downloads the actual HTML, text, and PDF artifacts the models will read.
 3. **Extraction** routes evidence to the eight domain agents (company overview, financials, legal, industry, leadership, employees, news, risk signals). The financial coordinator fans out into specialists for document discovery, statement metrics, capital structure, guidance and funding, and finance-specific red flags. Each agent emits typed, schema-validated claims.
 4. **Verification** re-reads every claim against the specific evidence it cites. A claim that does not survive is dropped, not softened.
 5. **Assembly** builds the report from verified claims only: executive summary, entity profile, key findings, risk matrix, domain sections, recommendations, and a full source log.
@@ -70,7 +70,7 @@ Required environment: `OPENAI_API_KEY`, `TINYFISH_API_KEY`. The default model is
 }
 ```
 
-Only `company_name` is required; everything else improves coverage. Explicit `source_jobs` are supported, as are authenticated Tinyfish workflows (`tinyfish_use_vault`, `tinyfish_credential_item_ids`, `tinyfish_enable_agent_memory`, and per-job `source_type`, `preferred_run_mode`, `allow_stealth_fallback`).
+Only `company_name` is required; everything else improves coverage. Explicit `source_jobs` are supported, as are authenticated Tinyfish workflows (`tinyfish_use_vault`, `tinyfish_credential_item_ids`, `tinyfish_enable_agent_memory`, and per-job `source_type`, `preferred_run_mode`, and an explicit `proxy_country_code` for region-specific pages).
 
 ## Project layout
 
@@ -78,7 +78,7 @@ Only `company_name` is required; everything else improves coverage. Explicit `so
 |---|---|
 | `src/gus_reporter/pipeline.py` | end-to-end orchestration: planning, waves, extraction, verification, assembly |
 | `src/gus_reporter/agents.py` | domain-agent definitions and routing |
-| `src/gus_reporter/tinyfish_client.py` | Tinyfish batch client: vault, agent memory, lite to stealth retry |
+| `src/gus_reporter/tinyfish_client.py` | Tinyfish batch client: vault, agent memory, blocked-source detection |
 | `src/gus_reporter/raw_source_client.py` | direct raw HTML/text/PDF acquisition after discovery |
 | `src/gus_reporter/openai_client.py` | Responses API client with retries and timeouts |
 | `src/gus_reporter/models.py`, `schemas.py` | request, evidence, claim, and report types with strict schemas |

@@ -12,6 +12,9 @@ from gus_reporter.models import SourceJob, TinyfishRunRecord, utc_now_iso
 
 
 TERMINAL_RUN_STATUSES = {"COMPLETED", "FAILED", "CANCELLED"}
+# Phrases that mean the site refused automated access. A run that matches is
+# recorded as blocked and is never retried with a different browser, because
+# retrying around a bot wall would be evading the site's access policy.
 BLOCKED_MARKERS = (
     "access denied",
     "anti-bot",
@@ -30,6 +33,21 @@ def _clean_optional_text(value: Any) -> str:
     if text.lower() in {"none", "null"}:
         return ""
     return text
+
+
+def looks_access_blocked(record: TinyfishRunRecord) -> bool:
+    """True when the run's status, result, error or steps mention a bot wall."""
+    serialized = json.dumps(
+        {
+            "status": record.status,
+            "result": record.result,
+            "error": record.error,
+            "steps": record.steps,
+        },
+        sort_keys=True,
+        ensure_ascii=True,
+    ).lower()
+    return any(marker in serialized for marker in BLOCKED_MARKERS)
 
 
 @dataclass
@@ -52,7 +70,6 @@ class TinyfishClient:
         poll_interval_seconds: int,
         poll_timeout_seconds: int | None,
         batch_size: int = 20,
-        retry_with_stealth: bool = True,
         request_max_retries: int = 3,
         request_retry_backoff_seconds: float = 2.0,
         request_timeout_seconds: int | None = 120,
@@ -65,7 +82,6 @@ class TinyfishClient:
             poll_timeout_seconds if poll_timeout_seconds and poll_timeout_seconds > 0 else None
         )
         self.batch_size = max(1, min(batch_size, 100))
-        self.retry_with_stealth = retry_with_stealth
         self.request_max_retries = max(0, request_max_retries)
         self.request_retry_backoff_seconds = max(0.1, request_retry_backoff_seconds)
         self.request_timeout_seconds = (
@@ -130,30 +146,11 @@ class TinyfishClient:
         )
 
     def _run_job_with_retry(self, job: SourceJob) -> TinyfishRunRecord:
-        record = self._run_job_once(
+        return self._run_job_once(
             job=job,
             browser_profile=job.browser_profile,
             attempt_number=1,
         )
-        if self._should_retry_with_stealth(job, record, job.browser_profile):
-            fallback_profile = self._fallback_profile(job, job.browser_profile)
-            if fallback_profile:
-                self._emit_source_job_event(
-                    job=job,
-                    status="retrying",
-                    message="Retrying with stealth profile after likely anti-bot block.",
-                    run_id=record.run_id,
-                    browser_profile=fallback_profile,
-                    attempt_number=2,
-                )
-                retry_record = self._run_job_once(
-                    job=job,
-                    browser_profile=fallback_profile,
-                    attempt_number=2,
-                )
-                retry_record.attempts = record.attempts + retry_record.attempts
-                return retry_record
-        return record
 
     def _run_job_once(
         self,
@@ -226,30 +223,12 @@ class TinyfishClient:
                 self._emit_source_job_event(
                     job=current.job,
                     status=record.status.lower(),
-                    message=f"Tinyfish run finished with status {record.status.lower()}.",
+                    message=self._finished_message(record),
                     run_id=record.run_id,
                     browser_profile=current.browser_profile,
                     streaming_url=record.streaming_url,
                     attempt_number=current.attempt_number,
                 )
-                if self._should_retry_with_stealth(
-                    current.job,
-                    record,
-                    current.browser_profile,
-                ):
-                    fallback_profile = self._fallback_profile(
-                        current.job, current.browser_profile
-                    )
-                    if fallback_profile:
-                        retry_run = self._start_pending_run(
-                            index=current.index,
-                            job=current.job,
-                            browser_profile=fallback_profile,
-                            attempt_number=current.attempt_number + 1,
-                            prior_attempts=record.attempts,
-                        )
-                        pending[retry_run.run_id] = retry_run
-                        continue
                 completed[current.index] = record
 
             if pending:
@@ -376,7 +355,7 @@ class TinyfishClient:
                 self._emit_source_job_event(
                     job=job,
                     status=record.status.lower(),
-                    message=f"Tinyfish run finished with status {record.status.lower()}.",
+                    message=self._finished_message(record),
                     run_id=record.run_id,
                     browser_profile=browser_profile,
                     streaming_url=record.streaming_url,
@@ -494,7 +473,7 @@ class TinyfishClient:
                         self._emit_source_job_event(
                             job=job,
                             status=record.status.lower(),
-                            message=f"Tinyfish run finished with status {record.status.lower()}.",
+                            message=self._finished_message(record),
                             run_id=record.run_id,
                             browser_profile=browser_profile,
                             streaming_url=record.streaming_url,
@@ -528,7 +507,7 @@ class TinyfishClient:
         self._emit_source_job_event(
             job=job,
             status=record.status.lower(),
-            message=f"Tinyfish run finished with status {record.status.lower()}.",
+            message=self._finished_message(record),
             run_id=record.run_id,
             browser_profile=browser_profile,
             streaming_url=record.streaming_url,
@@ -571,7 +550,7 @@ class TinyfishClient:
                 }
             ]
         attempts = list(pending.prior_attempts) + attempts
-        return TinyfishRunRecord(
+        record = TinyfishRunRecord(
             run_id=pending.run_id,
             status=str(data.get("status", "COMPLETED")).upper(),
             goal=str(data.get("goal", pending.job.goal)),
@@ -593,6 +572,8 @@ class TinyfishClient:
             result=data.get("result"),
             error=data.get("error"),
         )
+        record.access_blocked = looks_access_blocked(record)
+        return record
 
     def _build_payload(
         self, job: SourceJob, browser_profile: str
@@ -616,35 +597,11 @@ class TinyfishClient:
                 payload["credential_item_ids"] = job.credential_item_ids
         return payload
 
-    def _fallback_profile(self, job: SourceJob, browser_profile: str) -> str:
-        if (
-            not self.retry_with_stealth
-            or not job.allow_stealth_fallback
-            or browser_profile == "stealth"
-        ):
-            return ""
-        return "stealth"
-
-    def _should_retry_with_stealth(
-        self,
-        job: SourceJob,
-        record: TinyfishRunRecord,
-        browser_profile: str,
-    ) -> bool:
-        fallback_profile = self._fallback_profile(job, browser_profile)
-        if not fallback_profile:
-            return False
-        serialized = json.dumps(
-            {
-                "status": record.status,
-                "result": record.result,
-                "error": record.error,
-                "steps": record.steps,
-            },
-            sort_keys=True,
-            ensure_ascii=True,
-        ).lower()
-        return any(marker in serialized for marker in BLOCKED_MARKERS)
+    def _finished_message(self, record: TinyfishRunRecord) -> str:
+        message = f"Tinyfish run finished with status {record.status.lower()}."
+        if record.access_blocked:
+            message += " The site refused automated access; recorded as blocked, not retried."
+        return message
 
     def _request(
         self, method: str, path: str, payload: dict[str, Any] | None = None

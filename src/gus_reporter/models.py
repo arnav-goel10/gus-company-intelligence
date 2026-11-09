@@ -21,6 +21,21 @@ def utc_now_iso() -> str:
     return datetime.now(tz=UTC).replace(microsecond=0).isoformat()
 
 
+# Tinyfish also offers a "stealth" profile, documented as a modified browser
+# with anti-detection techniques. GUS reads public pages as a standard browser
+# and treats a bot wall as a refusal, so only the standard profile is allowed.
+PERMITTED_BROWSER_PROFILES = ("lite",)
+
+
+def require_permitted_browser_profile(profile: str) -> str:
+    if profile not in PERMITTED_BROWSER_PROFILES:
+        raise ValueError(
+            f"Browser profile {profile!r} is not supported. GUS only uses "
+            f"{', '.join(PERMITTED_BROWSER_PROFILES)} and does not evade bot protection."
+        )
+    return profile
+
+
 def _coerce_bool(value: Any) -> bool:
     if isinstance(value, bool):
         return value
@@ -42,7 +57,6 @@ class SourceJob:
     use_vault: bool = False
     credential_item_ids: list[str] = field(default_factory=list)
     enable_agent_memory: bool = False
-    allow_stealth_fallback: bool = True
 
     @classmethod
     def from_dict(cls, data: dict[str, Any], default_browser_profile: str) -> "SourceJob":
@@ -52,10 +66,10 @@ class SourceJob:
             url=str(data["url"]).strip(),
             goal=str(data["goal"]).strip(),
             source_type=str(data.get("source_type", "")).strip(),
-            browser_profile=str(
-                data.get("browser_profile", default_browser_profile)
-            ).strip()
-            or default_browser_profile,
+            browser_profile=require_permitted_browser_profile(
+                str(data.get("browser_profile", default_browser_profile)).strip()
+                or default_browser_profile
+            ),
             proxy_country_code=str(data.get("proxy_country_code", "")).strip(),
             preferred_run_mode=str(data.get("preferred_run_mode", "async")).strip()
             or "async",
@@ -66,9 +80,6 @@ class SourceJob:
                 if str(item).strip()
             ],
             enable_agent_memory=_coerce_bool(data.get("enable_agent_memory", False)),
-            allow_stealth_fallback=_coerce_bool(
-                data.get("allow_stealth_fallback", True)
-            ),
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -157,6 +168,7 @@ class TinyfishRunRecord:
     attempts: list[dict[str, Any]] = field(default_factory=list)
     result: Any = None
     error: Any = None
+    access_blocked: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
